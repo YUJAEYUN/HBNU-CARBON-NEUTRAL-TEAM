@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -31,24 +31,33 @@ export default function DashboardPage() {
     fetchUser();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/");
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold">대시보드</h1>
-      {user ? (
-        <div className="mt-4 p-4 bg-gray-100 rounded-md shadow-md">
-          <p className="text-lg"><strong>닉네임:</strong> {user.nickname}</p>
-          <p className="text-lg"><strong>이메일:</strong> {user.email}</p>
-          <p className="text-lg"><strong>학교:</strong> {user.school}</p>
-        </div>
-      ) : (
-        <p>로딩 중...</p>
-      )}
-      <button className="mt-4 bg-red-500 text-white p-2 rounded-md" onClick={() => {
-        localStorage.removeItem("token");
-        router.push("/");
-      }}>
-        로그아웃
-      </button>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-[375px] h-[812px] bg-white shadow-lg rounded-lg flex flex-col p-6">
+        <h1 className="text-2xl font-bold text-center text-gray-800">마이페이지</h1>
+
+        {user ? (
+          <div className="mt-6">
+            <p className="text-lg font-semibold text-gray-800">이메일: <span className="font-normal">{user.email}</span></p>
+            <p className="text-lg font-semibold text-gray-800">닉네임: <span className="font-normal">{user.nickname}</span></p>
+            <p className="text-lg font-semibold text-gray-800">학교: <span className="font-normal">{user.school}</span></p>
+
+            <button
+              className="mt-6 w-full bg-red-500 text-white p-3 rounded-md shadow-md font-bold"
+              onClick={handleLogout}
+            >
+              로그아웃
+            </button>
+          </div>
+        ) : (
+          <p className="text-center text-gray-600 mt-10">로딩 중...</p>
+        )}
+      </div>
     </div>
   );
 }
