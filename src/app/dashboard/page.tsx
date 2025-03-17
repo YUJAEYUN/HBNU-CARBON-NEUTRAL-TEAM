@@ -33,6 +33,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("storage")); // ✅ 상태 강제 업데이트
     router.push("/");
   };
 

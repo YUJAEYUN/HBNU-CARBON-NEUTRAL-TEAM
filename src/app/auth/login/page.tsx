@@ -19,6 +19,7 @@ export default function LoginPage() {
 
       const { token } = await response.json();
       localStorage.setItem("token", token); // ✅ JWT 토큰 저장
+      window.dispatchEvent(new Event("storage")); // ✅ 상태 강제 업데이트
       router.push("/"); // ✅ 로그인 성공 후 홈 화면(`/`)으로 이동
     } catch (error) {
       console.error("로그인 실패:", error);

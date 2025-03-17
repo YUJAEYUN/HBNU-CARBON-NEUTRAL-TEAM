@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
   const router = useRouter();
 
   useEffect(() => {
@@ -15,13 +15,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     };
 
     checkAuth(); // ✅ 최초 실행 시 토큰 확인
+
     window.addEventListener("storage", checkAuth); // ✅ 다른 탭에서 토큰 변경 감지
+
     return () => window.removeEventListener("storage", checkAuth);
   }, []);
-
-  useEffect(() => {
-    router.refresh(); // ✅ 토큰 변경 시 강제 리렌더링
-  }, [isLoggedIn]);
   
   return (
     <html lang="ko">
