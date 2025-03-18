@@ -11,10 +11,12 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "bcryptjs": "^3.0.2",
+    "cheerio": "^1.0.0",
     "framer-motion": "^12.5.0",
     "jsonwebtoken": "^9.0.2",
     "next": "15.2.2",
     "next-auth": "^4.24.11",
+    "puppeteer": "^24.4.0",
     "react": "^19.0.0",
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.0.0",

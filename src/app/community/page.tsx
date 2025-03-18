@@ -6,7 +6,7 @@ const CommunityPage = () => {
 
   const categories = [
     { name: "학교 꿀팁 정보", path: "/community/tips" },
-    { name: "학식 정보", path: "/community/food" },
+    { name: "학식 정보", path: "/community/hansik" },
     { name: "학교 셔틀버스 정보", path: "/community/shuttle" },
     { name: "사용자 인증 게시판", path: "/community/verification" },
   ];
