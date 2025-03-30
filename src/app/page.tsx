@@ -42,10 +42,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/forest-bg.jpg')" }}
-    >
-      <div className="w-[375px] h-[812px] bg-white/80 shadow-lg rounded-lg flex flex-col relative overflow-hidden">
+    <div className="flex justify-center items-center min-h-screen bg-cover bg-center">
+      <div className="w-full h-full min-h-screen max-w-[430px] mx-auto bg-white/80 shadow-lg flex flex-col relative overflow-hidden">
         {isLoggedIn ? <LoggedInHome user={user} router={router} shake={shake} setShake={setShake}/> : <LoggedOutHome router={router} />}
       </div>
     </div>
@@ -53,100 +51,95 @@ export default function HomePage() {
 }
 
 // ✅ 로그인 후 홈 화면 (기존 UI)
-function LoggedInHome({ user, router, shake, setShake  }: { user: any; router: any; shake: boolean; setShake: any }) {
-    return (
-      <div
-        className="flex justify-center items-center min-h-screen bg-cover bg-center"
-        style={{ backgroundImage: "url('/forest-bg.jpg')" }}
-      >
-        <div className="w-[375px] h-[812px] bg-white/80 shadow-lg rounded-lg flex flex-col relative overflow-hidden">
-          {/* ✅ 상단 타이틀 */}
-          <h1 className="w-40 h-20 text-2xl font-bold text-center text-gray-800 mt-6">테스트</h1>
-  
-          {user ? (
-            <div className="flex flex-col items-center overflow-y-auto">
-              {/* ✅ 환경 정보 (테스트 제목과 더 가까운 위치) */}
-              <div className="flex items-center justify-between w-[67%] bg-gray-100 rounded-lg p-3 mt-2">
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-800">🌳 {user.trees}</p>
-                  <p className="text-gray-600 text-sm">그루</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-800">🎖 {user.level}</p>
-                  <p className="text-gray-600 text-sm">레벨</p>
-                </div>
+function LoggedInHome({ user, router, shake, setShake }: { user: any; router: any; shake: boolean; setShake: any }) {
+  return (
+    <div className="flex-1 flex flex-col h-full pb-[76px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
+      {/* 상단 타이틀 */}
+      <h1 className="w-full text-2xl font-bold text-center text-green-800 mt-safe pt-4 mb-4">
+        탄소중립 챌린지
+      </h1>
+
+      {user ? (
+        <div className="flex-1 flex flex-col px-4 overflow-y-auto">
+          {/* 환경 정보 카드 */}
+          <div className="w-full bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4 mb-4">
+            <div className="flex justify-around">
+              <div className="text-center">
+                <p className="text-xl font-bold text-green-700">🌳 {user.trees}</p>
+                <p className="text-green-600 text-sm">나무</p>
               </div>
-  
-              {/* 진행 중인 미션 */}
-            <div className="mt-4 p-4 bg-white border rounded-lg shadow-md w-[67%] max-w-[400px] flex items-center">
-              {/* 왼쪽: 미션 정보 */}
-              <div className="flex-1">
+              <div className="text-center">
+                <p className="text-xl font-bold text-blue-700">🎖 {user.level}</p>
+                <p className="text-blue-600 text-sm">레벨</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 미션 카드 */}
+          <div className="w-full bg-white rounded-xl shadow-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
                 <h2 className="text-lg font-bold text-gray-800">1일 1 채식 도전팀</h2>
-                <p className="text-sm text-gray-500">🚩 15 tCO₂eq</p>
-                {/* 참여자 아이콘 */}
+                <p className="text-sm text-green-600">🚩 15 tCO₂eq 절감 목표</p>
                 <div className="flex mt-2">
                   {[...Array(3)].map((_, i) => (
-                    <FaUserCircle key={i} className="text-gray-400 text-2xl -ml-1" />
+                    <FaUserCircle key={i} className="text-green-400 text-2xl -ml-1" />
                   ))}
                   <span className="text-gray-500 text-sm ml-2">+5명</span>
                 </div>
               </div>
-              {/* 오른쪽: 원형 진행도 */}
-              <div className="w-16 h-16">
+              <div className="w-20 h-20">
                 <CircularProgressbar
                   value={12}
                   text={`12%`}
                   styles={buildStyles({
-                    pathColor: "#3b82f6",
-                    textColor: "#3b82f6",
+                    pathColor: "#22c55e",
+                    textColor: "#22c55e",
                     trailColor: "#e5e7eb",
-                    textSize: "18px",
                   })}
-                  />
-                  </div>
-                </div>
-  
-              {/* ✅ 마을 숲(게임 요소) + 떠다니는 캡션 */}
-              <div className="relative w-full flex justify-center mt-10">
-                {/* 대화 캡션 */}
-                <motion.div
-                  className="absolute top-[-40px] bg-white p-2 rounded-lg shadow-md text-sm font-bold text-gray-800"
-                  animate={{ y: [-5,5] }}
-                  transition={{ repeat: Infinity, repeatType: "mirror", duration: 1}}
-                >
-                  🌿 캐릭터를 터치해보세요!
-                </motion.div>
-  
-                {/* 마을 숲 이미지 */}
-                <motion.div
-                  className="bg-green-200 p-4 rounded-lg shadow-md"
-                  animate={shake ? { rotate: [-5, 5, -5, 5, 0] } : {}}
-                  transition={{ duration: 0.5 }}
-                  onClick={() => setShake(true)}
-                  onAnimationComplete={() => setShake(false)}
-                >
-                  <img src="/village.png" alt="마을 숲" className="w-40 h-40 object-contain" />
-                </motion.div>
-              </div>
-  
-              {/* ✅ 나무 심기 */}
-              <div className="mt-4 p-4 bg-green-100 rounded-lg shadow-md w-[80%] max-w-[400px]">
-                <p className="text-lg font-bold text-green-800">오늘의 나무를 심어볼까요?</p>
-                <button className="mt-2 w-full bg-green-500 text-white p-2 rounded-md">
-                  미션 확인
-                </button>
+                />
               </div>
             </div>
-          ) : (
-            <p className="text-center text-gray-600 mt-10">로딩 중...</p>
-          )}
-  
+          </div>
+
+          {/* 캐릭터 섹션 */}
+          <div className="flex-1 flex flex-col justify-center items-center relative my-4">
+            <motion.div
+              className="absolute -top-8 bg-white/90 px-4 py-2 rounded-full shadow-lg"
+              animate={{ y: [-5, 5] }}
+              transition={{ repeat: Infinity, repeatType: "mirror", duration: 1.5 }}
+            >
+              <p className="text-green-700 font-medium">🌿 캐릭터를 터치해보세요!</p>
+            </motion.div>
+
+            <motion.div
+              className="bg-green-100 p-6 rounded-full shadow-lg"
+              animate={shake ? { rotate: [-5, 5, -5, 5, 0] } : {}}
+              transition={{ duration: 0.5 }}
+              onClick={() => setShake(true)}
+              onAnimationComplete={() => setShake(false)}
+              whileHover={{ scale: 1.05 }}
+            >
+              <img src="/village.png" alt="마을 숲" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
+            </motion.div>
+          </div>
+
+          {/* 나무 심기 섹션 */}
+          <div className="w-full mt-auto p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl shadow-md mb-4">
+            <p className="text-lg font-bold text-green-800 mb-3">오늘의 나무를 심어볼까요?</p>
+            <button className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition-colors duration-200 shadow-md">
+              미션 시작하기
+            </button>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-
+      ) : (
+        <div className="flex-1 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ✅ 로그인 전 기본 홈 화면
 function LoggedOutHome({ router }: { router: any }) {
