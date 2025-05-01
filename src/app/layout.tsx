@@ -20,12 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
     return () => window.removeEventListener("storage", checkAuth);
   }, []);
-  
+
   return (
     <html lang="ko">
-      <body className="bg-gray-100 text-gray-900 flex justify-center items-center min-h-screen">
+      <body className="bg-primary-light text-gray-900 flex justify-center items-center min-h-screen">
         {/* ✅ 모바일 화면 크기 고정 */}
-        <div className="w-[375px] h-[812px] bg-white shadow-lg rounded-lg overflow-hidden relative flex flex-col">
+        <div className="w-[375px] h-[812px] bg-white shadow-xl rounded-2xl overflow-hidden relative flex flex-col">
           <div className="flex-grow overflow-y-auto">{children}</div>
           {isLoggedIn && <NavBar />} {/* ✅ 로그인한 경우에만 네비게이션 바 표시 */}
         </div>

@@ -1,7 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  @apply bg-gray-100 text-gray-900;
+  @apply bg-primary-light text-gray-900;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-primary-light;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-medium rounded-full;
+}
+
+/* 버튼 효과 */
+button {
+  @apply transition-all duration-200;
+}
+
+button:active {
+  transform: scale(0.98);
 }
