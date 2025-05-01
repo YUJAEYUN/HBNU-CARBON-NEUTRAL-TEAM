@@ -55,88 +55,75 @@ function LoggedInHome({ user, router, shake, setShake }: { user: any; router: an
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
       {/* 상단 타이틀 */}
-      <div className="w-full bg-primary py-6 px-4 shadow-md">
-        <h1 className="text-2xl font-bold text-white text-center">
-          탄소중립 챌린지
-        </h1>
+      <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md">
+        <h1 className="text-xl font-bold text-white">C-nergy</h1>
+        <button className="text-white p-2 rounded-full">
+          <FaBolt className="text-xl" />
+        </button>
       </div>
 
       {user ? (
         <div className="flex-1 flex flex-col px-4 overflow-y-auto pt-4">
-          {/* 환경 정보 카드 */}
-          <div className="w-full bg-gradient-to-r from-primary-light to-primary-medium rounded-xl p-5 mb-5 shadow-md">
-            <div className="flex justify-around">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary-dark">🌳 {user?.trees || 0}</p>
-                <p className="text-primary-dark text-sm font-medium">나무</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary-dark">🎖 {user?.level || 1}</p>
-                <p className="text-primary-dark text-sm font-medium">레벨</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary-dark">🏆 {user?.points || 0}</p>
-                <p className="text-primary-dark text-sm font-medium">포인트</p>
+          {/* 탄소 절감량 카드 */}
+          <div className="w-full bg-primary-light rounded-xl p-4 mb-4">
+            <p className="text-sm text-primary-dark mb-1">오늘의 탄소 절감량</p>
+            <div className="flex items-end justify-between">
+              <p className="text-2xl font-bold text-primary-dark">0.87kg CO<sub>2</sub></p>
+              <div className="flex items-center">
+                <p className="text-sm text-primary-dark mr-1">Lv.3</p>
+                <span className="text-primary-dark">⭐</span>
               </div>
             </div>
           </div>
 
-          {/* 미션 카드 */}
-          <div className="w-full bg-white rounded-xl shadow-md p-5 mb-5 border border-primary-light">
-            <h2 className="text-lg font-bold text-primary-dark mb-3">진행 중인 챌린지</h2>
-            <div className="flex items-center justify-between bg-primary-light p-4 rounded-lg">
-              <div>
-                <h3 className="text-lg font-bold text-primary-dark">1일 1 채식 도전팀</h3>
-                <p className="text-sm text-primary">🚩 15 tCO₂eq 절감 목표</p>
-                <div className="flex mt-2">
-                  {[...Array(3)].map((_, i) => (
-                    <FaUserCircle key={i} className="text-primary-medium text-2xl -ml-1" />
-                  ))}
-                  <span className="text-gray-600 text-sm ml-2">+5명</span>
-                </div>
+          {/* 카테고리 그리드 */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {[
+              { icon: "🗓️", label: "시간표" },
+              { icon: "🍽️", label: "식사" },
+              { icon: "🏫", label: "교통" },
+              { icon: "📊", label: "온도계" },
+              { icon: "🚶", label: "걸음수" },
+              { icon: "🌱", label: "캐릭터" },
+              { icon: "🚗", label: "카풀" },
+              { icon: "📝", label: "게시판" }
+            ].map((item, index) => (
+              <button key={index} className="bg-white p-3 rounded-lg shadow-sm flex flex-col items-center justify-center">
+                <span className="text-xl mb-1">{item.icon}</span>
+                <span className="text-xs text-gray-700">{item.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* 오늘의 활동 */}
+          <div className="mb-4">
+            <h2 className="text-lg font-bold text-primary-dark mb-2 px-1">오늘의 활동</h2>
+            <div className="bg-white rounded-lg shadow-sm p-4 mb-3 border border-gray-100">
+              <p className="text-gray-800 font-medium">교내 카페에서 텀블러 사용하여 일회용컵 절약</p>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm text-gray-500">오전 9시 • 9분 전</span>
+                <span className="text-sm text-primary-dark font-medium">-0.12kg</span>
               </div>
-              <div className="w-20 h-20">
-                <CircularProgressbar
-                  value={12}
-                  text={`12%`}
-                  styles={buildStyles({
-                    pathColor: "#4CAF50",
-                    textColor: "#2E7D32",
-                    trailColor: "#E8F5E9",
-                  })}
-                />
+            </div>
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+              <p className="text-gray-800 font-medium">이번주 계단 이용하기 목표 달성</p>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm text-gray-500">오전 8시 • 32분 전</span>
+                <span className="text-sm text-primary-dark font-medium">-0.25kg</span>
               </div>
             </div>
           </div>
 
-          {/* 캐릭터 섹션 */}
-          <div className="flex-1 flex flex-col justify-center items-center relative my-5">
-            <motion.div
-              className="absolute -top-8 bg-primary-light px-4 py-2 rounded-full shadow-md border border-primary-medium"
-              animate={{ y: [-5, 5] }}
-              transition={{ repeat: Infinity, repeatType: "mirror", duration: 1.5 }}
-            >
-              <p className="text-primary-dark font-medium">🌿 캐릭터를 터치해보세요!</p>
-            </motion.div>
-
-            <motion.div
-              className="bg-primary-light p-8 rounded-full shadow-lg border-4 border-primary-medium"
-              animate={shake ? { rotate: [-5, 5, -5, 5, 0] } : {}}
-              transition={{ duration: 0.5 }}
-              onClick={() => setShake(true)}
-              onAnimationComplete={() => setShake(false)}
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src="/village.png" alt="마을 숲" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
-            </motion.div>
-          </div>
-
-          {/* 나무 심기 섹션 */}
-          <div className="w-full mt-auto p-5 bg-primary rounded-xl shadow-md mb-5">
-            <p className="text-lg font-bold text-white mb-3">오늘의 나무를 심어볼까요?</p>
-            <button className="w-full bg-white hover:bg-primary-light text-primary-dark py-3 rounded-lg transition-colors duration-200 shadow-md font-bold">
-              미션 시작하기
-            </button>
+          {/* 추천 활동 */}
+          <div>
+            <h2 className="text-lg font-bold text-primary-dark mb-2 px-1">추천 활동</h2>
+            <div className="bg-primary-light rounded-lg p-4 mb-3 border border-primary-medium">
+              <p className="text-primary-dark font-medium">학교 식당에서 채식 메뉴 선택하기</p>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm text-gray-600">점심 • 12시 30분</span>
+                <span className="text-sm text-primary-dark font-medium">-0.5kg</span>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
