@@ -79,16 +79,20 @@ function LoggedInHome({ user, router, shake, setShake }: { user: any; router: an
           {/* 카테고리 그리드 */}
           <div className="grid grid-cols-4 gap-2 mb-4">
             {[
-              { icon: "🗓️", label: "시간표" },
-              { icon: "🍽️", label: "식사" },
-              { icon: "🏫", label: "교통" },
-              { icon: "📊", label: "온도계" },
-              { icon: "🚶", label: "걸음수" },
-              { icon: "🌱", label: "캐릭터" },
-              { icon: "🚗", label: "카풀" },
-              { icon: "📝", label: "게시판" }
+              { icon: "🗓️", label: "시간표", path: "/timetable" },
+              { icon: "🍽️", label: "식사", path: "/community/hansik" },
+              { icon: "🏫", label: "교통", path: "/" },
+              { icon: "📊", label: "온도계", path: "/" },
+              { icon: "🚶", label: "걸음수", path: "/" },
+              { icon: "🌱", label: "캐릭터", path: "/character" },
+              { icon: "🚗", label: "카풀", path: "/" },
+              { icon: "📝", label: "게시판", path: "/community" }
             ].map((item, index) => (
-              <button key={index} className="bg-white p-3 rounded-lg shadow-sm flex flex-col items-center justify-center">
+              <button
+                key={index}
+                className="bg-white p-3 rounded-lg shadow-sm flex flex-col items-center justify-center"
+                onClick={() => router.push(item.path)}
+              >
                 <span className="text-xl mb-1">{item.icon}</span>
                 <span className="text-xs text-gray-700">{item.label}</span>
               </button>
