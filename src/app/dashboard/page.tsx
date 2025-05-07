@@ -1,43 +1,24 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaChartBar, FaUser, FaSignOutAlt, FaChevronRight, FaLeaf } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("activity"); // 'activity' 또는 'profile'
   const router = useRouter();
+  const { user, logout, isLoading } = useAuth();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/auth/login");
-      return;
-    }
-
-    async function fetchUser() {
-      try {
-        const response = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) throw new Error("인증 실패");
-        const data = await response.json();
-        setUser(data);
-      } catch (error) {
-        console.error("사용자 정보를 가져오는 중 오류 발생:", error);
-        router.push("/auth/login");
-      }
-    }
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.dispatchEvent(new Event("storage")); // ✅ 상태 강제 업데이트
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
+
+  // 로딩 중일 때 로딩 화면 표시
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">

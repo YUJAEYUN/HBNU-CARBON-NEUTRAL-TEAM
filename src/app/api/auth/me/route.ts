@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
+    // 쿠키에서 토큰 가져오기
+    const token = cookies().get("auth_token")?.value;
 
     if (!token) {
       return NextResponse.json({ error: "토큰이 없습니다." }, { status: 401 });

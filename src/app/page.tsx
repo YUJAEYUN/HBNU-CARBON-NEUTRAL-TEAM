@@ -1,45 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { FaBolt } from "react-icons/fa";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function HomePage() {
-  const [user, setUser] = useState<Record<string, unknown> | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const router = useRouter();
+  const { user, isLoggedIn, isLoading } = useAuth();
 
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setIsLoggedIn(false); // ✅ 토큰 없으면 로그인되지 않은 상태
-      return;
-    }
-
-    setIsLoggedIn(true); // ✅ 토큰이 있으면 로그인된 상태
-
-    async function fetchUser() {
-      try {
-        const response = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) throw new Error("인증 실패");
-        const data = await response.json();
-        setUser(data);
-      } catch (error) {
-        console.error("사용자 정보를 가져오는 중 오류 발생:", error);
-        setIsLoggedIn(false); // 인증 실패 시 로그아웃 상태로 전환
-      }
-    }
-
-    fetchUser();
-  }, []);
+  // 로딩 중일 때 로딩 화면 표시
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-cover bg-center">

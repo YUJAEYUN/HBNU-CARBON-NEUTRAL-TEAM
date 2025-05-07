@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +23,18 @@ export async function POST(req: Request) {
 
     console.log("로그인 성공:", data.session.access_token); // ✅ JWT 토큰 출력 (디버깅)
 
-    return NextResponse.json({ token: data.session.access_token }, { status: 200 });
+    // 쿠키에 토큰 저장 (7일 유효기간)
+    cookies().set({
+      name: "auth_token",
+      value: data.session.access_token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: "/"
+    });
+
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("서버 오류:", (error as Error).message);
     return NextResponse.json({ error: "서버 오류 발생" }, { status: 500 });

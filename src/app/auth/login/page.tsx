@@ -1,30 +1,30 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { login, isLoading } = useAuth();
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) throw new Error("로그인 실패");
-
-      const { token } = await response.json();
-      localStorage.setItem("token", token); // ✅ JWT 토큰 저장
-      window.dispatchEvent(new Event("storage")); // ✅ 상태 강제 업데이트
-      router.push("/"); // ✅ 로그인 성공 후 홈 화면(`/`)으로 이동
+      const success = await login(email, password);
+      if (success) {
+        router.push("/"); // ✅ 로그인 성공 후 홈 화면(`/`)으로 이동
+      }
     } catch (error) {
       console.error("로그인 실패:", error);
     }
   };
+
+  // 로딩 중일 때 로딩 화면 표시
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
