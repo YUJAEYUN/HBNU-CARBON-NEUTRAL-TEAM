@@ -85,7 +85,7 @@ function LoggedInHome({ user, router, shake, setShake }: { user: any; router: an
               { icon: "📊", label: "온도계", path: "/" },
               { icon: "🚶", label: "걸음수", path: "/" },
               { icon: "🌱", label: "캐릭터", path: "/character" },
-              { icon: "🚗", label: "카풀", path: "/" },
+              { icon: "🚗", label: "카풀", path: "/carpool" },
               { icon: "📝", label: "게시판", path: "/community" }
             ].map((item, index) => (
               <button
