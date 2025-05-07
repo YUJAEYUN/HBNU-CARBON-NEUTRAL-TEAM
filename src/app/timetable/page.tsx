@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaPlus, FaArrowLeft } from "react-icons/fa";
 
@@ -7,7 +7,7 @@ export default function TimetablePage() {
   const [activeDay, setActiveDay] = useState<string>("월");
   const router = useRouter();
   const days = ["월", "화", "수", "목", "금"];
-  
+
   // 시간표 데이터 (실제로는 API나 DB에서 가져올 수 있음)
   const timetableData = {
     월: [
@@ -30,7 +30,7 @@ export default function TimetablePage() {
       {/* 상단 헤더 */}
       <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md">
         <div className="flex items-center">
-          <button 
+          <button
             className="text-white mr-2"
             onClick={() => router.push("/")}
           >

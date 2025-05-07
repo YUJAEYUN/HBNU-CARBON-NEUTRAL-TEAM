@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import {FaUserCircle, FaTree, FaCamera, FaHome, FaBolt, FaCoins, FaComments, FaUser } from "react-icons/fa";
+import { FaBolt } from "react-icons/fa";
+import Image from "next/image";
 
 export default function HomePage() {
-  const [user, setUser] = useState<any>(null);
-  const [shake, setShake] = useState(false);
+  const [user, setUser] = useState<Record<string, unknown> | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const router = useRouter();
 
@@ -44,14 +44,14 @@ export default function HomePage() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-cover bg-center">
       <div className="w-full h-full min-h-screen max-w-[430px] mx-auto bg-white shadow-lg flex flex-col relative overflow-hidden">
-        {isLoggedIn ? <LoggedInHome user={user} router={router} shake={shake} setShake={setShake}/> : <LoggedOutHome router={router} />}
+        {isLoggedIn ? <LoggedInHome user={user} router={router} /> : <LoggedOutHome router={router} />}
       </div>
     </div>
   );
 }
 
 // ✅ 로그인 후 홈 화면 (새로운 UI)
-function LoggedInHome({ user, router, shake, setShake }: { user: any; router: any; shake: boolean; setShake: any }) {
+function LoggedInHome({ user, router }: { user: Record<string, unknown> | null; router: ReturnType<typeof useRouter> }) {
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
       {/* 상단 타이틀 */}
@@ -140,11 +140,11 @@ function LoggedInHome({ user, router, shake, setShake }: { user: any; router: an
 }
 
 // ✅ 로그인 전 기본 홈 화면
-function LoggedOutHome({ router }: { router: any }) {
+function LoggedOutHome({ router }: { router: ReturnType<typeof useRouter> }) {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-primary-light to-white">
       <div className="text-center px-6 py-10">
-        <img src="/village.png" alt="탄소중립 챌린지" className="w-32 h-32 mx-auto mb-6" />
+        <Image src="/village.png" alt="탄소중립 챌린지" width={128} height={128} className="mx-auto mb-6" />
         <h1 className="text-3xl font-bold text-primary-dark mb-4">탄소중립 챌린지</h1>
         <p className="text-gray-700 mb-8 text-lg">
           일상 속 작은 실천으로<br />
