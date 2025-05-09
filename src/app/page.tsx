@@ -7,6 +7,7 @@ import { FaBolt } from "react-icons/fa";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -27,7 +28,46 @@ export default function HomePage() {
 }
 
 // 로그인 후 홈 화면 (입체적 디자인 적용)
-function LoggedInHome({ user, router }: { user: Record<string, unknown> | null; router: ReturnType<typeof useRouter> }) {
+function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown> | null; router: ReturnType<typeof useRouter> }>) {
+  // 탄소 절감량 애니메이션을 위한 상태
+  const [carbonValue, setCarbonValue] = useState(0);
+  const targetValue = 0.87; // 최종 표시될 값
+
+  // 컴포넌트가 마운트되면 애니메이션 시작
+  useEffect(() => {
+    // 더 간단한 방식으로 애니메이션 구현
+    let startTimestamp: number | null = null;
+    const duration = 2000; // 2초 동안 애니메이션 진행
+
+    const step = (timestamp: number) => {
+      startTimestamp ??= timestamp;
+      const elapsed = timestamp - startTimestamp;
+
+      // 진행률 계산 (0~1 사이 값)
+      const progress = Math.min(elapsed / duration, 1);
+
+      // easeOutQuart 이징 함수 적용 (부드러운 감속 효과)
+      const easedProgress = 1 - Math.pow(1 - progress, 4);
+
+      // 현재 값 계산
+      const currentValue = targetValue * easedProgress;
+      setCarbonValue(currentValue);
+
+      // 애니메이션이 완료되지 않았으면 다음 프레임 요청
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    // 애니메이션 시작
+    requestAnimationFrame(step);
+
+    // 컴포넌트 언마운트 시 정리
+    return () => {
+      setCarbonValue(targetValue);
+    };
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
       {/* 상단 타이틀 - 유리 효과 적용 */}
@@ -66,7 +106,27 @@ function LoggedInHome({ user, router }: { user: Record<string, unknown> | null; 
             <p className="text-sm text-primary-dark mb-2">오늘의 탄소 절감량</p>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-3xl font-bold text-primary-dark">0.87kg CO<sub>2</sub></p>
+                <div className="relative">
+                  <motion.p
+                    className="text-3xl font-bold text-primary-dark"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <span>{carbonValue.toFixed(2)}</span>kg CO<sub>2</sub>
+                  </motion.p>
+                  {/* 애니메이션 완료 시 표시되는 효과 */}
+                  {carbonValue >= targetValue * 0.99 && (
+                    <motion.div
+                      className="absolute -right-2 -top-2"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 10 }}
+                    >
+                      <span className="text-lg">✨</span>
+                    </motion.div>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 mt-1">어제보다 0.2kg 더 절감했어요!</p>
               </div>
               <div className="w-16 h-16 relative">
@@ -93,17 +153,17 @@ function LoggedInHome({ user, router }: { user: Record<string, unknown> | null; 
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             {[
-              { icon: "🗓️", label: "시간표", path: "/timetable" },
-              { icon: "🍽️", label: "식사", path: "/community/hansik" },
-              { icon: "🏫", label: "교통", path: "/" },
-              { icon: "📊", label: "온도계", path: "/" },
-              { icon: "🚶", label: "걸음수", path: "/" },
-              { icon: "🌱", label: "캐릭터", path: "/character" },
-              { icon: "🚗", label: "카풀", path: "/carpool" },
-              { icon: "📝", label: "게시판", path: "/community" }
+              { icon: "🗓️", label: "시간표", path: "/timetable", id: "timetable" },
+              { icon: "🍽️", label: "식사", path: "/community/hansik", id: "hansik" },
+              { icon: "🏫", label: "교통", path: "/", id: "transport" },
+              { icon: "📊", label: "온도계", path: "/", id: "temperature" },
+              { icon: "🚶", label: "걸음수", path: "/", id: "steps" },
+              { icon: "🌱", label: "캐릭터", path: "/character", id: "character" },
+              { icon: "🚗", label: "카풀", path: "/carpool", id: "carpool" },
+              { icon: "📝", label: "게시판", path: "/community", id: "community" }
             ].map((item, index) => (
               <motion.button
-                key={index}
+                key={item.id}
                 className="neu-card p-3 flex flex-col items-center justify-center"
                 onClick={() => router.push(item.path)}
                 whileHover={{ scale: 1.05 }}
@@ -186,7 +246,7 @@ function LoggedInHome({ user, router }: { user: Record<string, unknown> | null; 
 }
 
 // 로그인 전 기본 홈 화면 (입체적 디자인 적용)
-function LoggedOutHome({ router }: { router: ReturnType<typeof useRouter> }) {
+function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRouter> }>) {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-primary-light via-white to-primary-light">
       <motion.div
