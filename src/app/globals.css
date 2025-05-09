@@ -1,82 +1,184 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --card-shadow: 0 10px 15px -3px rgba(76, 175, 80, 0.1), 0 4px 6px -2px rgba(76, 175, 80, 0.05);
-  --button-shadow: 0 4px 0 0 #2E7D32;
+  /* iOS 스타일 그림자 */
+  --ios-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  --ios-shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --ios-shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.15);
+
+  /* iOS 스타일 색상 */
+  --ios-green: #34C759;
+  --ios-blue: #007AFF;
+  --ios-indigo: #5856D6;
+  --ios-purple: #AF52DE;
+  --ios-teal: #5AC8FA;
+  --ios-red: #FF3B30;
+  --ios-orange: #FF9500;
+  --ios-yellow: #FFCC00;
+  --ios-gray: #8E8E93;
+  --ios-gray-light: #E5E5EA;
+  --ios-background: #F2F2F7;
 }
 
 body {
-  @apply bg-primary-light text-gray-900;
-  font-family: 'Noto Sans KR', sans-serif;
+  @apply bg-gray-50 text-gray-900;
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 스크롤바 스타일링 */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-primary-light;
+  @apply bg-gray-100;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary-medium rounded-full;
+  @apply bg-gray-300 rounded-full;
 }
 
 /* 버튼 효과 */
 button {
-  @apply transition-all duration-200;
+  @apply transition-all duration-150;
 }
 
 button:active {
-  transform: translateY(2px);
+  @apply opacity-70;
 }
 
-/* 3D 효과를 위한 클래스 */
+/* iOS 스타일 컴포넌트 */
 @layer components {
-  .card-3d {
-    @apply bg-white rounded-xl shadow-card transition-all duration-300 hover:shadow-card-hover;
-    transform: perspective(1000px) translateZ(0);
+  /* iOS 카드 */
+  .ios-card {
+    @apply bg-white rounded-2xl transition-all duration-200;
+    box-shadow: var(--ios-shadow-sm);
   }
 
-  .card-3d:hover {
-    transform: perspective(1000px) translateZ(10px);
+  .ios-card:active {
+    @apply bg-gray-50;
+  }
+
+  /* iOS 버튼 */
+  .ios-button {
+    @apply bg-primary text-white font-medium rounded-full py-3 px-6 transition-all duration-150;
+    box-shadow: var(--ios-shadow-sm);
+  }
+
+  .ios-button:active {
+    @apply transform scale-95 opacity-90;
+  }
+
+  /* iOS 세컨더리 버튼 */
+  .ios-button-secondary {
+    @apply bg-white text-primary font-medium rounded-full py-3 px-6 border border-gray-200 transition-all duration-150;
+  }
+
+  .ios-button-secondary:active {
+    @apply bg-gray-50 transform scale-95;
+  }
+
+  /* iOS 아이콘 버튼 */
+  .ios-icon-button {
+    @apply bg-white p-3 rounded-full transition-all duration-150;
+    box-shadow: var(--ios-shadow-sm);
+  }
+
+  .ios-icon-button:active {
+    @apply transform scale-95 opacity-90;
+  }
+
+  /* iOS 유리 효과 */
+  .ios-glass {
+    @apply bg-white bg-opacity-70 backdrop-filter backdrop-blur-xl rounded-2xl border border-white border-opacity-20;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  /* iOS 입력 필드 */
+  .ios-input {
+    @apply bg-gray-100 rounded-xl px-4 py-3 text-gray-800 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+  }
+
+  /* iOS 탭 버튼 */
+  .ios-tab {
+    @apply py-2 px-4 rounded-full text-sm font-medium transition-all duration-150;
+  }
+
+  .ios-tab.active {
+    @apply bg-primary text-white;
+  }
+
+  .ios-tab:not(.active) {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  /* iOS 헤더 */
+  .ios-header {
+    @apply bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg py-4 px-4 flex justify-between items-center;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  /* iOS 바텀 시트 */
+  .ios-bottom-sheet {
+    @apply bg-white rounded-t-2xl shadow-lg;
+  }
+
+  /* iOS 스타일 그리드 아이템 */
+  .ios-grid-item {
+    @apply bg-white rounded-2xl p-4 flex flex-col items-center justify-center transition-all duration-200;
+    box-shadow: var(--ios-shadow-sm);
+  }
+
+  .ios-grid-item:active {
+    @apply transform scale-95 bg-gray-50;
+  }
+
+  /* 기존 클래스 iOS 스타일로 업데이트 */
+  .card-3d {
+    @apply bg-white rounded-2xl transition-all duration-200;
+    box-shadow: var(--ios-shadow-sm);
+  }
+
+  .card-3d:hover, .card-3d:active {
+    @apply transform scale-[1.02];
+    box-shadow: var(--ios-shadow);
   }
 
   .button-3d {
-    @apply relative bg-primary text-white font-bold rounded-xl transition-all duration-200;
-    box-shadow: var(--button-shadow);
+    @apply bg-primary text-white font-medium rounded-full py-3 px-6 transition-all duration-150;
+    box-shadow: var(--ios-shadow-sm);
   }
 
   .button-3d:active {
-    @apply transform translate-y-1;
-    box-shadow: 0 2px 0 0 #2E7D32;
+    @apply transform scale-95 opacity-90;
   }
 
   .neu-card {
-    @apply bg-primary-light rounded-xl transition-all duration-300;
-    box-shadow: 6px 6px 12px #d1d9d1, -6px -6px 12px #ffffff;
+    @apply bg-white rounded-2xl transition-all duration-200;
+    box-shadow: var(--ios-shadow-sm);
   }
 
-  .neu-card:hover {
-    box-shadow: 8px 8px 16px #d1d9d1, -8px -8px 16px #ffffff;
+  .neu-card:hover, .neu-card:active {
+    @apply transform scale-[1.02];
+    box-shadow: var(--ios-shadow);
   }
 
   .neu-button {
-    @apply bg-primary-light text-primary-dark font-medium rounded-xl transition-all duration-300;
-    box-shadow: 6px 6px 12px #d1d9d1, -6px -6px 12px #ffffff;
+    @apply bg-white text-primary font-medium rounded-full py-3 px-6 border border-gray-200 transition-all duration-150;
   }
 
   .neu-button:active {
-    @apply bg-primary-light;
-    box-shadow: inset 6px 6px 12px #d1d9d1, inset -6px -6px 12px #ffffff;
+    @apply bg-gray-50 transform scale-95;
   }
 
   .glass-effect {
-    @apply bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl border border-white border-opacity-20;
+    @apply bg-white bg-opacity-70 backdrop-filter backdrop-blur-xl rounded-2xl border border-white border-opacity-20;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   }
 }

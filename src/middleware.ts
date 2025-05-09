@@ -5,20 +5,21 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = [
   '/dashboard',
   '/character',
+  '/certification',
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // 인증이 필요한 경로인지 확인
-  const isProtectedRoute = protectedRoutes.some(route => 
+  const isProtectedRoute = protectedRoutes.some(route =>
     pathname.startsWith(route)
   );
-  
+
   if (isProtectedRoute) {
     // 쿠키에서 토큰 확인
     const token = request.cookies.get('auth_token')?.value;
-    
+
     // 토큰이 없으면 로그인 페이지로 리다이렉트
     if (!token) {
       const url = new URL('/auth/login', request.url);
@@ -26,7 +27,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
-  
+
   return NextResponse.next();
 }
 

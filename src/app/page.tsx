@@ -18,20 +18,87 @@ export default function HomePage() {
     return <LoadingScreen />;
   }
 
+  // 목업 데이터 - 실제로는 API에서 가져올 데이터
+  const mockData = {
+    carbonReduction: 0.87,
+    yesterdayReduction: 0.67,
+    level: 3,
+    levelProgress: 65,
+    activities: [
+      { id: 1, title: "교내 카페에서 텀블러 사용하여 일회용컵 절약", time: "오전 9시", timeAgo: "9분 전", reduction: 0.12 },
+      { id: 2, title: "이번주 계단 이용하기 목표 달성", time: "오전 8시", timeAgo: "32분 전", reduction: 0.25 },
+      { id: 3, title: "전자영수증 사용", time: "어제", timeAgo: "1일 전", reduction: 0.08 },
+    ],
+    personalStats: {
+      monthlyGoal: 20,
+      monthlyReduction: 12.5,
+      progress: 65
+    },
+    events: [
+      { id: 1, title: "교내 환경 봉사활동", date: "5월 15일", time: "14:00", duration: "2시간" },
+      { id: 2, title: "탄소중립 캠페인", date: "5월 20일", time: "10:00", duration: "3시간" }
+    ],
+    news: [
+      { id: 1, title: "대학생 탄소중립 아이디어 공모전 개최", content: "환경부에서 주관하는 대학생 탄소중립 아이디어 공모전이 다음 달 개최됩니다.", date: "2023.05.10" },
+      { id: 2, title: "캠퍼스 내 일회용품 사용 제한 확대", content: "우리 대학은 다음 학기부터 캠퍼스 내 일회용품 사용을 단계적으로 제한합니다.", date: "2023.05.08" }
+    ]
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="w-full h-full flex flex-col relative overflow-hidden">
-        {isLoggedIn ? <LoggedInHome user={user} router={router} /> : <LoggedOutHome router={router} />}
+        {isLoggedIn ? <LoggedInHome user={user} router={router} mockData={mockData} /> : <LoggedOutHome router={router} />}
       </div>
     </div>
   );
 }
 
-// 로그인 후 홈 화면 (입체적 디자인 적용)
-function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown> | null; router: ReturnType<typeof useRouter> }>) {
+// 목업 데이터 타입 정의
+interface MockData {
+  carbonReduction: number;
+  yesterdayReduction: number;
+  level: number;
+  levelProgress: number;
+  activities: Array<{
+    id: number;
+    title: string;
+    time: string;
+    timeAgo: string;
+    reduction: number;
+  }>;
+  personalStats: {
+    monthlyGoal: number;
+    monthlyReduction: number;
+    progress: number;
+  };
+  events: Array<{
+    id: number;
+    title: string;
+    date: string;
+    time: string;
+    duration: string;
+  }>;
+  news: Array<{
+    id: number;
+    title: string;
+    content: string;
+    date: string;
+  }>;
+}
+
+// 로그인 후 홈 화면 (iOS 스타일 적용)
+function LoggedInHome({
+  user,
+  router,
+  mockData
+}: Readonly<{
+  user: Record<string, unknown> | null;
+  router: ReturnType<typeof useRouter>;
+  mockData: MockData;
+}>) {
   // 탄소 절감량 애니메이션을 위한 상태
   const [carbonValue, setCarbonValue] = useState(0);
-  const targetValue = 0.87; // 최종 표시될 값
+  const targetValue = mockData.carbonReduction; // 목업 데이터에서 값 가져오기
 
   // 컴포넌트가 마운트되면 애니메이션 시작
   useEffect(() => {
@@ -66,19 +133,19 @@ function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown>
     return () => {
       setCarbonValue(targetValue);
     };
-  }, []);
+  }, [targetValue]);
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
-      {/* 상단 타이틀 - 유리 효과 적용 */}
+      {/* 상단 타이틀 - iOS 스타일 헤더 */}
       <motion.div
-        className="w-full bg-primary bg-opacity-90 backdrop-filter backdrop-blur-md py-4 px-4 flex justify-between items-center shadow-lg"
+        className="ios-header sticky top-0 z-10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <motion.h1
-          className="text-xl font-bold text-white"
+          className="text-xl font-semibold text-gray-800"
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
@@ -86,34 +153,35 @@ function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown>
           C-nergy
         </motion.h1>
         <motion.button
-          className="text-white p-2 rounded-full bg-white bg-opacity-20"
-          whileHover={{ scale: 1.1, rotate: 15 }}
-          whileTap={{ scale: 0.9 }}
+          className="ios-icon-button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <FaBolt className="text-xl" />
+          <FaBolt className="text-primary text-lg" />
         </motion.button>
       </motion.div>
 
       {user ? (
         <div className="flex-1 flex flex-col px-4 overflow-y-auto pt-4">
-          {/* 탄소 절감량 카드 - 3D 효과 적용 */}
+          {/* 탄소 절감량 카드 - iOS 스타일 카드 */}
           <motion.div
-            className="card-3d w-full p-5 mb-5"
+            className="ios-card w-full p-5 mb-5"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-sm text-primary-dark mb-2">오늘의 탄소 절감량</p>
+            <p className="text-sm font-medium text-gray-500 mb-2">오늘의 탄소 절감량</p>
             <div className="flex items-center justify-between">
               <div>
                 <div className="relative">
                   <motion.p
-                    className="text-3xl font-bold text-primary-dark"
+                    className="text-3xl font-bold text-gray-800"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <span>{carbonValue.toFixed(2)}</span>kg CO<sub>2</sub>
+                    <span>{carbonValue.toFixed(2)}</span>
+                    <span className="text-lg font-medium">kg</span>
                   </motion.p>
                   {/* 애니메이션 완료 시 표시되는 효과 */}
                   {carbonValue >= targetValue * 0.99 && (
@@ -127,17 +195,19 @@ function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown>
                     </motion.div>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">어제보다 0.2kg 더 절감했어요!</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  어제보다 {(mockData.carbonReduction - mockData.yesterdayReduction).toFixed(2)}kg 더 절감했어요!
+                </p>
               </div>
               <div className="w-16 h-16 relative">
                 <CircularProgressbar
-                  value={65}
-                  text={`Lv.3`}
+                  value={mockData.levelProgress}
+                  text={`Lv.${mockData.level}`}
                   styles={buildStyles({
                     textSize: '28px',
-                    pathColor: '#4CAF50',
-                    textColor: '#2E7D32',
-                    trailColor: '#E8F5E9',
+                    pathColor: '#34C759', // iOS 그린 색상
+                    textColor: '#248A3D',
+                    trailColor: '#E9F9EF',
                     pathTransition: 'stroke-dashoffset 0.5s ease 0s',
                   })}
                 />
@@ -145,9 +215,9 @@ function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown>
             </div>
           </motion.div>
 
-          {/* 카테고리 그리드 - 뉴모피즘 효과 적용 */}
+          {/* 핵심 버튼 - 4개로 축소 (iOS 스타일) */}
           <motion.div
-            className="grid grid-cols-4 gap-3 mb-5"
+            className="grid grid-cols-2 gap-4 mb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -155,85 +225,149 @@ function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown>
             {[
               { icon: "🗓️", label: "시간표", path: "/timetable", id: "timetable" },
               { icon: "🍽️", label: "식사", path: "/community/hansik", id: "hansik" },
-              { icon: "🏫", label: "교통", path: "/", id: "transport" },
-              { icon: "📊", label: "온도계", path: "/", id: "temperature" },
-              { icon: "🚶", label: "걸음수", path: "/", id: "steps" },
-              { icon: "🌱", label: "캐릭터", path: "/character", id: "character" },
-              { icon: "🚗", label: "카풀", path: "/carpool", id: "carpool" },
-              { icon: "📝", label: "게시판", path: "/community", id: "community" }
+              { icon: "📦", label: "중고장터", path: "/marketplace", id: "marketplace" },
+              { icon: "🚗", label: "카풀", path: "/carpool", id: "carpool" }
             ].map((item, index) => (
               <motion.button
                 key={item.id}
-                className="neu-card p-3 flex flex-col items-center justify-center"
+                className="ios-grid-item h-28 rounded-2xl"
                 onClick={() => router.push(item.path)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index, duration: 0.3 }}
               >
-                <span className="text-2xl mb-1">
+                <span className="text-4xl mb-2">
                   {item.icon}
                 </span>
-                <span className="text-xs font-medium text-primary-dark">{item.label}</span>
+                <span className="text-sm font-medium text-gray-700">{item.label}</span>
               </motion.button>
             ))}
           </motion.div>
 
-          {/* 오늘의 활동 - 카드 효과 적용 */}
+          {/* 오늘의 활동 - iOS 스타일 카드 */}
           <motion.div
-            className="mb-5"
+            className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            <h2 className="text-lg font-bold text-primary-dark mb-3 px-1">오늘의 활동</h2>
-            <motion.div
-              className="card-3d p-4 mb-3"
-              whileHover={{ scale: 1.02 }}
-            >
-              <p className="text-gray-800 font-medium">교내 카페에서 텀블러 사용하여 일회용컵 절약</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-500">오전 9시 • 9분 전</span>
-                <span className="text-sm bg-primary-light text-primary-dark font-medium px-2 py-1 rounded-full">-0.12kg</span>
-              </div>
-            </motion.div>
-            <motion.div
-              className="card-3d p-4"
-              whileHover={{ scale: 1.02 }}
-            >
-              <p className="text-gray-800 font-medium">이번주 계단 이용하기 목표 달성</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-500">오전 8시 • 32분 전</span>
-                <span className="text-sm bg-primary-light text-primary-dark font-medium px-2 py-1 rounded-full">-0.25kg</span>
-              </div>
-            </motion.div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">오늘의 활동</h2>
+
+            {mockData.activities.map((activity, index) => (
+              <motion.div
+                key={activity.id}
+                className="ios-card p-4 mb-3"
+                whileHover={{ scale: 1.02 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
+              >
+                <p className="text-gray-800 font-medium">{activity.title}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-sm text-gray-500">{activity.time} • {activity.timeAgo}</span>
+                  <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
+                    -{activity.reduction}kg
+                  </span>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
 
-          {/* 추천 활동 - 유리 효과 적용 */}
+          {/* 개인실적 - iOS 스타일 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
+            className="mb-6"
           >
-            <h2 className="text-lg font-bold text-primary-dark mb-3 px-1">추천 활동</h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">개인실적</h2>
             <motion.div
-              className="glass-effect p-4 mb-3 bg-primary-light bg-opacity-50"
+              className="ios-card p-4 mb-3"
               whileHover={{ scale: 1.02 }}
             >
-              <div className="flex items-start">
-                <div className="bg-primary bg-opacity-20 p-2 rounded-full mr-3">
-                  <span className="text-xl">🥗</span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-primary-dark font-medium">학교 식당에서 채식 메뉴 선택하기</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-gray-600">점심 • 12시 30분</span>
-                    <span className="text-sm bg-primary bg-opacity-20 text-primary-dark font-medium px-2 py-1 rounded-full">-0.5kg</span>
-                  </div>
-                </div>
+              <div className="flex justify-between items-center">
+                <p className="text-gray-800 font-medium">이번 달 탄소 절감량</p>
+                <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
+                  {mockData.personalStats.monthlyReduction}kg
+                </span>
+              </div>
+              <div className="mt-4 bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-primary h-full transition-all duration-1000"
+                  style={{ width: `${mockData.personalStats.progress}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="text-xs text-gray-500">목표: {mockData.personalStats.monthlyGoal}kg</span>
+                <span className="text-xs text-primary font-medium">{mockData.personalStats.progress}%</span>
               </div>
             </motion.div>
+          </motion.div>
+
+          {/* 대외활동/봉사활동 - iOS 스타일 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="mb-6"
+          >
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">대외활동/봉사활동</h2>
+
+            {mockData.events.map((event, index) => (
+              <motion.div
+                key={event.id}
+                className="ios-card p-4 mb-3"
+                whileHover={{ scale: 1.02 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index + 0.8, duration: 0.3 }}
+              >
+                <div className="flex items-start">
+                  <div className="bg-gray-100 p-3 rounded-full mr-3">
+                    <span className="text-xl">{index === 0 ? '🌱' : '🌍'}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-800 font-medium">{event.title}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-sm text-gray-500">{event.date} • {event.time}</span>
+                      <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
+                        {event.duration}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* 뉴스 - iOS 스타일 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.5 }}
+            className="mb-6"
+          >
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">환경 뉴스</h2>
+
+            {mockData.news.map((item, index) => (
+              <motion.div
+                key={item.id}
+                className="ios-card p-4 mb-3"
+                whileHover={{ scale: 1.02 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index + 0.9, duration: 0.3 }}
+              >
+                <p className="text-gray-800 font-medium">{item.title}</p>
+                <p className="text-sm text-gray-500 mt-1">{item.content}</p>
+                <div className="flex justify-between items-center mt-3">
+                  <span className="text-xs text-gray-400">{item.date}</span>
+                  <button className="text-xs text-ios-blue font-medium">자세히 보기</button>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       ) : (
@@ -245,10 +379,10 @@ function LoggedInHome({ user, router }: Readonly<{ user: Record<string, unknown>
   );
 }
 
-// 로그인 전 기본 홈 화면 (입체적 디자인 적용)
+// 로그인 전 기본 홈 화면 (iOS 스타일 적용)
 function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRouter> }>) {
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-primary-light via-white to-primary-light">
+    <div className="flex flex-col items-center justify-center h-full bg-white">
       <motion.div
         className="text-center px-6 py-10"
         initial={{ opacity: 0 }}
@@ -256,7 +390,7 @@ function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRoute
         transition={{ duration: 0.8 }}
       >
         <motion.div
-          className="relative w-40 h-40 mx-auto mb-8"
+          className="relative w-48 h-48 mx-auto mb-10"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{
@@ -266,23 +400,23 @@ function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRoute
             delay: 0.3
           }}
         >
-          {/* 그림자 효과 */}
-          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-8 bg-black opacity-10 rounded-full blur-md"></div>
+          {/* 그림자 효과 - iOS 스타일 */}
+          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black opacity-5 rounded-full blur-lg"></div>
 
           {/* 이미지 */}
-          <div className="relative z-10">
+          <div className="relative z-10 animate-bounce-sm">
             <Image
               src="/village.png"
               alt="탄소중립 챌린지"
-              width={160}
-              height={160}
-              className="drop-shadow-xl"
+              width={180}
+              height={180}
+              className="drop-shadow-md"
             />
           </div>
         </motion.div>
 
         <motion.h1
-          className="text-4xl font-bold text-primary-dark mb-4"
+          className="text-4xl font-bold text-gray-800 mb-4"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.5 }}
@@ -291,7 +425,7 @@ function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRoute
         </motion.h1>
 
         <motion.p
-          className="text-gray-700 mb-10 text-lg"
+          className="text-gray-600 mb-12 text-lg"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.5 }}
@@ -301,32 +435,32 @@ function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRoute
         </motion.p>
 
         <motion.div
-          className="flex flex-col space-y-5 w-full max-w-xs mx-auto"
+          className="flex flex-col space-y-4 w-full max-w-xs mx-auto"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.9, duration: 0.5 }}
         >
           <motion.button
-            className="button-3d w-full px-6 py-4 text-white rounded-xl font-bold"
+            className="ios-button w-full py-4 text-white font-semibold text-lg"
             onClick={() => router.push("/auth/login")}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97, y: 4 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             로그인
           </motion.button>
 
           <motion.button
-            className="neu-button w-full px-6 py-4 rounded-xl font-bold"
+            className="ios-button-secondary w-full py-4 font-semibold text-lg"
             onClick={() => router.push("/auth/signup")}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             회원가입
           </motion.button>
         </motion.div>
 
         <motion.p
-          className="mt-10 text-sm text-gray-600"
+          className="mt-12 text-sm text-gray-400"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.5 }}
