@@ -235,3 +235,26 @@ export default function CharacterPage() {
     </div>
   );
 }
+
+{/* 이번 주 활동 결과 */}
+<div className="w-full max-w-xs bg-white rounded-xl p-4 shadow-sm">
+  <h2 className="text-primary-dark font-bold mb-3">이번 주 활동 결과</h2>
+  <div className="space-y-2">
+    <div className="flex justify-between">
+      <span className="text-gray-700">도보 이용:</span>
+      <span className="text-primary-dark font-medium">10kg</span> {/* 이번 주 도보 이용 */}
+    </div>
+    <div className="flex justify-between">
+      <span className="text-gray-700">텀블러 사용:</span>
+      <span className="text-primary-dark font-medium">5kg</span> {/* 이번 주 텀블러 사용 */}
+    </div>
+    <div className="flex justify-between">
+      <span className="text-gray-700">전자영수증:</span>
+      <span className="text-primary-dark font-medium">0.8kg</span> {/* 이번 주 전자영수증 */}
+    </div>
+    <div className="flex justify-between border-t border-primary-medium pt-2 mt-2">
+      <span className="text-primary-dark font-bold">총 절감량:</span>
+      <span className="text-primary-dark font-bold">15.8kg CO₂</span> {/* 이번 주 총 절감량 */}
+    </div>
+  </div>
+</div>
