@@ -15,12 +15,45 @@ const CHARACTER_STAGES = [
   { level: 5, name: "대나무 마스터", description: "탄소중립의 상징", requiredPoints: 500 },
 ];
 
+// 활동 결과 목업 데이터
+const ACTIVITY_DATA = {
+  daily: {
+    title: "오늘의 활동 결과",
+    items: [
+      { label: "도보 이용", value: "0.4kg" },
+      { label: "텀블러 사용", value: "0.3kg" },
+      { label: "전자영수증", value: "0.1kg" }
+    ],
+    total: "0.8kg CO₂"
+  },
+  weekly: {
+    title: "이번 주 활동 결과",
+    items: [
+      { label: "도보 이용", value: "10kg" },
+      { label: "텀블러 사용", value: "5kg" },
+      { label: "전자영수증", value: "0.8kg" }
+    ],
+    total: "15.8kg CO₂"
+  },
+  monthly: {
+    title: "이번 달 활동 결과",
+    items: [
+      { label: "도보 이용", value: "25.5kg" },
+      { label: "텀블러 사용", value: "12.3kg" },
+      { label: "전자영수증", value: "3.2kg" },
+      { label: "다회용기", value: "8.7kg" }
+    ],
+    total: "49.7kg CO₂"
+  }
+};
+
 export default function CharacterPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "monthly">("daily");
 
   // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
   const currentPoints = 180;
@@ -159,37 +192,52 @@ export default function CharacterPage() {
           </p>
         )}
 
-        {/* 활동량 표시 */}
+        {/* 활동량 표시 - 탭 버튼 */}
         <div className="w-full max-w-xs">
           <div className="flex justify-between mb-4">
-            <button className="flex-1 py-2 px-4 text-center rounded-l-lg font-medium bg-primary text-white">오늘</button>
-            <button className="flex-1 py-2 px-4 text-center font-medium bg-gray-100 text-gray-600">이번주</button>
-            <button className="flex-1 py-2 px-4 text-center rounded-r-lg font-medium bg-gray-100 text-gray-600">이번달</button>
+            <button
+              className={`flex-1 py-2 px-4 text-center rounded-l-lg font-medium ${activeTab === "daily" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}`}
+              onClick={() => setActiveTab("daily")}
+            >
+              오늘
+            </button>
+            <button
+              className={`flex-1 py-2 px-4 text-center font-medium ${activeTab === "weekly" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}`}
+              onClick={() => setActiveTab("weekly")}
+            >
+              이번주
+            </button>
+            <button
+              className={`flex-1 py-2 px-4 text-center rounded-r-lg font-medium ${activeTab === "monthly" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}`}
+              onClick={() => setActiveTab("monthly")}
+            >
+              이번달
+            </button>
           </div>
         </div>
 
-        {/* 오늘의 활동 결과 */}
-        <div className="w-full max-w-xs bg-white rounded-xl p-4 shadow-sm">
-          <h2 className="text-primary-dark font-bold mb-3">오늘의 활동 결과</h2>
+        {/* 활동 결과 - 선택된 탭에 따라 다른 내용 표시 */}
+        <motion.div
+          className="w-full max-w-xs ios-card p-4"
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <h2 className="text-gray-800 font-bold mb-3">{ACTIVITY_DATA[activeTab].title}</h2>
           <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-700">도보 이용:</span>
-              <span className="text-primary-dark font-medium">0.4kg</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">텀블러 사용:</span>
-              <span className="text-primary-dark font-medium">0.3kg</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">전자영수증:</span>
-              <span className="text-primary-dark font-medium">0.1kg</span>
-            </div>
-            <div className="flex justify-between border-t border-primary-medium pt-2 mt-2">
+            {ACTIVITY_DATA[activeTab].items.map((item) => (
+              <div key={`${activeTab}-${item.label}`} className="flex justify-between">
+                <span className="text-gray-700">{item.label}:</span>
+                <span className="text-primary-dark font-medium">{item.value}</span>
+              </div>
+            ))}
+            <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
               <span className="text-primary-dark font-bold">총 절감량:</span>
-              <span className="text-primary-dark font-bold">0.8kg CO₂</span>
+              <span className="text-primary-dark font-bold">{ACTIVITY_DATA[activeTab].total}</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* 챗봇 대화창 */}
@@ -221,7 +269,7 @@ export default function CharacterPage() {
               placeholder="메시지를 입력하세요..."
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             />
             <button
               className="bg-primary text-white p-2 rounded-r-lg"
@@ -235,26 +283,3 @@ export default function CharacterPage() {
     </div>
   );
 }
-
-{/* 이번 주 활동 결과 */}
-<div className="w-full max-w-xs bg-white rounded-xl p-4 shadow-sm">
-  <h2 className="text-primary-dark font-bold mb-3">이번 주 활동 결과</h2>
-  <div className="space-y-2">
-    <div className="flex justify-between">
-      <span className="text-gray-700">도보 이용:</span>
-      <span className="text-primary-dark font-medium">10kg</span> {/* 이번 주 도보 이용 */}
-    </div>
-    <div className="flex justify-between">
-      <span className="text-gray-700">텀블러 사용:</span>
-      <span className="text-primary-dark font-medium">5kg</span> {/* 이번 주 텀블러 사용 */}
-    </div>
-    <div className="flex justify-between">
-      <span className="text-gray-700">전자영수증:</span>
-      <span className="text-primary-dark font-medium">0.8kg</span> {/* 이번 주 전자영수증 */}
-    </div>
-    <div className="flex justify-between border-t border-primary-medium pt-2 mt-2">
-      <span className="text-primary-dark font-bold">총 절감량:</span>
-      <span className="text-primary-dark font-bold">15.8kg CO₂</span> {/* 이번 주 총 절감량 */}
-    </div>
-  </div>
-</div>
