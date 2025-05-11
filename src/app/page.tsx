@@ -247,7 +247,7 @@ function LoggedInHome({
           </motion.div>
 
           {/* 오늘의 활동 - iOS 스타일 카드 */}
-          <motion.div
+          {/* <motion.div
             className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -273,7 +273,7 @@ function LoggedInHome({
                 </div>
               </motion.div>
             ))}
-          </motion.div>
+          </motion.div> */}
 
           {/* 개인실적 - iOS 스타일 */}
           <motion.div
@@ -349,7 +349,7 @@ function LoggedInHome({
             transition={{ delay: 0.9, duration: 0.5 }}
             className="mb-6"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">환경 뉴스</h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">탄소 뉴스</h2>
 
             {mockData.news.map((item, index) => (
               <motion.div
