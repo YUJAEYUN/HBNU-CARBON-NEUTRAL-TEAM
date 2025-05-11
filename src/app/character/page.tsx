@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FaInfoCircle, FaComment, FaFileAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import { ChatMessage } from "@/lib/openai";
 
 // 캐릭터 성장 단계 정보
 const CHARACTER_STAGES = [
@@ -49,11 +50,25 @@ const ACTIVITY_DATA = {
 
 export default function CharacterPage() {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "monthly">("daily");
+
+  // 채팅 관련 상태
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { role: "assistant", content: "안녕하세요! 오늘 어떤 친환경 활동을 하셨나요?" }
+  ]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // 채팅창이 열릴 때마다 스크롤을 아래로 이동
+  useEffect(() => {
+    if (showChatbot && chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [showChatbot, chatMessages]);
 
   // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
   const currentPoints = 180;
@@ -81,11 +96,45 @@ export default function CharacterPage() {
   }
 
   // 챗봇 메시지 전송 처리
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (chatMessage.trim()) {
-      // 여기서 실제 챗봇 API 호출 구현
-      alert(`메시지를 전송했습니다: ${chatMessage}`);
-      setChatMessage("");
+      try {
+        // 사용자 메시지 추가
+        const userMessage: ChatMessage = { role: "user", content: chatMessage };
+        const updatedMessages = [...chatMessages, userMessage];
+        setChatMessages(updatedMessages);
+        setChatMessage("");
+        setChatLoading(true);
+
+        // API 호출
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ messages: updatedMessages }),
+        });
+
+        if (!response.ok) {
+          throw new Error("API 응답 오류");
+        }
+
+        const data = await response.json();
+
+        // 응답 메시지 추가
+        if (data.message) {
+          setChatMessages([...updatedMessages, data.message]);
+        }
+      } catch (error) {
+        console.error("채팅 오류:", error);
+        // 오류 메시지 추가
+        setChatMessages([
+          ...chatMessages,
+          { role: "assistant", content: "죄송합니다. 대화 처리 중 오류가 발생했습니다." }
+        ]);
+      } finally {
+        setChatLoading(false);
+      }
     }
   };
 
@@ -120,7 +169,7 @@ export default function CharacterPage() {
         >
           <h3 className="font-bold text-primary-dark mb-2">캐릭터 성장 정보</h3>
           <div className="space-y-2">
-            {CHARACTER_STAGES.map((stage, index) => (
+            {CHARACTER_STAGES.map((stage) => (
               <div
                 key={stage.level}
                 className={`p-2 rounded ${currentStage.level >= stage.level ? 'bg-primary-light' : 'bg-gray-100'}`}
@@ -257,10 +306,33 @@ export default function CharacterPage() {
               닫기
             </button>
           </div>
-          <div className="h-64 p-3 overflow-y-auto">
-            <div className="bg-primary-light p-2 rounded-lg mb-2 max-w-[80%]">
-              <p className="text-sm">안녕하세요! 오늘 어떤 친환경 활동을 하셨나요?</p>
-            </div>
+          <div
+            ref={chatContainerRef}
+            className="h-64 p-3 overflow-y-auto"
+          >
+            {chatMessages.map((msg, idx) => {
+              // 고유한 ID 생성 (메시지 내용과 인덱스 조합)
+              const messageId = `${msg.role}-${msg.content.substring(0, 10)}-${idx}`;
+              return (
+                <div
+                  key={messageId}
+                  className={`p-2 rounded-lg mb-2 max-w-[80%] ${
+                    msg.role === 'assistant'
+                      ? 'bg-primary-light mr-auto'
+                      : 'bg-gray-100 ml-auto'
+                  }`}
+                >
+                  <p className="text-sm">{msg.content}</p>
+                </div>
+              );
+            })}
+            {chatLoading && (
+              <div className="bg-primary-light p-2 rounded-lg mb-2 max-w-[80%] flex">
+                <div className="w-2 h-2 bg-primary rounded-full mr-1 animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full mr-1 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            )}
           </div>
           <div className="p-3 border-t border-gray-200 flex">
             <input
@@ -270,10 +342,16 @@ export default function CharacterPage() {
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              disabled={chatLoading}
             />
             <button
-              className="bg-primary text-white p-2 rounded-r-lg"
+              className={`p-2 rounded-r-lg ${
+                chatLoading
+                  ? 'bg-gray-400 text-white'
+                  : 'bg-primary text-white'
+              }`}
               onClick={handleSendMessage}
+              disabled={chatLoading}
             >
               전송
             </button>
