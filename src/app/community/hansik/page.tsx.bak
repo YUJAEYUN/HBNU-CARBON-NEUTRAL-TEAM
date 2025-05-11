@@ -5,91 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaCalendarAlt, FaUtensils, FaMapMarkerAlt, FaClock, FaPhone } from "react-icons/fa";
 
-// 탭 메뉴 컴포넌트
-function TabMenu() {
-  const [activeTab, setActiveTab] = useState<string>("한식");
-
-  // 메뉴 데이터
-  const menuData = {
-    한식: [
-      { name: "해물순두부찌개", desc: "밥, 반찬 포함", price: "6,500원", color: "text-primary" },
-      { name: "촌돼지김치찌개", desc: "밥, 반찬 포함", price: "6,500원", color: "text-primary" },
-      { name: "부대찌개", desc: "밥, 반찬 포함", price: "6,500원", color: "text-primary" },
-      { name: "제육덮밥", desc: "반찬 포함", price: "6,000원", color: "text-primary" },
-      { name: "불고기덮밥", desc: "반찬 포함", price: "6,000원", color: "text-primary" },
-      { name: "된장찌개", desc: "밥, 반찬 포함", price: "5,500원", color: "text-primary" }
-    ],
-    양식: [
-      { name: "등심돈가스+알밥", desc: "반찬 포함", price: "6,500원", color: "text-blue-600" },
-      { name: "치즈돈까스+우동", desc: "반찬 포함", price: "7,000원", color: "text-blue-600" },
-      { name: "치킨마요덮밥", desc: "반찬 포함", price: "6,000원", color: "text-blue-600" },
-      { name: "해장라면+공깃밥", desc: "반찬 포함", price: "5,000원", color: "text-blue-600" },
-      { name: "함박스테이크", desc: "밥, 반찬 포함", price: "7,500원", color: "text-blue-600" },
-      { name: "오므라이스", desc: "반찬 포함", price: "6,000원", color: "text-blue-600" }
-    ],
-    분식: [
-      { name: "김치볶음밥", desc: "반찬 포함", price: "5,500원", color: "text-green-600" },
-      { name: "떡볶이", desc: "단품", price: "4,000원", color: "text-green-600" },
-      { name: "라볶이", desc: "단품", price: "5,000원", color: "text-green-600" },
-      { name: "김밥", desc: "단품", price: "3,500원", color: "text-green-600" }
-    ]
-  };
-
-  return (
-    <div>
-      {/* 탭 버튼 */}
-      <div className="flex border-b mb-4">
-        {Object.keys(menuData).map((tab) => (
-          <button
-            key={tab}
-            className={`py-2 px-4 font-medium ${
-              activeTab === tab
-                ? "border-b-2 border-primary text-primary"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab} 메뉴
-          </button>
-        ))}
-      </div>
-
-      {/* 탭 내용 */}
-      <motion.div
-        key={activeTab}
-        className="ios-card p-4"
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <h2 className={`text-lg font-bold mb-4 border-b pb-2 ${
-          activeTab === "한식" ? "text-primary" :
-          activeTab === "양식" ? "text-blue-600" : "text-green-600"
-        }`}>
-          {activeTab} 메뉴
-        </h2>
-
-        <div className="space-y-4">
-          {menuData[activeTab as keyof typeof menuData].map((item, index) => (
-            <div
-              key={index}
-              className={`flex justify-between items-center py-2 ${
-                index < menuData[activeTab as keyof typeof menuData].length - 1 ? "border-b border-gray-100" : ""
-              }`}
-            >
-              <div>
-                <p className="font-medium">{item.name}</p>
-                <p className="text-xs text-gray-500">{item.desc}</p>
-              </div>
-              <p className={`font-bold ${item.color}`}>{item.price}</p>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
 // 식당 타입 정의
 interface Restaurant {
   id: string;
@@ -108,7 +23,7 @@ export default function HansikPage() {
   const [today, setToday] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("학생식당");
   const [showMenuDetails, setShowMenuDetails] = useState<boolean>(false);
-
+  
   // 식당 목록 (추가 가능)
   const restaurants: Restaurant[] = [
     {
@@ -211,11 +126,11 @@ export default function HansikPage() {
 
       {/* 식당 선택 탭 */}
       <div className="bg-white p-4">
-        <div className="flex justify-between gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {restaurants.map((restaurant) => (
             <button
               key={restaurant.id}
-              className={`ios-tab text-center flex-1 ${activeTab === restaurant.name ? 'active' : ''}`}
+              className={`ios-tab text-center py-2 ${activeTab === restaurant.name ? 'active' : ''}`}
               onClick={() => setActiveTab(restaurant.name)}
             >
               {restaurant.name}
@@ -241,7 +156,7 @@ export default function HansikPage() {
                   {restaurant.isOpen ? '영업중' : '영업종료'}
                 </span>
               </div>
-
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="text-primary mr-2" />
@@ -260,7 +175,7 @@ export default function HansikPage() {
                   <span className="text-gray-600">{restaurant.contact}</span>
                 </div>
               </div>
-
+              
               {restaurant.name === "교직원식당" ? (
                 <div className="mt-3 pt-2 border-t">
                   <p className="text-xs text-gray-500">
@@ -285,10 +200,10 @@ export default function HansikPage() {
                     ※ 브리드(국제교류관) 운영시간: 9:00 ~ 17:00(학기) / 9:00 ~ 16:00(방학)<br />
                     ※ 오시온 운영시간: 8:30 ~ 18:00(학기) / 9:00 ~ 17:00(방학)
                   </p>
-
+                  
                   {activeTab === "커피숍" && (
                     <div className="mt-3">
-                      <button
+                      <button 
                         onClick={() => window.open("https://www.hanbat.ac.kr/kor/sub06_030303.do", "_blank")}
                         className="w-full py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                       >
@@ -298,10 +213,10 @@ export default function HansikPage() {
                   )}
                 </div>
               )}
-
+              
               {restaurant.name === "학생식당" && (
                 <div className="mt-3">
-                  <button
+                  <button 
                     onClick={() => setShowMenuDetails(!showMenuDetails)}
                     className="w-full py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                   >
@@ -316,14 +231,12 @@ export default function HansikPage() {
 
       {/* 학식 메뉴 정보 */}
       <div className="flex-1 p-4">
-        {activeTab !== "커피숍" && (
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">메뉴 정보</h2>
-            <div className="text-sm text-gray-500">
-              <span className="bg-gray-100 px-2 py-1 rounded">{today}</span>
-            </div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">메뉴 정보</h2>
+          <div className="text-sm text-gray-500">
+            <span className="bg-gray-100 px-2 py-1 rounded">{today}</span>
           </div>
-        )}
+        </div>
 
         {/* 단품 메뉴 구성 */}
         {showMenuDetails && (
@@ -340,75 +253,60 @@ export default function HansikPage() {
               </div>
             </div>
 
-            {/* 메뉴 카테고리 탭 */}
-            <TabMenu />
+            <motion.div
+              className="ios-card p-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">한식 메뉴</h2>
 
-            <div className="mt-4 pt-2 text-xs text-gray-500">
-              <p>※ 메뉴는 식자재 수급 상황에 따라 변경될 수 있습니다.</p>
-              <p>※ 식당운영시간: 월~금 (토, 일, 공휴일 미운영)</p>
-              <p>※ 백반단가: 5,500원 (카드, 현금 결제 가능)</p>
-            </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div>
+                    <p className="font-medium">해물순두부찌개</p>
+                    <p className="text-xs text-gray-500">밥, 반찬 포함</p>
+                  </div>
+                  <p className="font-bold text-primary">6,500원</p>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div>
+                    <p className="font-medium">촌돼지김치찌개</p>
+                    <p className="text-xs text-gray-500">밥, 반찬 포함</p>
+                  </div>
+                  <p className="font-bold text-primary">6,500원</p>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div>
+                    <p className="font-medium">부대찌개</p>
+                    <p className="text-xs text-gray-500">밥, 반찬 포함</p>
+                  </div>
+                  <p className="font-bold text-primary">6,500원</p>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div>
+                    <p className="font-medium">제육덮밥</p>
+                    <p className="text-xs text-gray-500">반찬 포함</p>
+                  </div>
+                  <p className="font-bold text-primary">6,000원</p>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div>
+                    <p className="font-medium">불고기덮밥</p>
+                    <p className="text-xs text-gray-500">반찬 포함</p>
+                  </div>
+                  <p className="font-bold text-primary">6,000원</p>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <div>
+                    <p className="font-medium">된장찌개</p>
+                    <p className="text-xs text-gray-500">밥, 반찬 포함</p>
+                  </div>
+                  <p className="font-bold text-primary">5,500원</p>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
-        )}
-
-        {activeTab !== "커피숍" && (
-          <div className="flex flex-col space-y-4">
-            {/* 중식 메뉴 */}
-            <motion.div
-              className="ios-card overflow-hidden"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <div className="bg-primary text-white p-3">
-                <h2 className="text-lg font-bold">🍱 중식 (11:00 ~ 14:00)</h2>
-              </div>
-              <div className="p-4">
-                {mealData && mealData.lunch ? (
-                  <div className="space-y-2">
-                    {mealData.lunch.split("\n").map((item, index) => (
-                      <div key={index} className="flex items-start py-2 border-b border-gray-100 last:border-0">
-                        <span className="text-primary mr-2">•</span>
-                        <span className="text-gray-800">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-4 text-center text-gray-500">
-                    오늘은 중식 정보가 없습니다.
-                  </div>
-                )}
-              </div>
-            </motion.div>
-
-            {/* 석식 메뉴 */}
-            <motion.div
-              className="ios-card overflow-hidden"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
-              <div className="bg-blue-600 text-white p-3">
-                <h2 className="text-lg font-bold">🌙 석식 (17:00 ~ 18:30)</h2>
-              </div>
-              <div className="p-4">
-                {mealData && mealData.dinner ? (
-                  <div className="space-y-2">
-                    {mealData.dinner.split("\n").map((item, index) => (
-                      <div key={index} className="flex items-start py-2 border-b border-gray-100 last:border-0">
-                        <span className="text-blue-600 mr-2">•</span>
-                        <span className="text-gray-800">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-4 text-center text-gray-500">
-                    오늘은 석식 정보가 없습니다.
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
         )}
       </div>
     </div>
