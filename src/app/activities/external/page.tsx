@@ -117,12 +117,12 @@ export default function ExternalActivitiesPage() {
   // 분야 필터링
   const filteredActivities = activities.filter(activity => {
     // 검색어 필터링
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          activity.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // 분야 필터링
     const matchesField = selectedField === "전체" || activity.field === selectedField;
-    
+
     return matchesSearch && matchesField;
   });
 
@@ -149,15 +149,15 @@ export default function ExternalActivitiesPage() {
           <h1 className="text-xl font-semibold text-gray-800">탄소중립 대외활동</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             className="text-gray-500"
             onClick={() => setShowFilter(!showFilter)}
           >
             <FaFilter />
           </button>
-          <a 
-            href="https://www.wevity.com" 
-            target="_blank" 
+          <a
+            href="https://www.wevity.com"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-ios-blue font-medium flex items-center"
           >
@@ -182,7 +182,7 @@ export default function ExternalActivitiesPage() {
 
       {/* 필터 영역 */}
       {showFilter && (
-        <motion.div 
+        <motion.div
           className="px-4 py-2 bg-gray-50"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
@@ -233,18 +233,13 @@ export default function ExternalActivitiesPage() {
                     <h3 className="font-bold text-gray-800 text-lg">{activity.title}</h3>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{activity.field}</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{activity.organization}</p>
-                  <p className="text-sm text-gray-500 mt-1">대상: {activity.target}</p>
-                  
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex justify-between text-xs text-gray-500">
-                      <span>활동기간: {activity.period}</span>
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500">
-                      <span>접수기간: {activity.applicationPeriod}</span>
+                      <span>주관: {activity.organization}</span>
+                      <span>대상: {activity.target}</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 flex flex-wrap gap-1">
                     {activity.benefits.map((benefit, index) => (
                       <span key={index} className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full flex items-center">
@@ -252,9 +247,9 @@ export default function ExternalActivitiesPage() {
                       </span>
                     ))}
                   </div>
-                  
+
                   <p className="mt-3 text-sm text-gray-600 line-clamp-2">{activity.description}</p>
-                  
+
                   <div className="mt-3 flex justify-end">
                     <button className="text-xs bg-primary text-white font-medium px-3 py-1 rounded-full shadow-sm flex items-center">
                       신청하기 <span className="ml-1">›</span>

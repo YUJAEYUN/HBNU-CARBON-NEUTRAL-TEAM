@@ -39,8 +39,8 @@ export default function HomePage() {
       progress: 65
     },
     events: [
-      { id: 1, title: "탄소중립 봉사활동하러가기", date: "5월 15일", time: "14:00", duration: "2시간" },
-      { id: 2, title: "탄소중립 대외활동하러가기", date: "5월 20일", time: "10:00", duration: "3시간" }
+      { id: 1, title: "탄소중립 봉사활동하러가기", date: "5월 15일", time: "14:00", duration: "" },
+      { id: 2, title: "탄소중립 대외활동하러가기", date: "5월 20일", time: "10:00", duration: "" }
     ],
     news: [
       {
@@ -386,9 +386,6 @@ function LoggedInHome({
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-gray-500">{event.date} • {event.time}</span>
                       <div className="flex items-center">
-                        <span className={`text-sm ${index === 0 ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} font-medium px-3 py-1 rounded-full mr-2`}>
-                          {event.duration}
-                        </span>
                         <span className={`${index === 0 ? 'text-green-500' : 'text-blue-500'} text-lg`}>›</span>
                       </div>
                     </div>
