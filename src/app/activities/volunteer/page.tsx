@@ -123,12 +123,12 @@ export default function VolunteerActivitiesPage() {
   // 카테고리 필터링
   const filteredActivities = activities.filter(activity => {
     // 검색어 필터링
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          activity.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // 카테고리 필터링
     const matchesCategory = selectedCategory === "전체" || activity.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -155,15 +155,15 @@ export default function VolunteerActivitiesPage() {
           <h1 className="text-xl font-semibold text-gray-800">탄소중립 봉사활동</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             className="text-gray-500"
             onClick={() => setShowFilter(!showFilter)}
           >
             <FaFilter />
           </button>
-          <a 
-            href="https://www.1365.go.kr" 
-            target="_blank" 
+          <a
+            href="https://www.1365.go.kr"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-ios-blue font-medium flex items-center"
           >
@@ -188,7 +188,7 @@ export default function VolunteerActivitiesPage() {
 
       {/* 필터 영역 */}
       {showFilter && (
-        <motion.div 
+        <motion.div
           className="px-4 py-2 bg-gray-50"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
@@ -239,21 +239,15 @@ export default function VolunteerActivitiesPage() {
                     <h3 className="font-bold text-gray-800 text-lg">{activity.title}</h3>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{activity.category}</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{activity.organization}</p>
-                  <p className="text-sm text-gray-500 mt-1">{activity.location}</p>
-                  
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex justify-between text-xs text-gray-500">
-                      <span>활동기간: {activity.startDate} ~ {activity.endDate}</span>
-                      <span>모집인원: {activity.participants}</span>
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500">
-                      <span>모집기간: {activity.recruitmentPeriod}</span>
+                      <span>주관: {activity.organization}</span>
+                      <span>장소: {activity.location}</span>
                     </div>
                   </div>
-                  
+
                   <p className="mt-3 text-sm text-gray-600 line-clamp-2">{activity.description}</p>
-                  
+
                   <div className="mt-3 flex justify-end">
                     <button className="text-xs bg-primary text-white font-medium px-3 py-1 rounded-full shadow-sm flex items-center">
                       신청하기 <span className="ml-1">›</span>
