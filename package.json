@@ -17,6 +17,7 @@
     "jsonwebtoken": "^9.0.2",
     "next": "^15.2.2",
     "next-auth": "^4.24.11",
+    "openai": "^4.98.0",
     "puppeteer": "^24.4.0",
     "react": "^19.1.0",
     "react-circular-progressbar": "^2.2.0",
