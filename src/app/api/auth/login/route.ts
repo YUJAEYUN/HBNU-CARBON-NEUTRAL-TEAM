@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error("로그인 실패:", error.message); // ✅ 오류 메시지 출력
-      return NextResponse.json({ error: error.message }, { status: 401 });
+      return NextResponse.json({ success: false, error: error.message }, { status: 401 });
     }
 
     if (!data.session) {
@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     console.log("로그인 성공:", data.session.access_token); // ✅ JWT 토큰 출력 (디버깅)
 
     // 쿠키에 토큰 저장 (7일 유효기간)
-    cookies().set({
+    const cookieStore = cookies();
+    await cookieStore.set({
       name: "auth_token",
       value: data.session.access_token,
       httpOnly: true,

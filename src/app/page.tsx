@@ -39,8 +39,8 @@ export default function HomePage() {
       progress: 65
     },
     events: [
-      { id: 1, title: "교내 환경 봉사활동", date: "5월 15일", time: "14:00", duration: "2시간" },
-      { id: 2, title: "탄소중립 캠페인", date: "5월 20일", time: "10:00", duration: "3시간" }
+      { id: 1, title: "탄소중립 봉사활동하러가기", date: "5월 15일", time: "14:00", duration: "2시간" },
+      { id: 2, title: "탄소중립 대외활동하러가기", date: "5월 20일", time: "10:00", duration: "3시간" }
     ],
     news: [
       {
@@ -342,35 +342,55 @@ function LoggedInHome({
             </motion.div>
           </motion.div>
 
-          {/* 대외활동/봉사활동 - iOS 스타일 */}
+          {/* 탄소중립 활동 - iOS 스타일 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
             className="mb-6"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">대외활동/봉사활동</h2>
+            <div className="flex justify-between items-center mb-3 px-1">
+              <h2 className="text-lg font-semibold text-gray-800">탄소중립 활동</h2>
+              <div className="flex space-x-2">
+                <button
+                  className="text-xs text-ios-blue font-medium flex items-center"
+                  onClick={() => router.push("/activities/volunteer")}
+                >
+                  더 많은 봉사활동 <span className="ml-1">›</span>
+                </button>
+                <button
+                  className="text-xs text-ios-blue font-medium flex items-center"
+                  onClick={() => router.push("/activities/external")}
+                >
+                  더 많은 대외활동 <span className="ml-1">›</span>
+                </button>
+              </div>
+            </div>
 
             {mockData.events.map((event, index) => (
               <motion.div
                 key={event.id}
-                className="ios-card p-4 mb-3"
+                className={`ios-card p-4 mb-3 border-l-4 ${index === 0 ? 'border-green-500' : 'border-blue-500'}`}
                 whileHover={{ scale: 1.02 }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index + 0.8, duration: 0.3 }}
+                onClick={() => router.push(index === 0 ? "/activities/volunteer" : "/activities/external")}
               >
-                <div className="flex items-start">
-                  <div className="bg-gray-100 p-3 rounded-full mr-3">
+                <div className="flex items-center">
+                  <div className={`${index === 0 ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} p-3 rounded-full mr-3 flex items-center justify-center`} style={{ width: '48px', height: '48px' }}>
                     <span className="text-xl">{index === 0 ? '🌱' : '🌍'}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-gray-800 font-medium">{event.title}</p>
+                    <p className={`${index === 0 ? 'text-green-700' : 'text-blue-700'} font-bold text-lg`}>{event.title}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-gray-500">{event.date} • {event.time}</span>
-                      <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
-                        {event.duration}
-                      </span>
+                      <div className="flex items-center">
+                        <span className={`text-sm ${index === 0 ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} font-medium px-3 py-1 rounded-full mr-2`}>
+                          {event.duration}
+                        </span>
+                        <span className={`${index === 0 ? 'text-green-500' : 'text-blue-500'} text-lg`}>›</span>
+                      </div>
                     </div>
                   </div>
                 </div>

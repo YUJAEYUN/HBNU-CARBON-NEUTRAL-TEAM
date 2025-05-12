@@ -43,13 +43,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await fetch("/api/auth/me");
-      
+
       if (!response.ok) {
         setIsLoggedIn(false);
         setUser(null);
         return;
       }
-      
+
       const data = await response.json();
       setUser(data);
       setIsLoggedIn(true);
@@ -66,22 +66,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      console.log("로그인 시도:", email); // 디버깅용
+
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) return false;
-
       const data = await response.json();
+      console.log("로그인 응답:", data); // 디버깅용
+
+      if (!response.ok) {
+        console.error("로그인 실패 응답:", data.error);
+        return false;
+      }
+
       if (data.success) {
+        console.log("로그인 성공, 사용자 정보 가져오기");
         await fetchUser();
         return true;
       }
+
       return false;
     } catch (error) {
-      console.error("로그인 실패:", error);
+      console.error("로그인 실패 (예외):", error);
       return false;
     } finally {
       setIsLoading(false);
@@ -95,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
       });
-      
+
       if (response.ok) {
         setIsLoggedIn(false);
         setUser(null);

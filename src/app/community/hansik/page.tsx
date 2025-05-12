@@ -108,6 +108,8 @@ export default function HansikPage() {
   const [today, setToday] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("학생식당");
   const [showMenuDetails, setShowMenuDetails] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string>("mon");
 
   // 식당 목록 (추가 가능)
   const restaurants: Restaurant[] = [
@@ -118,7 +120,7 @@ export default function HansikPage() {
       type: "한식",
       isOpen: true,
       operatingHours: "평일 11:00 - 19:00",
-      contact: "042-123-4567"
+      contact: "042-821-1485"
     },
     {
       id: "restaurant2",
@@ -127,7 +129,7 @@ export default function HansikPage() {
       type: "한식",
       isOpen: true,
       operatingHours: "평일 11:30 - 13:30",
-      contact: "042-123-4569"
+      contact: "042-821-1485"
     },
     {
       id: "restaurant3",
@@ -140,33 +142,68 @@ export default function HansikPage() {
     },
   ];
 
+  // 요일에 따른 날짜 문자열 반환 함수
+  const getDateStringByDay = (day: string): string => {
+    switch (day) {
+      case 'mon':
+        return "2025년 5월 12일 월요일";
+      case 'tue':
+        return "2025년 5월 13일 화요일";
+      case 'wed':
+        return "2025년 5월 14일 수요일";
+      case 'thu':
+        return "2025년 5월 15일 목요일";
+      case 'fri':
+        return "2025년 5월 16일 금요일";
+      default:
+        return "2025년 5월 12일 월요일";
+    }
+  };
+
   useEffect(() => {
     async function fetchMeals() {
       try {
         setLoading(true);
-        const response = await fetch("/api/hansik");
+        setApiError(null);
+
+        // 선택된 요일에 따른 날짜 설정
+        const dateStr = getDateStringByDay(selectedDay);
+        setToday(dateStr);
+
+        // API 호출 (요일 파라미터 포함)
+        console.log(`학식 API 호출 중... (요일: ${selectedDay})`);
+        const response = await fetch(`/api/hansik?day=${selectedDay}`);
+
+        if (!response.ok) {
+          throw new Error(`API 응답 오류: ${response.status}`);
+        }
+
         const data = await response.json();
         console.log("API 응답 데이터:", data);
+
+        // 오류 응답 처리
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
         setMealData(data);
       } catch (error) {
         console.error("학식 정보를 가져오는 중 오류 발생:", error);
+        setApiError(error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.");
+
+        // 오류 발생 시 기본 데이터 설정
+        setMealData({
+          date: getDateStringByDay(selectedDay),
+          lunch: "학식 정보를 가져올 수 없습니다.",
+          dinner: "학식 정보를 가져올 수 없습니다."
+        });
       } finally {
         setLoading(false);
       }
     }
 
-    // 오늘 날짜 설정
-    const date = new Date();
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      weekday: "long",
-    };
-    setToday(date.toLocaleDateString("ko-KR", options));
-
     fetchMeals();
-  }, []);
+  }, [selectedDay]); // selectedDay가 변경될 때마다 API 호출
 
   // 로딩 상태 표시
   if (loading) {
@@ -316,13 +353,69 @@ export default function HansikPage() {
 
       {/* 학식 메뉴 정보 */}
       <div className="flex-1 p-4">
-        {activeTab !== "커피숍" && (
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">메뉴 정보</h2>
-            <div className="text-sm text-gray-500">
-              <span className="bg-gray-100 px-2 py-1 rounded">{today}</span>
-            </div>
+        {/* API 오류 메시지 */}
+        {apiError && activeTab !== "커피숍" && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm font-medium">
+              <span className="mr-2">⚠️</span>
+              {apiError}
+            </p>
+            <p className="text-red-500 text-xs mt-1">
+              한밭대학교 학식 정보를 가져오는 중 문제가 발생했습니다. 기본 메뉴 정보를 표시합니다.
+            </p>
           </div>
+        )}
+
+        {activeTab !== "커피숍" && (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">메뉴 정보</h2>
+              <div className="text-sm text-gray-500">
+                <span className="bg-gray-100 px-2 py-1 rounded">{today}</span>
+              </div>
+            </div>
+
+            {/* 요일 선택 탭 */}
+            <div className="mb-4 border rounded-lg overflow-hidden">
+              <div className="flex border-b">
+                <button
+                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'mon' ? 'bg-primary text-white' : 'bg-gray-50'}`}
+                  onClick={() => setSelectedDay('mon')}
+                >
+                  <div className="font-bold">월</div>
+                  <div className="text-xs">2025-05-12</div>
+                </button>
+                <button
+                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'tue' ? 'bg-primary text-white' : 'bg-gray-50'}`}
+                  onClick={() => setSelectedDay('tue')}
+                >
+                  <div className="font-bold">화</div>
+                  <div className="text-xs">2025-05-13</div>
+                </button>
+                <button
+                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'wed' ? 'bg-primary text-white' : 'bg-gray-50'}`}
+                  onClick={() => setSelectedDay('wed')}
+                >
+                  <div className="font-bold">수</div>
+                  <div className="text-xs">2025-05-14</div>
+                </button>
+                <button
+                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'thu' ? 'bg-primary text-white' : 'bg-gray-50'}`}
+                  onClick={() => setSelectedDay('thu')}
+                >
+                  <div className="font-bold">목</div>
+                  <div className="text-xs">2025-05-15</div>
+                </button>
+                <button
+                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'fri' ? 'bg-primary text-white' : 'bg-gray-50'}`}
+                  onClick={() => setSelectedDay('fri')}
+                >
+                  <div className="font-bold">금</div>
+                  <div className="text-xs">2025-05-16</div>
+                </button>
+              </div>
+            </div>
+          </>
         )}
 
         {/* 단품 메뉴 구성 */}

@@ -230,4 +230,14 @@ button:active {
     width: 10px;
     height: 10px;
   }
+
+  /* 중고거래 페이지 스타일 */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
 }
