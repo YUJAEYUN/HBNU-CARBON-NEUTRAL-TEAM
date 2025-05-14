@@ -59,7 +59,7 @@ export default function CharacterPage() {
 
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "안녕하세요! 오늘 어떤 친환경 활동을 하셨나요?" }
+    { role: "assistant", content: "안녕하세요! 저는 탄소중립을 도와주는 대나무예요 🌱 오늘은 어떤 친환경 활동을 하셨나요? 작은 실천도 정말 소중해요!" }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
