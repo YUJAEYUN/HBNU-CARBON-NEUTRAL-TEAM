@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { ChatMessage } from "@/lib/openai";
+import axiosInstance from "@/lib/axios";
 
 // 캐릭터 성장 단계 정보
 const CHARACTER_STAGES = [
@@ -106,24 +107,14 @@ export default function CharacterPage() {
         setChatMessage("");
         setChatLoading(true);
 
-        // API 호출
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: updatedMessages }),
+        // axiosInstance를 사용한 API 호출
+        const response = await axiosInstance.post("/api/chat", {
+          messages: updatedMessages
         });
 
-        if (!response.ok) {
-          throw new Error("API 응답 오류");
-        }
-
-        const data = await response.json();
-
         // 응답 메시지 추가
-        if (data.message) {
-          setChatMessages([...updatedMessages, data.message]);
+        if (response.data.message) {
+          setChatMessages([...updatedMessages, response.data.message]);
         }
       } catch (error) {
         console.error("채팅 오류:", error);
