@@ -58,7 +58,7 @@ export default function CharacterPage() {
         {/* 대나무 줄기 */}
         <div className={`w-2 h-${6 + level} bg-[#8B4513] rounded-sm mx-auto`}></div>
         {/* 대나무 잎 */}
-        <div 
+        <div
           className={`w-${6 + level} h-${6 + level} bg-primary rounded-full absolute -top-3 left-1/2 transform -translate-x-1/2`}
         ></div>
       </div>
@@ -97,23 +97,23 @@ export default function CharacterPage() {
           <h3 className="font-bold text-primary-dark mb-3">캐릭터 성장 정보</h3>
           <div className="grid grid-cols-5 gap-2 mb-3">
             {CHARACTER_STAGES.map((stage) => (
-              <div 
-                key={stage.level} 
+              <div
+                key={stage.level}
                 className={`text-center ${currentStage.level >= stage.level ? '' : 'opacity-70'}`}
               >
                 {/* 레벨별 캐릭터 표시 - 간단한 버전 */}
                 <div className="relative h-14 flex items-end justify-center">
                   <div className={`${currentStage.level < stage.level ? 'opacity-40' : ''}`}>
                     {/* 줄기 */}
-                    <div 
+                    <div
                       className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-${1 + stage.level/2} h-${6 + stage.level*2} bg-[#8B5A2B] rounded-sm`}
                     ></div>
-                    
+
                     {/* 잎 - 레벨에 따라 크기와 개수 증가 */}
-                    <div 
+                    <div
                       className={`absolute bottom-${6 + stage.level} left-1/2 transform -translate-x-1/2 w-${4 + stage.level*2} h-${4 + stage.level*2} bg-primary rounded-full`}
                     ></div>
-                    
+
                     {/* 레벨 4부터 작은 잎 추가 */}
                     {stage.level >= 4 && (
                       <>
@@ -121,7 +121,7 @@ export default function CharacterPage() {
                         <div className="absolute bottom-6 right-0 w-3 h-3 bg-primary-medium rounded-full"></div>
                       </>
                     )}
-                    
+
                     {/* 레벨 5에서 꽃 추가 */}
                     {stage.level === 5 && (
                       <div className="absolute -top-1 -right-1 text-lg">🌸</div>
@@ -134,14 +134,14 @@ export default function CharacterPage() {
               </div>
             ))}
           </div>
-          
+
           <div className="space-y-2">
             {CHARACTER_STAGES.map((stage) => (
               <div
                 key={stage.level}
                 className={`p-2 rounded ${
-                  currentStage.level >= stage.level 
-                    ? 'bg-primary-light' 
+                  currentStage.level >= stage.level
+                    ? 'bg-primary-light'
                     : 'bg-gray-100'
                 }`}
               >
@@ -177,10 +177,15 @@ export default function CharacterPage() {
           transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         >
           <div className="relative">
-            {/* 임시 대나무 캐릭터 */}
+            {/* 메인 캐릭터 이미지 */}
             <div className="relative">
-              <div className={`w-8 h-${16 + currentStage.level * 4} bg-[#8B4513] rounded-md mx-auto`}></div>
-              <div className={`w-${24 + currentStage.level * 4} h-${24 + currentStage.level * 4} bg-primary rounded-full absolute -top-16 left-1/2 transform -translate-x-1/2`}></div>
+              <Image
+                src="/mainCharacter.png"
+                alt="대나무 캐릭터"
+                width={120}
+                height={120}
+                className="object-contain"
+              />
             </div>
 
             {/* 챗봇 버튼 */}
@@ -277,7 +282,7 @@ export default function CharacterPage() {
           exit={{ y: 300 }}
         >
           <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-            <p className="font-bold text-primary-dark">대나무와 대화하기</p>
+            <p className="font-bold text-primary-dark">캐릭터와 대화하기</p>
             <button
               className="text-gray-500"
               onClick={() => setShowChatbot(false)}
@@ -319,7 +324,7 @@ export default function CharacterPage() {
                 <FaTimes className="text-gray-500" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {/* 총 누적 활동 실적 */}
               <div className="bg-primary-light p-4 rounded-lg">
@@ -331,7 +336,7 @@ export default function CharacterPage() {
                 <p className="text-xs text-gray-600 mt-1">참여 시작: 2023년 2월 2일 (87일)</p>
                 <p className="text-xs text-gray-600">연속 활동 12일 🔥</p>
               </div>
-              
+
               {/* 활동 유형별 누적 */}
               <div className="bg-gray-50 p-3 rounded-lg">
                 <h3 className="font-medium text-gray-800 mb-2">활동 유형별 누적</h3>
@@ -353,7 +358,7 @@ export default function CharacterPage() {
                   ))}
                 </div>
               </div>
-              
+
               {/* 환경 기여도 */}
               <div className="bg-gray-50 p-3 rounded-lg">
                 <h3 className="font-medium text-gray-800 mb-2">환경 기여도</h3>
