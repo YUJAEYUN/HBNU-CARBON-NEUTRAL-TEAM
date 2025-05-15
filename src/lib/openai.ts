@@ -60,7 +60,7 @@ export async function generateChatResponse(messages: ChatMessage[]): Promise<Cha
       model: 'gpt-4',
       messages: messages as any,
       temperature: 0.8,  // 약간 더 창의적인 응답을 위해 온도 상향
-      max_tokens: 250,   // 더 긴 응답을 위해 토큰 수 증가
+      max_tokens: 300,   // 더 긴 응답을 위해 토큰 수 증가
       presence_penalty: 0.3,  // 다양한 주제를 다루도록 설정
       frequency_penalty: 0.5, // 반복 줄이기
     });
