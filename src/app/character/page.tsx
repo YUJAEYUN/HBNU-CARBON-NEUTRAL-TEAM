@@ -545,10 +545,12 @@ export default function CharacterPage() {
           <div className="p-3 border-t border-gray-200 flex justify-center items-center">
             {/* 인식된 텍스트 표시 (인식 중일 때만) */}
             {isListening && recognizedText && (
-              <div className="flex-1 text-center text-sm text-gray-600 mx-2 max-w-[70%] truncate">
-                {recognizedText.includes('[en]') ?
-                  <span className="text-blue-500">{recognizedText.replace('[en] ', '')}</span> :
-                  recognizedText}
+              <div className="flex-1 text-center text-sm text-gray-600 mx-2 max-w-[70%] overflow-hidden">
+                <div className="animate-typing whitespace-nowrap overflow-hidden">
+                  {recognizedText.includes('[en]') ?
+                    <span className="text-blue-500">{recognizedText.replace('[en] ', '')}</span> :
+                    recognizedText}
+                </div>
               </div>
             )}
 

@@ -12,6 +12,7 @@ interface VoiceState {
   isSpeaking: boolean;
   voiceMode: boolean;
   recognizedText: string;
+  finalRecognizedText: string; // 최종 인식 결과 (누적)
   speechRecognition: any;
 
   // 액션
@@ -21,6 +22,8 @@ interface VoiceState {
   stopSpeakingVoice: () => void;
   setVoiceMode: (active: boolean) => void;
   setRecognizedText: (text: string) => void;
+  appendFinalText: (text: string) => void; // 최종 인식 결과 추가
+  resetRecognizedText: () => void; // 인식 텍스트 초기화
   speakMessage: (content: string) => void;
 }
 
@@ -29,6 +32,7 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
   isSpeaking: false,
   voiceMode: false,
   recognizedText: '',
+  finalRecognizedText: '', // 최종 인식 결과 (누적)
   speechRecognition: null,
 
   initialize: () => {
@@ -63,14 +67,21 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
     }
 
     // 음성 인식 시작
-    set({ isListening: true, voiceMode: true, recognizedText: '' });
+    set({ isListening: true, voiceMode: true, recognizedText: '', finalRecognizedText: '' });
 
     try {
       startListening(
         get().speechRecognition, // 최신 객체 사용
         // 음성 인식 결과 처리
         (result) => {
+          // 현재 인식 중인 텍스트 업데이트 (UI 표시용)
           set({ recognizedText: result.transcript });
+
+          // 최종 결과인 경우 누적 텍스트에 추가
+          if (result.isFinal) {
+            const cleanText = result.transcript.replace('[en] ', '');
+            get().appendFinalText(cleanText);
+          }
         },
         // 오류 처리
         (error) => {
@@ -117,17 +128,22 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
   },
 
   stopVoiceRecognition: () => {
-    const { speechRecognition, recognizedText } = get();
+    const { speechRecognition, finalRecognizedText } = get();
     if (!speechRecognition) return '';
 
     stopListening(speechRecognition);
     set({ isListening: false });
 
-    // 인식된 텍스트 반환 후 상태 초기화 (다음 인식을 위해)
-    const textToReturn = recognizedText;
+    // 누적된 최종 텍스트 반환 (없으면 현재 인식 중인 텍스트 사용)
+    const textToReturn = finalRecognizedText || get().recognizedText;
+
+    // 디버깅 로그
+    console.log(`음성 인식 최종 결과: "${textToReturn}"`);
+
+    // 약간의 지연 후 상태 초기화 (UI 업데이트 시간 확보)
     setTimeout(() => {
-      set({ recognizedText: '' });
-    }, 500); // 약간의 지연으로 UI 업데이트 시간 확보
+      set({ recognizedText: '', finalRecognizedText: '' });
+    }, 500);
 
     return textToReturn;
   },
@@ -143,6 +159,17 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
 
   setRecognizedText: (text) => {
     set({ recognizedText: text });
+  },
+
+  appendFinalText: (text) => {
+    const { finalRecognizedText } = get();
+    // 공백 추가하여 텍스트 누적
+    const newText = finalRecognizedText ? `${finalRecognizedText} ${text}` : text;
+    set({ finalRecognizedText: newText });
+  },
+
+  resetRecognizedText: () => {
+    set({ recognizedText: '', finalRecognizedText: '' });
   },
 
   speakMessage: (content) => {

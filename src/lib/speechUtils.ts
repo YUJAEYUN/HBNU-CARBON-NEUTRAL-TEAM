@@ -126,6 +126,7 @@ export const startListening = (
     // 가장 최근의 인식 결과 가져오기
     const lastResultIndex = event.results.length - 1;
     const transcript = event.results[lastResultIndex][0].transcript;
+    const isFinal = event.results[lastResultIndex].isFinal;
 
     // 언어 태그 추가 (영어로 인식 중인 경우 표시)
     let processedTranscript = transcript;
@@ -134,12 +135,16 @@ export const startListening = (
       processedTranscript = `[en] ${transcript}`;
     }
 
+    // 모든 결과 처리 (최종 결과와 중간 결과 모두)
     if (onResult) {
       onResult({
         transcript: processedTranscript,
-        isFinal: event.results[lastResultIndex].isFinal
+        isFinal: isFinal
       });
     }
+
+    // 디버깅 로그
+    console.log(`음성 인식 결과: "${processedTranscript}" (최종: ${isFinal})`);
   };
 
   // 오류 처리 개선
