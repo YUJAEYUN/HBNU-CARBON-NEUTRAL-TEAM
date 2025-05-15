@@ -1,12 +1,13 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FaInfoCircle, FaComment, FaFileAlt } from "react-icons/fa";
+import { FaInfoCircle, FaComment, FaFileAlt, FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { ChatMessage } from "@/lib/openai";
 import axiosInstance from "@/lib/axios";
+import { useVoiceStore } from "@/store/voiceStore";
 
 // 캐릭터 성장 단계 정보
 const CHARACTER_STAGES = [
@@ -54,6 +55,7 @@ export default function CharacterPage() {
   const { isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
+  const [showVoiceChat, setShowVoiceChat] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "monthly">("daily");
 
@@ -64,6 +66,21 @@ export default function CharacterPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Zustand 스토어에서 음성 인식 관련 상태와 함수 가져오기
+  const {
+    isListening,
+    isSpeaking,
+    voiceMode,
+    recognizedText,
+    initialize,
+    startVoiceRecognition,
+    stopVoiceRecognition,
+    stopSpeakingVoice: handleStopSpeaking, // 이름 변경하여 사용
+    setVoiceMode,
+    setRecognizedText, // 인식된 텍스트 설정 함수 추가
+    speakMessage
+  } = useVoiceStore();
+
   // 채팅창이 열릴 때마다 스크롤을 아래로 이동
   useEffect(() => {
     if (showChatbot && chatContainerRef.current) {
@@ -71,37 +88,30 @@ export default function CharacterPage() {
     }
   }, [showChatbot, chatMessages]);
 
-  // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
-  const currentPoints = 180;
+  // 음성 인식 초기화 (컴포넌트 마운트 시 한 번만 실행)
+  useEffect(() => {
+    initialize();
 
-  // 현재 캐릭터 단계 계산
-  const currentStage = CHARACTER_STAGES.reduce((prev, curr) => {
-    return currentPoints >= curr.requiredPoints ? curr : prev;
-  }, CHARACTER_STAGES[0]);
+    // 컴포넌트 언마운트 시 정리는 필요 없음 (Zustand에서 관리)
+  }, [initialize]);
 
-  // 다음 단계 계산
-  const nextStageIndex = CHARACTER_STAGES.findIndex(stage => stage.level === currentStage.level) + 1;
-  const nextStage = nextStageIndex < CHARACTER_STAGES.length ? CHARACTER_STAGES[nextStageIndex] : null;
+  // 새 메시지가 추가될 때 TTS로 읽기
+  useEffect(() => {
+    // 마지막 메시지가 어시스턴트의 메시지이고, 음성 모드가 활성화되어 있을 때만 TTS 실행
+    const lastMessage = chatMessages[chatMessages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant' && voiceMode) {
+      speakMessage(lastMessage.content);
+    }
+  }, [chatMessages, voiceMode, speakMessage]);
 
-  // 다음 단계까지 남은 포인트
-  const pointsToNextLevel = nextStage ? nextStage.requiredPoints - currentPoints : 0;
+  // 챗봇 메시지 전송 처리 (useCallback으로 감싸서 의존성 문제 해결)
+  const handleSendMessage = useCallback(async (messageText?: string) => {
+    const textToSend = messageText || chatMessage;
 
-  // 진행률 계산
-  const progressPercentage = nextStage
-    ? ((currentPoints - currentStage.requiredPoints) / (nextStage.requiredPoints - currentStage.requiredPoints)) * 100
-    : 100;
-
-  // 로딩 중일 때 로딩 화면 표시
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
-  // 챗봇 메시지 전송 처리
-  const handleSendMessage = async () => {
-    if (chatMessage.trim()) {
+    if (textToSend.trim()) {
       try {
         // 사용자 메시지 추가
-        const userMessage: ChatMessage = { role: "user", content: chatMessage };
+        const userMessage: ChatMessage = { role: "user", content: textToSend };
         const updatedMessages = [...chatMessages, userMessage];
         setChatMessages(updatedMessages);
         setChatMessage("");
@@ -127,7 +137,91 @@ export default function CharacterPage() {
         setChatLoading(false);
       }
     }
-  };
+  }, [chatMessage, chatMessages, setChatMessages, setChatMessage, setChatLoading]);
+
+  // 음성 인식 토글 핸들러
+  const handleVoiceToggle = useCallback(() => {
+    if (isListening) {
+      // 음성 인식 중지 및 텍스트 전송
+      const text = stopVoiceRecognition();
+      if (text && text.trim()) {
+        // [en] 태그 제거하고 음성입력 태그 추가
+        const cleanText = text.replace('[en] ', '');
+
+        // 영어로 인식된 경우 표시 (짧은 접두사 사용)
+        const isEnglish = text.includes('[en]');
+        // 토큰 수를 줄이기 위해 접두사를 최소화
+        const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
+
+        // 메시지 전송 (토큰 수를 줄이기 위해 접두사 최소화)
+        handleSendMessage(`${messagePrefix}${cleanText}`);
+      }
+    } else {
+      // 음성 인식 시작 전 상태 표시
+      setChatLoading(true);
+
+      // 인식된 텍스트 초기화
+      setRecognizedText('');
+
+      // 음성 인식 시작 (약간의 지연으로 UI 업데이트 시간 확보)
+      setTimeout(() => {
+        startVoiceRecognition();
+        setChatLoading(false);
+      }, 100);
+    }
+  }, [isListening, startVoiceRecognition, stopVoiceRecognition, handleSendMessage, setChatLoading, setRecognizedText]);
+
+  // 음성 대화창 열기 시 음성 모드 활성화
+  useEffect(() => {
+    if (showVoiceChat) {
+      setVoiceMode(true);
+    }
+  }, [showVoiceChat, setVoiceMode]);
+
+  // 음성 대화창 닫기 시 음성 인식 중지
+  useEffect(() => {
+    // 음성 대화창이 닫힐 때만 실행
+    if (!showVoiceChat && isListening) {
+      const text = stopVoiceRecognition();
+      if (text && text.trim()) {
+        // [en] 태그 제거하고 음성입력 태그 추가
+        const cleanText = text.replace('[en] ', '');
+
+        // 영어로 인식된 경우 표시 (짧은 접두사 사용)
+        const isEnglish = text.includes('[en]');
+        // 토큰 수를 줄이기 위해 접두사를 최소화
+        const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
+
+        // 메시지 전송 (토큰 수를 줄이기 위해 접두사 최소화)
+        handleSendMessage(`${messagePrefix}${cleanText}`);
+      }
+    }
+  }, [showVoiceChat, isListening, stopVoiceRecognition, handleSendMessage]);
+
+  // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
+  const currentPoints = 180;
+
+  // 현재 캐릭터 단계 계산
+  const currentStage = CHARACTER_STAGES.reduce((prev, curr) => {
+    return currentPoints >= curr.requiredPoints ? curr : prev;
+  }, CHARACTER_STAGES[0]);
+
+  // 다음 단계 계산
+  const nextStageIndex = CHARACTER_STAGES.findIndex(stage => stage.level === currentStage.level) + 1;
+  const nextStage = nextStageIndex < CHARACTER_STAGES.length ? CHARACTER_STAGES[nextStageIndex] : null;
+
+  // 다음 단계까지 남은 포인트
+  const pointsToNextLevel = nextStage ? nextStage.requiredPoints - currentPoints : 0;
+
+  // 진행률 계산
+  const progressPercentage = nextStage
+    ? ((currentPoints - currentStage.requiredPoints) / (nextStage.requiredPoints - currentStage.requiredPoints)) * 100
+    : 100;
+
+  // 로딩 중일 때 로딩 화면 표시
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">
@@ -195,14 +289,30 @@ export default function CharacterPage() {
             <div className="w-8 h-20 bg-[#8B4513] rounded-md mx-auto"></div>
             <div className="w-32 h-32 bg-primary rounded-full absolute -top-16 left-1/2 transform -translate-x-1/2"></div>
 
-            {/* 챗봇 버튼 */}
+            {/* 텍스트 챗봇 버튼 */}
             <motion.button
               className="absolute -right-8 -bottom-4 bg-white p-2 rounded-full shadow-lg"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => setShowChatbot(!showChatbot)}
+              onClick={() => {
+                setShowChatbot(!showChatbot);
+                if (showVoiceChat) setShowVoiceChat(false);
+              }}
             >
               <FaComment className="text-primary text-xl" />
+            </motion.button>
+
+            {/* 음성 챗봇 버튼 */}
+            <motion.button
+              className="absolute -left-8 -bottom-4 bg-white p-2 rounded-full shadow-lg"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                setShowVoiceChat(!showVoiceChat);
+                if (showChatbot) setShowChatbot(false);
+              }}
+            >
+              <FaMicrophone className={`text-xl ${voiceMode ? 'text-green-500' : 'text-blue-500'}`} />
             </motion.button>
           </div>
         </motion.div>
@@ -280,7 +390,7 @@ export default function CharacterPage() {
         </motion.div>
       </div>
 
-      {/* 챗봇 대화창 */}
+      {/* 텍스트 챗봇 대화창 */}
       {showChatbot && (
         <motion.div
           className="fixed bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 max-w-[375px] mx-auto"
@@ -304,6 +414,11 @@ export default function CharacterPage() {
             {chatMessages.map((msg, idx) => {
               // 고유한 ID 생성 (메시지 내용과 인덱스 조합)
               const messageId = `${msg.role}-${msg.content.substring(0, 10)}-${idx}`;
+              // 음성 입력 태그 제거 (모든 종류의 음성 입력 태그 처리)
+              const displayContent = msg.content
+                .replace('🎤 ', '')
+                .replace('🇺🇸 ', '');
+
               return (
                 <div
                   key={messageId}
@@ -313,7 +428,7 @@ export default function CharacterPage() {
                       : 'bg-gray-100 ml-auto'
                   }`}
                 >
-                  <p className="text-sm">{msg.content}</p>
+                  <p className="text-sm">{displayContent}</p>
                 </div>
               );
             })}
@@ -335,17 +450,134 @@ export default function CharacterPage() {
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               disabled={chatLoading}
             />
+
+            {/* 메시지 전송 버튼 */}
             <button
               className={`p-2 rounded-r-lg ${
                 chatLoading
                   ? 'bg-gray-400 text-white'
                   : 'bg-primary text-white'
               }`}
-              onClick={handleSendMessage}
+              onClick={() => handleSendMessage()}
               disabled={chatLoading}
             >
               전송
             </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* 음성 챗봇 대화창 */}
+      {showVoiceChat && (
+        <motion.div
+          className="fixed bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 max-w-[375px] mx-auto"
+          initial={{ y: 300 }}
+          animate={{ y: 0 }}
+          exit={{ y: 300 }}
+        >
+          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+            <p className="font-bold text-primary-dark">대나무와 음성으로 대화하기</p>
+            <button
+              className="text-gray-500"
+              onClick={() => setShowVoiceChat(false)}
+            >
+              닫기
+            </button>
+          </div>
+          <div className="h-64 p-3 overflow-y-auto">
+            {/* 음성 인식 상태 표시 - 제거 (하단에 표시) */}
+
+            {/* 음성 출력 상태 표시 */}
+            {isSpeaking && (
+              <div className="mb-4 p-2 bg-green-100 text-green-800 rounded-lg text-center text-sm flex justify-between items-center">
+                <span>🔊 대나무가 말하고 있어요...</span>
+                <button
+                  className="bg-red-500 text-white rounded-full p-1 text-xs"
+                  onClick={handleStopSpeaking}
+                  title="음성 출력 중지"
+                >
+                  <FaVolumeMute />
+                </button>
+              </div>
+            )}
+
+            {chatMessages.map((msg, idx) => {
+              // 고유한 ID 생성 (메시지 내용과 인덱스 조합)
+              const messageId = `voice-${msg.role}-${msg.content.substring(0, 10)}-${idx}`;
+              // 음성 입력 태그 제거 (모든 종류의 음성 입력 태그 처리)
+              const displayContent = msg.content
+                .replace('🎤 ', '')
+                .replace('🇺🇸 ', '');
+
+              return (
+                <div
+                  key={messageId}
+                  className={`p-2 rounded-lg mb-2 max-w-[80%] ${
+                    msg.role === 'assistant'
+                      ? 'bg-primary-light mr-auto'
+                      : 'bg-gray-100 ml-auto'
+                  }`}
+                >
+                  {/* 음성으로 읽기 버튼 (어시스턴트 메시지에만 표시) */}
+                  {msg.role === 'assistant' && !isSpeaking && (
+                    <button
+                      className="float-right ml-2 text-xs text-gray-500 hover:text-gray-700"
+                      onClick={() => {
+                        speakMessage(msg.content);
+                      }}
+                      title="음성으로 듣기"
+                    >
+                      <FaVolumeUp />
+                    </button>
+                  )}
+                  <p className="text-sm">{displayContent}</p>
+                </div>
+              );
+            })}
+            {chatLoading && (
+              <div className="bg-primary-light p-2 rounded-lg mb-2 max-w-[80%] flex">
+                <div className="w-2 h-2 bg-primary rounded-full mr-1 animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full mr-1 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            )}
+          </div>
+          <div className="p-3 border-t border-gray-200 flex justify-center items-center">
+            {/* 인식된 텍스트 표시 (인식 중일 때만) */}
+            {isListening && recognizedText && (
+              <div className="flex-1 text-center text-sm text-gray-600 mx-2 max-w-[70%] truncate">
+                {recognizedText.includes('[en]') ?
+                  <span className="text-blue-500">{recognizedText.replace('[en] ', '')}</span> :
+                  recognizedText}
+              </div>
+            )}
+
+            {/* 음성 인식 상태 표시 (인식 중이지만 텍스트가 없을 때) */}
+            {isListening && !recognizedText && (
+              <div className="flex-1 text-center text-sm text-gray-500 mx-2">
+                <span className="animate-pulse inline-block mr-1">●</span>
+                {recognizedText.includes('[en]')
+                  ? '영어로 인식 중...'
+                  : '말씀해주세요...'}
+              </div>
+            )}
+
+            {/* 음성 인식 토글 버튼 */}
+            <button
+              className={`p-4 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-blue-500'} text-white shadow-md transition-all duration-300 hover:scale-105`}
+              onClick={handleVoiceToggle}
+              disabled={chatLoading || isSpeaking}
+              title={isListening ? "음성 인식 중지 및 전송" : "음성 인식 시작"}
+            >
+              {isListening ? <FaMicrophoneSlash className="text-2xl" /> : <FaMicrophone className="text-2xl" />}
+            </button>
+
+            {/* 음성 인식 안내 (인식 중이 아닐 때) */}
+            {!isListening && (
+              <div className="flex-1 text-center text-xs text-gray-500 mx-2">
+                버튼을 눌러 대화를 시작하세요
+              </div>
+            )}
           </div>
         </motion.div>
       )}
