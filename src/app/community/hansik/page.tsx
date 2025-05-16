@@ -103,9 +103,8 @@ interface Restaurant {
 
 export default function HansikPage() {
   const router = useRouter();
-  const [mealData, setMealData] = useState<{ date: string; lunch: string; dinner: string } | null>(null);
+  const [mealData, setMealData] = useState<{ date: string; lunch: string; dinner: string; dayOfWeek?: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [today, setToday] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("학생식당");
   const [showMenuDetails, setShowMenuDetails] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -142,23 +141,7 @@ export default function HansikPage() {
     },
   ];
 
-  // 요일에 따른 날짜 문자열 반환 함수
-  const getDateStringByDay = (day: string): string => {
-    switch (day) {
-      case 'mon':
-        return "2025년 5월 12일 월요일";
-      case 'tue':
-        return "2025년 5월 13일 화요일";
-      case 'wed':
-        return "2025년 5월 14일 수요일";
-      case 'thu':
-        return "2025년 5월 15일 목요일";
-      case 'fri':
-        return "2025년 5월 16일 금요일";
-      default:
-        return "2025년 5월 12일 월요일";
-    }
-  };
+
 
   useEffect(() => {
     async function fetchMeals() {
@@ -166,9 +149,7 @@ export default function HansikPage() {
         setLoading(true);
         setApiError(null);
 
-        // 선택된 요일에 따른 날짜 설정
-        const dateStr = getDateStringByDay(selectedDay);
-        setToday(dateStr);
+        // 선택된 요일 사용
 
         // API 호출 (요일 파라미터 포함)
         console.log(`학식 API 호출 중... (요일: ${selectedDay})`);
@@ -186,6 +167,7 @@ export default function HansikPage() {
           throw new Error(data.error);
         }
 
+
         setMealData(data);
       } catch (error) {
         console.error("학식 정보를 가져오는 중 오류 발생:", error);
@@ -193,7 +175,7 @@ export default function HansikPage() {
 
         // 오류 발생 시 기본 데이터 설정
         setMealData({
-          date: getDateStringByDay(selectedDay),
+          date: selectedDay,
           lunch: "학식 정보를 가져올 수 없습니다.",
           dinner: "학식 정보를 가져올 수 없습니다."
         });
@@ -241,7 +223,7 @@ export default function HansikPage() {
         <div className="flex items-center">
           <div className="text-sm text-gray-500 flex items-center">
             <FaCalendarAlt className="mr-1" />
-            <span>{today}</span>
+            <span>{mealData && mealData.date ? mealData.date : ""}</span>
           </div>
         </div>
       </div>
@@ -370,49 +352,30 @@ export default function HansikPage() {
           <>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">메뉴 정보</h2>
-              <div className="text-sm text-gray-500">
-                <span className="bg-gray-100 px-2 py-1 rounded">{today}</span>
-              </div>
             </div>
 
             {/* 요일 선택 탭 */}
             <div className="mb-4 border rounded-lg overflow-hidden">
               <div className="flex border-b">
-                <button
-                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'mon' ? 'bg-primary text-white' : 'bg-gray-50'}`}
-                  onClick={() => setSelectedDay('mon')}
-                >
-                  <div className="font-bold">월</div>
-                  <div className="text-xs">2025-05-12</div>
-                </button>
-                <button
-                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'tue' ? 'bg-primary text-white' : 'bg-gray-50'}`}
-                  onClick={() => setSelectedDay('tue')}
-                >
-                  <div className="font-bold">화</div>
-                  <div className="text-xs">2025-05-13</div>
-                </button>
-                <button
-                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'wed' ? 'bg-primary text-white' : 'bg-gray-50'}`}
-                  onClick={() => setSelectedDay('wed')}
-                >
-                  <div className="font-bold">수</div>
-                  <div className="text-xs">2025-05-14</div>
-                </button>
-                <button
-                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'thu' ? 'bg-primary text-white' : 'bg-gray-50'}`}
-                  onClick={() => setSelectedDay('thu')}
-                >
-                  <div className="font-bold">목</div>
-                  <div className="text-xs">2025-05-15</div>
-                </button>
-                <button
-                  className={`flex-1 py-2 px-3 text-center ${selectedDay === 'fri' ? 'bg-primary text-white' : 'bg-gray-50'}`}
-                  onClick={() => setSelectedDay('fri')}
-                >
-                  <div className="font-bold">금</div>
-                  <div className="text-xs">2025-05-16</div>
-                </button>
+                {['mon', 'tue', 'wed', 'thu', 'fri'].map((day) => {
+                  // 요일 이름 매핑
+                  const dayNames: Record<string, string> = {
+                    'mon': '월', 'tue': '화', 'wed': '수', 'thu': '목', 'fri': '금'
+                  };
+
+                  // 요일 이름
+                  const dayName = dayNames[day] || '';
+
+                  return (
+                    <button
+                      key={day}
+                      className={`flex-1 py-2 px-3 text-center ${selectedDay === day ? 'bg-primary text-white' : 'bg-gray-50'}`}
+                      onClick={() => setSelectedDay(day)}
+                    >
+                      <div className="font-bold">{dayName}</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </>
@@ -458,13 +421,19 @@ export default function HansikPage() {
               </div>
               <div className="p-4">
                 {mealData && mealData.lunch ? (
-                  <div className="space-y-2">
-                    {mealData.lunch.split("\n").map((item, index) => (
-                      <div key={index} className="flex items-start py-2 border-b border-gray-100 last:border-0">
-                        <span className="text-primary mr-2">•</span>
-                        <span className="text-gray-800">{item}</span>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {mealData.lunch.split("\n").map((item, index) => {
+                      // 빈 항목 건너뛰기
+                      if (!item || item.trim() === "") return null;
+
+                      return (
+                        <div key={index} className="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow border-l-4 border-primary">
+                          <div className="flex items-center">
+                            <span className="text-gray-800">{item.trim()}</span>
+                          </div>
+                        </div>
+                      );
+                    }).filter(Boolean)}
                   </div>
                 ) : (
                   <div className="py-4 text-center text-gray-500">
@@ -486,13 +455,19 @@ export default function HansikPage() {
               </div>
               <div className="p-4">
                 {mealData && mealData.dinner ? (
-                  <div className="space-y-2">
-                    {mealData.dinner.split("\n").map((item, index) => (
-                      <div key={index} className="flex items-start py-2 border-b border-gray-100 last:border-0">
-                        <span className="text-blue-600 mr-2">•</span>
-                        <span className="text-gray-800">{item}</span>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {mealData.dinner.split("\n").map((item, index) => {
+                      // 빈 항목 건너뛰기
+                      if (!item || item.trim() === "") return null;
+
+                      return (
+                        <div key={index} className="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-600">
+                          <div className="flex items-center">
+                            <span className="text-gray-800">{item.trim()}</span>
+                          </div>
+                        </div>
+                      );
+                    }).filter(Boolean)}
                   </div>
                 ) : (
                   <div className="py-4 text-center text-gray-500">
