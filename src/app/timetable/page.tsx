@@ -814,12 +814,12 @@ export default function TimetablePage() {
         </div>
       </div>
 
-      {/* 친구 시간표 섹션 */}
+      {/* 친구 시간표 섹션
       <div className="border-t border-gray-200 p-4">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-800">친구 시간표</h2>
         </div>
-      </div>
+      </div> */}
 
       {/* 시간표 추가 모달 */}
       <AnimatePresence>
@@ -1002,12 +1002,17 @@ export default function TimetablePage() {
       <AnimatePresence>
         {showCourseSearchModal && (
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex flex-col z-[100]"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="bg-white w-full h-full flex flex-col">
+            <motion.div
+              className="bg-white w-full max-w-md max-h-[80vh] rounded-xl overflow-hidden flex flex-col"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
               {/* 모달 헤더 */}
               <div className="flex justify-between items-center p-4 border-b border-gray-200">
                 <div className="flex items-center">
@@ -1089,12 +1094,17 @@ export default function TimetablePage() {
               <AnimatePresence>
                 {activeFilterModal && (
                   <motion.div
-                    className="absolute inset-0 bg-white z-[200] flex flex-col"
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    exit={{ y: "100%" }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    className="absolute inset-0 bg-black bg-opacity-50 z-[200] flex items-center justify-center p-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                   >
+                    <motion.div
+                      className="bg-white w-full max-w-sm rounded-xl overflow-hidden flex flex-col max-h-[70vh]"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                    >
                     <div className="flex justify-between items-center p-4 border-b border-gray-200">
                       <h3 className="font-bold">
                         {activeFilterModal === "department" && "전공/영역 선택"}
@@ -1215,12 +1225,13 @@ export default function TimetablePage() {
                         </div>
                       )}
                     </div>
+                    </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
               {/* 과목 목록 */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto" style={{ maxHeight: "calc(80vh - 150px)" }}>
                 {getFilteredCourses().map((course) => (
                   <div
                     key={course.id}
@@ -1262,7 +1273,7 @@ export default function TimetablePage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
