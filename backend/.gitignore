@@ -19,7 +19,6 @@ yarn-error.log*
 
 # System files
 .DS_Store
-Thumbs.db
 
 # Build artifacts
 dist/
@@ -39,21 +38,6 @@ env/
 # VSCode settings (optional)
 .vscode/
 
-# Specific files to ignore
-__init__.py
-main.py
-
-# Backend specific
-backend/venv/
-backend/__pycache__/
-backend/**/__pycache__/
-backend/.env
-backend/__init__.py
-backend/main.py
-
-# Frontend specific
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/.env
-frontend/.env.local
+# macOS / Windows
+.DS_Store
+Thumbs.db
