@@ -57,3 +57,4 @@ frontend/.next/
 frontend/out/
 frontend/.env
 frontend/.env.local
+backend/carbon-project-hanbat.json
