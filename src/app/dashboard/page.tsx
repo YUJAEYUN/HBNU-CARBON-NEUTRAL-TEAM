@@ -309,12 +309,8 @@ function ActivityTab({ user }: { user: any }) {
     const randomStreak = Math.floor(Math.random() * 20) + 5; // 5~24일 사이의 랜덤 값
     setStreakDays(randomStreak);
     
-    // 참여 시작일 이후 경과일 계산
-    const startDate = new Date('2023-05-01');
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    setDaysSinceStart(diffDays);
+    // 참여 시작일 이후 경과일 계산 - 100일로 고정
+    setDaysSinceStart(100);
   }, []);
 
   // 뱃지 클릭 핸들러
