@@ -1,11 +1,12 @@
 "use client";
 import React from 'react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FaCamera, FaSearch, FaCalendarAlt, FaFilter, FaCheck, FaTimes, FaChevronDown } from "react-icons/fa";
+import { FaCamera, FaSearch, FaCalendarAlt, FaFilter, FaCheck, FaTimes, FaChevronDown, FaExclamationTriangle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import { getCertifications } from "@/utils/api";
 
 const CERTIFICATION_TYPES = [
   { id: "receipt", label: "전자영수증", icon: "🧾", color: "#C8E6C9" },    // 연한 녹색 (파스텔)
@@ -277,7 +278,7 @@ const SAMPLE_CERTIFICATIONS = [
 
 export default function CertificationPage() {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [certifications, setCertifications] = useState(SAMPLE_CERTIFICATIONS);
@@ -285,9 +286,39 @@ export default function CertificationPage() {
   const [showTypeList, setShowTypeList] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [selectedCertImage, setSelectedCertImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 백엔드에서 인증 목록 가져오기
+  useEffect(() => {
+    const fetchCertifications = async () => {
+      if (!user?.id) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await getCertifications(user.id);
+        if (data && data.certifications) {
+          setCertifications(data.certifications);
+        }
+      } catch (err) {
+        console.error('인증 목록 가져오기 오류:', err);
+        setError('인증 목록을 가져오는 중 오류가 발생했습니다.');
+        // 오류 발생 시 샘플 데이터 사용
+        setCertifications(SAMPLE_CERTIFICATIONS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchCertifications();
+    }
+  }, [user?.id]);
 
   // 로딩 중일 때 로딩 화면 표시
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return <LoadingScreen />;
   }
 
@@ -409,6 +440,16 @@ export default function CertificationPage() {
 
       {/* 인증 내역 목록 - iOS 스타일 */}
       <div className="flex-1 overflow-y-auto p-4">
+        {/* 오류 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+            <div className="flex items-center">
+              <FaExclamationTriangle className="text-red-500 mr-2" />
+              <p>{error}</p>
+            </div>
+          </div>
+        )}
+
         <div className="text-sm text-gray-500 mb-3">
           총 {filteredCertifications.length}개의 인증
         </div>
