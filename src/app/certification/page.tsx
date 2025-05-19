@@ -19,6 +19,7 @@ const CERTIFICATION_TYPES = [
 ];
 
 
+
 // 샘플 인증 데이터 - 더 많은 목업 데이터 추가
 const SAMPLE_CERTIFICATIONS = [
   {
@@ -27,10 +28,13 @@ const SAMPLE_CERTIFICATIONS = [
     title: "카페에서 텀블러 사용",
     date: "2025-05-16",
     time: "11:50",
+    date: "2025-05-16",
+    time: "11:50",
     timeAgo: "10분 전",
     location: "교내 카페",
     carbonReduction: 0.12,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 15,
     image: "/certification/tumbler.jpg"
@@ -41,10 +45,13 @@ const SAMPLE_CERTIFICATIONS = [
     title: "식당에서 다회용기 사용",
     date: "2025-05-16",
     time: "09:00",
+    date: "2025-05-16",
+    time: "09:00",
     timeAgo: "3시간 전",
     location: "학생 식당",
     carbonReduction: 0.25,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 20,
     image: "/certification/container.jpg"
@@ -55,10 +62,13 @@ const SAMPLE_CERTIFICATIONS = [
     title: "편의점 전자영수증 사용",
     date: "2025-05-16",
     time: "08:00",
+    date: "2025-05-16",
+    time: "08:00",
     timeAgo: "오늘",
     location: "CU 편의점",
     carbonReduction: 0.05,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 10,
     image: "/certification/receipt.jpg"
@@ -68,11 +78,13 @@ const SAMPLE_CERTIFICATIONS = [
     type: "email",
     title: "불필요한 이메일 50개 정리",
     date: "2025-05-15",
+    date: "2025-05-15",
     time: "20:15",
     timeAgo: "어제",
     location: "온라인",
     carbonReduction: 0.03,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 8,
     image: "/certification/email.jpg"
@@ -82,11 +94,13 @@ const SAMPLE_CERTIFICATIONS = [
     type: "refill",
     title: "샴푸 리필스테이션 이용",
     date: "2025-05-15",
+    date: "2025-05-15",
     time: "14:30",
     timeAgo: "어제",
     location: "제로웨이스트샵",
     carbonReduction: 0.18,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 18,
     image: "/certification/refill.jpg"
@@ -96,11 +110,13 @@ const SAMPLE_CERTIFICATIONS = [
     type: "recycle",
     title: "폐휴대폰 배터리 분리배출",
     date: "2025-05-14",
+    date: "2025-05-14",
     time: "11:20",
     timeAgo: "2일 전",
     location: "교내 수거함",
     carbonReduction: 0.35,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 25,
     image: "/certification/recycle.jpg"
@@ -110,11 +126,13 @@ const SAMPLE_CERTIFICATIONS = [
     type: "tumbler",
     title: "텀블러 사용 (스타벅스)",
     date: "2025-05-13",
+    date: "2025-05-13",
     time: "15:45",
     timeAgo: "3일 전",
     location: "스타벅스",
     carbonReduction: 0.12,
     verified: true,
+    status: "인증됨",
     status: "인증됨",
     points: 15,
     image: "/certification/tumbler2.jpg"
@@ -332,12 +350,14 @@ export default function CertificationPage() {
   // 카메라로 인증하기 기능
   const handleCameraCapture = () => {
     router.push('/camera');
+    router.push('/camera');
   };
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">
       {/* 상단 헤더 - iOS 스타일 */}
       <div className="ios-header sticky top-0 z-10">
+        <h1 className="text-xl font-semibold text-gray-800">환경을 위한 작은 실천</h1>
         <h1 className="text-xl font-semibold text-gray-800">환경을 위한 작은 실천</h1>
         <button
           className="ios-icon-button"
@@ -363,7 +383,95 @@ export default function CertificationPage() {
       )}
 
       {/* 검색 바와 인증 유형 드롭다운 */}
+      {/* 카메라 UI 모달 */}
+      {showCamera && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl p-4 relative w-full max-w-xs mx-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowCamera(false)}
+            >
+              닫기
+            </button>
+            <Camera trigger={showCamera} />
+          </div>
+        </div>
+      )}
+
+      {/* 검색 바와 인증 유형 드롭다운 */}
       <div className="p-4 bg-white">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="인증 내역 검색"
+              className="ios-input pl-10 h-9 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+          <div className="relative w-40">
+            <button
+              className="w-full flex items-center justify-between p-2 bg-gray-50 rounded-xl text-xs h-9"
+              onClick={() => setShowTypeList(!showTypeList)}
+            >
+              <div className="flex items-center">
+                {activeFilter === "all" ? (
+                  "전체"
+                ) : (
+                  <>
+                    <span className="mr-2">
+                      {CERTIFICATION_TYPES.find(t => t.id === activeFilter)?.icon}
+                    </span>
+                    {CERTIFICATION_TYPES.find(t => t.id === activeFilter)?.label}
+                  </>
+                )}
+              </div>
+              <FaChevronDown className={`text-gray-400 transition-transform ${showTypeList ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {showTypeList && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-lg z-50 overflow-hidden"
+                >
+                  <div className="py-1">
+                    <button
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center text-sm ${
+                        activeFilter === "all" ? 'bg-gray-50' : ''
+                      }`}
+                      onClick={() => {
+                        setActiveFilter("all");
+                        setShowTypeList(false);
+                      }}
+                    >
+                      전체
+                    </button>
+                    {CERTIFICATION_TYPES.map((type) => (
+                      <button
+                        key={type.id}
+                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center text-sm ${
+                          activeFilter === type.id ? 'bg-gray-50' : ''
+                        }`}
+                        onClick={() => {
+                          setActiveFilter(type.id);
+                          setShowTypeList(false);
+                        }}
+                      >
+                        <span className="mr-2">{type.icon}</span>
+                        {type.label}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <input
@@ -466,10 +574,12 @@ export default function CertificationPage() {
               <motion.div
                 key={cert.id}
                 className="ios-card p-4 mb-4 cursor-pointer"
+                className="ios-card p-4 mb-4 cursor-pointer"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
+                onClick={() => setSelectedCertImage(cert.image)}
                 onClick={() => setSelectedCertImage(cert.image)}
               >
                 <div className="flex items-start">
@@ -483,9 +593,15 @@ export default function CertificationPage() {
                     <div className="flex justify-between">
                       <h3 className="font-medium text-gray-800">{cert.title}</h3>
                       {cert.verified ? (
+                      {cert.verified ? (
                         <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full flex items-center">
                           <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span>
                           인증됨
+                        </span>
+                      ) : (
+                        <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full flex items-center">
+                          <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1"></span>
+                          {cert.status || '검토중'}
                         </span>
                       ) : (
                         <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-1 rounded-full flex items-center">
@@ -522,6 +638,30 @@ export default function CertificationPage() {
           </div>
         )}
       </div>
+
+      {/* 인증 이미지 모달 */}
+      {selectedCertImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-xl p-6 relative w-80 h-80 max-w-full max-h-full mx-auto flex flex-col items-center justify-center">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={() => setSelectedCertImage(null)}
+            >
+              닫기
+            </button>
+            <img src={selectedCertImage} alt="인증 사진" className="mt-4 w-52 h-52 object-contain rounded-lg mb-2" />
+            {/* 인증 정보 표시 */}
+            {certifications.find(cert => cert.image === selectedCertImage) && (
+              <div className="text-center mt-0">
+                <div className="font-semibold text-base mb-1">{certifications.find(cert => cert.image === selectedCertImage)?.title}</div>
+                <div className="text-xs text-gray-500 mb-1">{certifications.find(cert => cert.image === selectedCertImage)?.location}</div>
+                <div className="text-xs text-gray-400 mb-1">{certifications.find(cert => cert.image === selectedCertImage)?.date} {certifications.find(cert => cert.image === selectedCertImage)?.time}</div>
+                <div className="text-xs text-gray-400 mb-1">{certifications.find(cert => cert.image === selectedCertImage)?.status || (certifications.find(cert => cert.image === selectedCertImage)?.verified ? '인증됨' : '검토중')}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 인증 이미지 모달 */}
       {selectedCertImage && (
