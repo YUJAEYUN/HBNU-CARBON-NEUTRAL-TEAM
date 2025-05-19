@@ -26,7 +26,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [liked, setLiked] = useState(false);
-  
+
   // 목업 데이터 로드
   useEffect(() => {
     // 실제 구현에서는 API 호출로 대체
@@ -100,14 +100,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
     // 현재 ID에 해당하는 상품 찾기
     const foundProduct = mockProducts.find(p => p.id === params.id);
-    
+
     if (foundProduct) {
       setProduct(foundProduct);
     } else {
       // 상품이 없으면 목록 페이지로 리다이렉트
       router.push("/marketplace");
     }
-    
+
     setLoading(false);
   }, [params.id, router]);
 
@@ -115,13 +115,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const toggleLike = () => {
     setLiked(!liked);
   };
-  
+
   // 공유하기
   const shareProduct = () => {
     // 실제 구현에서는 공유 API 사용
     alert("공유 기능은 준비 중입니다.");
   };
-  
+
   // 채팅하기
   const startChat = () => {
     // 실제 구현에서는 채팅 페이지로 이동
@@ -238,7 +238,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       </div>
 
       {/* 하단 고정 버튼 */}
-      <div className="fixed bottom-[76px] left-0 right-0 bg-white border-t p-3 flex items-center space-x-3">
+      <div className="fixed bottom-[76px] left-1/2 transform -translate-x-1/2 w-full max-w-[375px] bg-white border-t p-3 flex items-center space-x-3">
         <motion.button
           className="flex-1 py-3 bg-gray-100 text-gray-800 rounded-xl font-medium"
           whileHover={{ scale: 1.02 }}
