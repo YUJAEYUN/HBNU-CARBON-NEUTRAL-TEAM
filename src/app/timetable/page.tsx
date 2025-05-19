@@ -69,7 +69,7 @@ export default function TimetablePage() {
       <AnimatePresence>
         {error && (
           <motion.div
-            className="absolute top-4 left-0 right-0 mx-auto w-4/5 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 shadow-md"
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[350px] bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 shadow-md"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
@@ -91,17 +91,23 @@ export default function TimetablePage() {
       {/* 로딩 인디케이터 */}
       <AnimatePresence>
         {loading && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-[300]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-center text-gray-700">로딩 중...</p>
-            </div>
-          </motion.div>
+          <div className="absolute inset-0 flex items-center justify-center z-[300]">
+            <motion.div
+              className="absolute inset-0 bg-black bg-opacity-30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            <motion.div
+              className="relative bg-white p-4 rounded-lg shadow-lg w-[280px]"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-2 text-center text-gray-700 text-sm">로딩 중...</p>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

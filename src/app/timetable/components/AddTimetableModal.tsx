@@ -21,26 +21,26 @@ const AddTimetableModal = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="absolute inset-0 z-50">
           {/* 배경 오버레이 */}
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            className="absolute inset-0 bg-black bg-opacity-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          
+
           {/* 모달 컨텐츠 */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-5 z-50 max-h-[80vh] overflow-y-auto"
+            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-5 max-h-[80vh] overflow-y-auto w-[375px] mx-auto"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
             <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6" />
-            
+
             <h2 className="text-xl font-bold mb-4">새 시간표 추가</h2>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -81,7 +81,7 @@ const AddTimetableModal = ({
               </button>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );

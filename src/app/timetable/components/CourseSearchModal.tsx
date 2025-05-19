@@ -266,15 +266,16 @@ const CourseSearchModal = ({
           {/* 필터 모달 */}
           <AnimatePresence>
             {showFilterModal && (
-              <motion.div
-                className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowFilterModal(false)}
-              >
+              <div className="absolute inset-0 flex items-center justify-center z-[200]">
                 <motion.div
-                  className="bg-white rounded-xl p-5 w-full max-w-md m-4"
+                  className="absolute inset-0 bg-black bg-opacity-50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowFilterModal(false)}
+                />
+                <motion.div
+                  className="relative bg-white rounded-xl p-5 w-[280px] mx-auto"
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
@@ -362,7 +363,7 @@ const CourseSearchModal = ({
                     </button>
                   </div>
                 </motion.div>
-              </motion.div>
+              </div>
             )}
           </AnimatePresence>
         </motion.div>
