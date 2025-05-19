@@ -119,8 +119,8 @@ export default function HansikPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <RestaurantInfo
-              restaurant={restaurant}
+            <RestaurantInfo 
+              restaurant={restaurant} 
               activeTab={activeTab}
               showMenuDetails={showMenuDetails}
               setShowMenuDetails={setShowMenuDetails}
@@ -133,9 +133,9 @@ export default function HansikPage() {
       <div className="flex-1 p-4">
         {/* API 오류 메시지 */}
         {apiError && activeTab !== "커피숍" && (
-          <ErrorMessage
-            message={apiError}
-            description="한밭대학교 학식 정보를 가져오는 중 문제가 발생했습니다. 기본 메뉴 정보를 표시합니다."
+          <ErrorMessage 
+            message={apiError} 
+            description="한밭대학교 학식 정보를 가져오는 중 문제가 발생했습니다. 기본 메뉴 정보를 표시합니다." 
           />
         )}
 
@@ -182,19 +182,19 @@ export default function HansikPage() {
         {activeTab !== "커피숍" && (
           <div className="flex flex-col space-y-4">
             {/* 중식 메뉴 */}
-            <MealCard
-              title="🍱 중식"
-              time="11:00 ~ 14:00"
-              menu={mealData.lunch}
-              delay={0.1}
+            <MealCard 
+              title="🍱 중식" 
+              time="11:00 ~ 14:00" 
+              menu={mealData.lunch} 
+              delay={0.1} 
             />
 
             {/* 석식 메뉴 */}
-            <MealCard
-              title="🌙 석식"
-              time="17:00 ~ 18:30"
-              menu={mealData.dinner}
-              delay={0.2}
+            <MealCard 
+              title="🌙 석식" 
+              time="17:00 ~ 18:30" 
+              menu={mealData.dinner} 
+              delay={0.2} 
             />
           </div>
         )}
