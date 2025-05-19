@@ -8,6 +8,10 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useState, useEffect } from "react";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Pagination } from 'swiper/modules';
 
 export default function HomePage() {
   const router = useRouter();
@@ -35,12 +39,42 @@ export default function HomePage() {
       progress: 65
     },
     events: [
-      { id: 1, title: "교내 환경 봉사활동", date: "5월 15일", time: "14:00", duration: "2시간" },
-      { id: 2, title: "탄소중립 캠페인", date: "5월 20일", time: "10:00", duration: "3시간" }
+      { id: 1, title: "탄소중립 봉사활동하러가기", date: "5월 15일", time: "14:00", duration: "" },
+      { id: 2, title: "탄소중립 대외활동하러가기", date: "5월 20일", time: "10:00", duration: "" }
     ],
     news: [
-      { id: 1, title: "대학생 탄소중립 아이디어 공모전 개최", content: "환경부에서 주관하는 대학생 탄소중립 아이디어 공모전이 다음 달 개최됩니다.", date: "2023.05.10" },
-      { id: 2, title: "캠퍼스 내 일회용품 사용 제한 확대", content: "우리 대학은 다음 학기부터 캠퍼스 내 일회용품 사용을 단계적으로 제한합니다.", date: "2023.05.08" }
+      {
+        id: 1,
+        title: "대학생 탄소중립 아이디어 공모전 개최",
+        content: "환경부에서 주관하는 대학생 탄소중립 아이디어 공모전이 다음 달 개최됩니다. 참가자들은 일상 속 탄소 배출을 줄이는 창의적인 아이디어를 제안할 수 있습니다.",
+        date: "2023.05.10",
+        image: "/news/carbon-neutral-idea.jpg",
+        color: "#C8E6C9"
+      },
+      {
+        id: 2,
+        title: "캠퍼스 내 일회용품 사용 제한 확대",
+        content: "우리 대학은 다음 학기부터 캠퍼스 내 일회용품 사용을 단계적으로 제한합니다. 학생들은 개인 텀블러와 식기를 지참하는 것이 권장됩니다.",
+        date: "2023.05.08",
+        image: "/news/disposable-ban.jpg",
+        color: "#BBDEFB"
+      },
+      {
+        id: 3,
+        title: "탄소발자국 줄이기 캠페인 시작",
+        content: "우리 대학에서는 이번 달부터 '나의 탄소발자국 줄이기' 캠페인을 시작합니다. 참여 학생들은 일상 속에서 탄소 배출을 줄이는 활동을 기록하고 공유할 수 있습니다.",
+        date: "2023.05.05",
+        image: "/news/carbon-footprint.jpg",
+        color: "#FFECB3"
+      },
+      {
+        id: 4,
+        title: "친환경 교통수단 이용 장려 프로그램",
+        content: "대학 내 자전거 이용과 카풀 참여를 장려하기 위한 새로운 프로그램이 시작됩니다. 참여 학생들에게는 다양한 혜택이 제공됩니다.",
+        date: "2023.05.03",
+        image: "/news/eco-transportation.jpg",
+        color: "#E1BEE7"
+      }
     ]
   };
 
@@ -83,6 +117,8 @@ interface MockData {
     title: string;
     content: string;
     date: string;
+    image: string;
+    color: string;
   }>;
 }
 
@@ -224,7 +260,7 @@ function LoggedInHome({
           >
             {[
               { icon: "🗓️", label: "시간표", path: "/timetable", id: "timetable" },
-              { icon: "🍽️", label: "식사", path: "/community/hansik", id: "hansik" },
+              { icon: "🍽️", label: "학식", path: "/community/hansik", id: "hansik" },
               { icon: "📦", label: "중고장터", path: "/marketplace", id: "marketplace" },
               { icon: "🚗", label: "카풀", path: "/carpool", id: "carpool" }
             ].map((item, index) => (
@@ -247,7 +283,7 @@ function LoggedInHome({
           </motion.div>
 
           {/* 오늘의 활동 - iOS 스타일 카드 */}
-          <motion.div
+          {/* <motion.div
             className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -273,7 +309,7 @@ function LoggedInHome({
                 </div>
               </motion.div>
             ))}
-          </motion.div>
+          </motion.div> */}
 
           {/* 개인실적 - iOS 스타일 */}
           <motion.div
@@ -306,35 +342,52 @@ function LoggedInHome({
             </motion.div>
           </motion.div>
 
-          {/* 대외활동/봉사활동 - iOS 스타일 */}
+          {/* 탄소중립 활동 - iOS 스타일 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
             className="mb-6"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">대외활동/봉사활동</h2>
+            <div className="flex justify-between items-center mb-3 px-1">
+              <h2 className="text-lg font-semibold text-gray-800">탄소중립 활동</h2>
+              <div className="flex space-x-2">
+                <button
+                  className="text-xs text-ios-blue font-medium flex items-center"
+                  onClick={() => router.push("/activities/volunteer")}
+                >
+                  더 많은 봉사활동 <span className="ml-1">›</span>
+                </button>
+                <button
+                  className="text-xs text-ios-blue font-medium flex items-center"
+                  onClick={() => router.push("/activities/external")}
+                >
+                  더 많은 대외활동 <span className="ml-1">›</span>
+                </button>
+              </div>
+            </div>
 
             {mockData.events.map((event, index) => (
               <motion.div
                 key={event.id}
-                className="ios-card p-4 mb-3"
+                className={`ios-card p-4 mb-3 border-l-4 ${index === 0 ? 'border-green-500' : 'border-blue-500'}`}
                 whileHover={{ scale: 1.02 }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index + 0.8, duration: 0.3 }}
+                onClick={() => router.push(index === 0 ? "/activities/volunteer" : "/activities/external")}
               >
-                <div className="flex items-start">
-                  <div className="bg-gray-100 p-3 rounded-full mr-3">
+                <div className="flex items-center">
+                  <div className={`${index === 0 ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} p-3 rounded-full mr-3 flex items-center justify-center`} style={{ width: '48px', height: '48px' }}>
                     <span className="text-xl">{index === 0 ? '🌱' : '🌍'}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-gray-800 font-medium">{event.title}</p>
+                    <p className={`${index === 0 ? 'text-green-700' : 'text-blue-700'} font-bold text-lg`}>{event.title}</p>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-gray-500">{event.date} • {event.time}</span>
-                      <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
-                        {event.duration}
-                      </span>
+                      <div className="flex items-center">
+                        <span className={`${index === 0 ? 'text-green-500' : 'text-blue-500'} text-lg`}>›</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -342,32 +395,59 @@ function LoggedInHome({
             ))}
           </motion.div>
 
-          {/* 뉴스 - iOS 스타일 */}
+          {/* 탄소 뉴스 - 카드뉴스 스타일 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.5 }}
             className="mb-6"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">환경 뉴스</h2>
+            <div className="flex justify-between items-center mb-3 px-1">
+              <h2 className="text-lg font-semibold text-gray-800">탄소 뉴스</h2>
+              <button className="text-xs text-ios-blue font-medium">전체보기</button>
+            </div>
 
-            {mockData.news.map((item, index) => (
-              <motion.div
-                key={item.id}
-                className="ios-card p-4 mb-3"
-                whileHover={{ scale: 1.02 }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index + 0.9, duration: 0.3 }}
-              >
-                <p className="text-gray-800 font-medium">{item.title}</p>
-                <p className="text-sm text-gray-500 mt-1">{item.content}</p>
-                <div className="flex justify-between items-center mt-3">
-                  <span className="text-xs text-gray-400">{item.date}</span>
-                  <button className="text-xs text-ios-blue font-medium">자세히 보기</button>
-                </div>
-              </motion.div>
-            ))}
+            <Swiper
+              modules={[Pagination]}
+              pagination={{ clickable: true }}
+              spaceBetween={20}
+              slidesPerView={1.1}
+              initialSlide={0}
+              loop={false}
+              centeredSlides={false}
+              className="card-news-swiper"
+            >
+              {mockData.news.map((item, index) => (
+                <SwiperSlide key={item.id}>
+                  <motion.div
+                    className="card-news-item rounded-xl overflow-hidden shadow-sm"
+                    whileHover={{ scale: 1.02 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index + 0.9, duration: 0.3 }}
+                  >
+                    <div className="h-40 w-full flex items-center justify-center relative" style={{ backgroundColor: `${item.color}` }}>
+                      <div className="text-6xl">
+                        {index === 0 ? '🌱' : index === 1 ? '♻️' : index === 2 ? '👣' : '🚲'}
+                      </div>
+                      <div className="absolute top-3 left-3 bg-white bg-opacity-80 px-2 py-1 rounded-full text-xs font-medium">
+                        {index === 0 ? '아이디어 공모전' : index === 1 ? '캠퍼스 정책' : index === 2 ? '캠페인' : '친환경 교통'}
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white content-area">
+                      <p className="text-gray-800 font-bold text-lg mb-2">{item.title}</p>
+                      <p className="text-sm text-gray-600 mb-3 content-text">{item.content}</p>
+                      <div className="flex justify-between items-center mt-auto">
+                        <span className="text-xs text-gray-500">{item.date}</span>
+                        <button className="text-xs bg-primary text-white font-medium px-3 py-1 rounded-full shadow-sm">
+                          자세히 보기
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </motion.div>
         </div>
       ) : (

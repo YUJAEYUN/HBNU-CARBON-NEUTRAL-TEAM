@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaChartBar, FaUser, FaSignOutAlt, FaChevronRight, FaInfoCircle } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
 
 // 프로필 탭 컴포넌트
 function ProfileTab({ user, handleLogout }: { user: any; handleLogout: () => Promise<void> }) {
@@ -9,8 +10,8 @@ function ProfileTab({ user, handleLogout }: { user: any; handleLogout: () => Pro
   const [showCustomerSupport, setShowCustomerSupport] = useState(false);
   const [showInviteFriends, setShowInviteFriends] = useState(false);
   const [showAppSettings, setShowAppSettings] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [appLock, setAppLock] = useState(false);
 
   const toggleAccountSettings = () => {
     setShowAccountSettings(!showAccountSettings);
@@ -185,22 +186,22 @@ function ProfileTab({ user, handleLogout }: { user: any; handleLogout: () => Pro
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={darkMode}
-                  onChange={() => setDarkMode(!darkMode)}
+                  checked={notifications}
+                  onChange={() => setNotifications(!notifications)}
                   className="mr-2"
                 />
-                <label className="text-gray-800">다크 모드</label>
+                <label className="text-gray-800">알림 설정</label>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={notifications}
-                  onChange={() => setNotifications(!notifications)}
+                  checked={appLock}
+                  onChange={() => setAppLock(!appLock)}
                   className="mr-2"
                 />
-                <label className="text-gray-800">알림 설정</label>
+                <label className="text-gray-800">암호 잠금</label>
               </div>
             </div>
           </div>
@@ -310,12 +311,8 @@ function ActivityTab({ user }: { user: any }) {
     const randomStreak = Math.floor(Math.random() * 20) + 5; // 5~24일 사이의 랜덤 값
     setStreakDays(randomStreak);
     
-    // 참여 시작일 이후 경과일 계산
-    const startDate = new Date('2023-05-01');
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    setDaysSinceStart(diffDays);
+    // 참여 시작일 이후 경과일 계산 - 100일로 고정
+    setDaysSinceStart(100);
   }, []);
 
   // 뱃지 클릭 핸들러
@@ -335,7 +332,7 @@ function ActivityTab({ user }: { user: any }) {
     : extendedBadges.filter(badge => badge.category === activeCategory);
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-20 overflow-y-auto h-full">
       {/* 통합된 정보 카드 */}
       <div className="bg-primary-light rounded-xl p-4 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
         <div className="flex justify-between items-start mb-4">
@@ -344,8 +341,8 @@ function ActivityTab({ user }: { user: any }) {
             <p className="text-2xl font-bold text-primary-dark">22.8kg CO<sub>2</sub></p>
           </div>
           <div className="bg-white rounded-full p-2 shadow-sm">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">5</span>
+            <div className="w-12 h-12 flex items-center justify-center">
+              <span className="text-3xl">🌿</span> {/* 캐릭터 이모지로 변경 */}
             </div>
           </div>
         </div>
@@ -416,57 +413,126 @@ function ActivityTab({ user }: { user: any }) {
             </div>
           </>
         ) : (
-          // 주간 탄소중립 추이 차트
-          <div className="pt-2">
-            <p className="text-sm text-gray-500 mb-4 text-center">이번 주 일별 탄소 절감량 (kg)</p>
-            <div className="flex items-end justify-between h-48 px-2">
-              {weeklyData.map((item) => {
-                // 각 막대의 높이를 직접 계산 (최소 15px, 최대 컨테이너 높이의 90%)
-                let barHeight;
-                switch(item.day) {
-                  case "월": barHeight = "30%"; break;
-                  case "화": barHeight = "50%"; break;
-                  case "수": barHeight = "20%"; break;
-                  case "목": barHeight = "70%"; break;
-                  case "금": barHeight = "40%"; break;
-                  case "토": barHeight = "90%"; break;
-                  case "일": barHeight = "25%"; break;
-                  default: barHeight = "20%";
-                }
-                
-                return (
-                  <div key={item.day} className="flex flex-col items-center w-1/7">
-                    <div 
-                      className="w-10 rounded-t-md transition-all duration-500 ease-in-out shadow-md"
-                      style={{ 
-                        height: barHeight,
-                        backgroundColor: '#34C759',
-                        border: '1px solid rgba(255,255,255,0.3)'
-                      }}
-                    ></div>
-                    <p className="text-xs mt-2 font-medium">{item.day}</p>
-                    <p className="text-xs text-gray-500">{item.value}kg</p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-100">
+          // 주간 탄소중립 추이 - 그래프 대신 인사이트 텍스트로 변경
+          <div className="pt-1">
+            <h3 className="text-xs font-medium text-gray-700 mb-2 text-center">지난 1주일 탄소절감 인사이트</h3>
+            
+            {/* 총 절감량 요약 - 크기 축소 */}
+            <div className="bg-green-50 p-3 rounded-xl mb-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">주간 총 절감량:</span>
-                <span className="text-sm font-bold text-primary">
+                <span className="text-xs font-medium text-gray-700">총 절감량</span>
+                <span className="text-lg font-bold text-primary">
                   {weeklyData.reduce((sum, item) => sum + item.value, 0).toFixed(1)}kg
                 </span>
               </div>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-600">일일 평균:</span>
-                <span className="text-sm font-medium text-primary">
-                  {(weeklyData.reduce((sum, item) => sum + item.value, 0) / 7).toFixed(1)}kg
+              <div className="flex justify-between items-center mt-0.5">
+                <span className="text-xs text-gray-600">전주 대비</span>
+                <span className="text-xs font-medium text-green-600 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12 7a1 1 0 01-1 1H9a1 1 0 01-1-1V6a1 1 0 011-1h2a1 1 0 011 1v1zm-1 4a1 1 0 00-1 1v1a1 1 0 001 1h2a1 1 0 001-1v-1a1 1 0 00-1-1h-2z" clipRule="evenodd" />
+                    <path d="M5 5a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V8a3 3 0 00-3-3H5zm-1 9v-1a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1zm7 0v-1a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1h-2a1 1 0 01-1-1zm-7-4v-1a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1zm7 0v-1a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1h-2a1 1 0 01-1-1z" />
+                  </svg>
+                  +15%
                 </span>
               </div>
+            </div>
+            
+            {/* 주요 인사이트 - 크기 축소 */}
+            <div className="space-y-2">
+              {/* 최고 활동일 */}
+              <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                <div className="flex items-start">
+                  <div className="bg-primary bg-opacity-10 p-1.5 rounded-lg mr-2">
+                    <span className="text-primary text-base">🏆</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-800">최고 활동일</h4>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      <span className="font-medium">토요일</span>에 <span className="font-medium">1.8kg</span>의 탄소를 절감했어요.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 주요 활동 */}
+              <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                <div className="flex items-start">
+                  <div className="bg-blue-50 p-1.5 rounded-lg mr-2">
+                    <span className="text-blue-500 text-base">🚲</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-800">주요 활동</h4>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      <span className="font-medium">대중교통 이용</span>이 전체 절감량의 <span className="font-medium">35%</span>를 차지했어요.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 개선 기회 */}
+              <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                <div className="flex items-start">
+                  <div className="bg-yellow-50 p-1.5 rounded-lg mr-2">
+                    <span className="text-yellow-500 text-base">💡</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-800">개선 기회</h4>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      <span className="font-medium">수요일</span>에 활동이 가장 적었어요. 
+                      평일에 텀블러 사용을 늘려보세요.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* 다음 주 목표 제안 - 크기 축소 */}
+            <div className="mt-3 bg-primary bg-opacity-5 p-2 rounded-lg border border-primary border-opacity-20">
+              <h4 className="text-xs font-medium text-primary mb-1 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                다음 주 목표 제안
+              </h4>
+              <ul className="text-xs text-gray-700 space-y-0.5">
+                <li className="flex items-start">
+                  <span className="text-primary mr-1">•</span>
+                  <span>주 3회 이상 대중교통 이용하기</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary mr-1">•</span>
+                  <span>텀블러 사용 횟수 20% 늘리기</span>
+                </li>
+              </ul>
             </div>
           </div>
         )}
       </div>
+
+      {/* 탄소 절감 추세 분석 섹션 제거 */}
+      {/* <div className="mt-6 p-3 bg-blue-50 rounded-lg">
+        <h4 className="text-sm font-medium text-blue-800 mb-2">탄소 절감 인사이트</h4>
+        <ul className="space-y-2">
+          <li className="flex items-start">
+            <span className="text-blue-500 mr-2">↗</span>
+            <p className="text-xs text-gray-700">
+              <span className="font-medium">꾸준한 성장:</span> 지난 4주 동안 매주 평균 12% 탄소 절감량이 증가했어요.
+            </p>
+          </li>
+          <li className="flex items-start">
+            <span className="text-green-500 mr-2">★</span>
+            <p className="text-xs text-gray-700">
+              <span className="font-medium">최고 활동:</span> 중고거래와 카풀 참여가 가장 큰 탄소 절감 효과를 보였어요.
+            </p>
+          </li>
+          <li className="flex items-start">
+            <span className="text-orange-500 mr-2">!</span>
+            <p className="text-xs text-gray-700">
+              <span className="font-medium">개선 기회:</span> 평일에 텀블러 사용을 늘리면 더 많은 탄소를 절감할 수 있어요.
+            </p>
+          </li>
+        </ul>
+      </div> */}
 
       {/* 뱃지 섹션 */}
       <div className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -616,31 +682,18 @@ function ActivityTab({ user }: { user: any }) {
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("activity"); // 'activity' 또는 'profile'
   const router = useRouter();
-  // 임시 사용자 상태 (실제로는 AuthContext에서 가져옴)
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, logout, isLoading } = useAuth();
   const [localLoading, setLocalLoading] = useState(true);
 
-  // 로그아웃 함수
-  const logout = async () => {
-    // 로그아웃 로직
-    setUser(null);
-    return Promise.resolve();
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/");
+    } catch (error) {
+      console.error("로그아웃 오류:", error);
+    }
   };
-
-  // 초기 로딩 시뮬레이션
-  useEffect(() => {
-    // 사용자 데이터 로드 시뮬레이션
-    setTimeout(() => {
-      setUser({
-        nickname: "시너지",
-        email: "user@example.com",
-        school: "한밭대학교",
-        grade: "1학년"
-      });
-      setIsLoading(false);
-    }, 1000);
-  }, []);
 
   // 초기 로딩 후 localLoading 상태 업데이트
   useEffect(() => {
@@ -654,13 +707,8 @@ export default function Dashboard() {
     }
   }, [isLoading]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/");
-  };
-
   // 로딩 중일 때 로딩 화면 표시
-  if (localLoading) {
+  if (localLoading || isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
@@ -671,27 +719,27 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full">
       {/* 탭 네비게이션 */}
-      <div className="flex p-2 bg-white gap-2">
+      <div className="flex p-2 pt-1 pb-0 bg-white gap-2">
         <button
-          className={`flex-1 py-3 px-4 rounded-xl text-center flex items-center justify-center ${
+          className={`flex-1 py-3.5 px-3 rounded-xl text-center flex items-center justify-center ${
             activeTab === "activity" ? "bg-primary text-white" : "bg-white text-gray-700"
           }`}
           onClick={() => setActiveTab("activity")}
         >
-          <div className="flex items-center justify-center">
-            <FaChartBar className="mr-2" />
-            <span>나의 탄소중립 활동</span>
+          <div className="flex items-center justify-center whitespace-nowrap">
+            <FaChartBar className="mr-1.5" />
+            <span className="text-sm font-medium">탄소중립 활동</span>
           </div>
         </button>
         <button
-          className={`flex-1 py-3 px-4 rounded-xl text-center flex items-center justify-center ${
+          className={`flex-1 py-3.5 px-3 rounded-xl text-center flex items-center justify-center ${
             activeTab === "profile" ? "bg-primary text-white" : "bg-white text-gray-700"
           }`}
           onClick={() => setActiveTab("profile")}
         >
           <div className="flex items-center justify-center">
-            <FaUser className="mr-2" />
-            <span>내 정보</span>
+            <FaUser className="mr-1.5" />
+            <span className="text-sm font-medium">내 정보</span>
           </div>
         </button>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FaInfoCircle, FaComment, FaFileAlt } from "react-icons/fa";
+import { FaFileAlt, FaInfoCircle, FaComment, FaTimes } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -9,11 +9,41 @@ import { ChatMessage } from "@/lib/openai";
 
 // 캐릭터 성장 단계 정보
 const CHARACTER_STAGES = [
-  { level: 1, name: "새싹", description: "탄소중립 여정의 시작", requiredPoints: 0 },
-  { level: 2, name: "어린 대나무", description: "성장 중인 대나무", requiredPoints: 50 },
-  { level: 3, name: "튼튼한 대나무", description: "건강하게 자란 대나무", requiredPoints: 150 },
-  { level: 4, name: "대나무 숲", description: "주변에 영향을 주는 대나무", requiredPoints: 300 },
-  { level: 5, name: "대나무 마스터", description: "탄소중립의 상징", requiredPoints: 500 },
+  { 
+    level: 1, 
+    name: "새싹", 
+    description: "탄소중립 여정의 시작", 
+    requiredPoints: 0,
+    image: "🌱" // 새싹 이모지
+  },
+  { 
+    level: 2, 
+    name: "어린 대나무", 
+    description: "성장 중인 대나무", 
+    requiredPoints: 50,
+    image: "🎋" // 어린 대나무 이모지
+  },
+  { 
+    level: 3, 
+    name: "튼튼한 대나무", 
+    description: "건강하게 자란 대나무", 
+    requiredPoints: 150,
+    image: "🌿" // 튼튼한 대나무 이모지
+  },
+  { 
+    level: 4, 
+    name: "대나무 숲", 
+    description: "주변에 영향을 주는 대나무", 
+    requiredPoints: 300,
+    image: "🌲" // 대나무 숲 이모지
+  },
+  { 
+    level: 5, 
+    name: "대나무 마스터", 
+    description: "탄소중립의 상징", 
+    requiredPoints: 500,
+    image: "🌳" // 대나무 마스터 이모지
+  },
 ];
 
 // 활동 결과 목업 데이터
@@ -55,6 +85,7 @@ export default function CharacterPage() {
   const [showChatbot, setShowChatbot] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [showStats, setShowStats] = useState(false); // 활동 실적 모달 표시 여부
 
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -146,7 +177,7 @@ export default function CharacterPage() {
         <div className="flex space-x-2">
           <button
             className="text-white p-2 rounded-full"
-            onClick={() => router.push("/character/stats")}
+            onClick={() => setShowStats(true)} // 여기만 수정: 활동 실적 모달 표시
           >
             <FaFileAlt className="text-xl" />
           </button>
@@ -172,14 +203,31 @@ export default function CharacterPage() {
             {CHARACTER_STAGES.map((stage) => (
               <div
                 key={stage.level}
-                className={`p-2 rounded ${currentStage.level >= stage.level ? 'bg-primary-light' : 'bg-gray-100'}`}
+                className={`p-2 rounded ${
+                  currentStage.level >= stage.level 
+                    ? 'bg-primary-light' 
+                    : 'bg-gray-100'
+                }`}
               >
-                <p className="font-medium">
-                  Lv.{stage.level} {stage.name}
-                  {currentStage.level === stage.level && " (현재)"}
-                </p>
-                <p className="text-xs text-gray-600">{stage.description}</p>
-                <p className="text-xs text-primary-dark">{stage.requiredPoints}+ 포인트</p>
+                <div className="flex items-center">
+                  <span className={`text-5xl mr-3 ${currentStage.level >= stage.level ? '' : 'filter blur-sm'}`}>
+                    {stage.image}
+                  </span>
+                  <div>
+                    <p className={`font-medium ${currentStage.level >= stage.level ? '' : 'filter blur-sm'}`}>
+                      Lv.{stage.level} {stage.name}
+                      {currentStage.level === stage.level && " (현재)"}
+                    </p>
+                    <p className={`text-xs text-primary-dark ${currentStage.level >= stage.level ? '' : 'filter blur-sm'}`}>
+                      {stage.requiredPoints}+ 포인트
+                    </p>
+                  </div>
+                </div>
+                {currentStage.level < stage.level && (
+                  <p className="text-xs text-gray-500 mt-1 ml-16">
+                    {stage.requiredPoints - currentPoints}포인트 더 모으면 볼 수 있어요
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -195,18 +243,19 @@ export default function CharacterPage() {
       <div className="flex-1 flex flex-col items-center p-4">
         {/* 캐릭터 이미지 */}
         <motion.div
-          className="w-48 h-48 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-8 mb-6"
+          className="w-56 h-56 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-8 mb-3"
           animate={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
           transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         >
           <div className="relative">
-            {/* 대나무 캐릭터 */}
-            <div className="w-8 h-20 bg-[#8B4513] rounded-md mx-auto"></div>
-            <div className="w-32 h-32 bg-primary rounded-full absolute -top-16 left-1/2 transform -translate-x-1/2"></div>
+            {/* 현재 레벨에 맞는 캐릭터 이미지 표시 */}
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-7xl">{currentStage.image}</span>
+            </div>
 
             {/* 챗봇 버튼 */}
             <motion.button
-              className="absolute -right-8 -bottom-4 bg-white p-2 rounded-full shadow-lg"
+              className="absolute -right-6 -bottom-8 bg-white p-2 rounded-full shadow-lg"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowChatbot(!showChatbot)}
@@ -216,18 +265,27 @@ export default function CharacterPage() {
           </div>
         </motion.div>
 
-        {/* 레벨 표시 */}
-        <p className="text-primary font-bold text-lg mb-2">
-          Lv.{currentStage.level} {currentStage.name}
-        </p>
+        {/* 레벨과 진행 바를 하나의 컴팩트한 컨테이너로 */}
+        <div className="w-full max-w-xs">
+          {/* 레벨 표시 */}
+          <p className="text-primary font-bold text-center mb-1">
+            Lv.{currentStage.level} {currentStage.name}
+          </p>
 
-        {/* 진행 바 */}
-        <div className="w-full max-w-xs mb-2">
-          <div className="w-full bg-gray-200 rounded-full h-4">
+          {/* 진행 바 */}
+          <div className="w-full bg-gray-200 rounded-full h-3 mb-1">
             <div
-              className="bg-primary h-4 rounded-full transition-all duration-1000 ease-out"
+              className="bg-primary h-3 rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${progressPercentage}%` }}
             ></div>
+          </div>
+          
+          {/* 포인트 정보 */}
+          <div className="flex justify-between items-center mb-6">
+            <p className="text-xs text-gray-500">{currentPoints}P</p>
+            {nextStage && (
+              <p className="text-xs text-gray-500">다음: {nextStage.requiredPoints}P</p>
+            )}
           </div>
         </div>
 
@@ -357,6 +415,94 @@ export default function CharacterPage() {
             </button>
           </div>
         </motion.div>
+      )}
+
+      {/* 활동 실적 모달 */}
+      {showStats && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 flex items-center justify-center p-4" onClick={() => setShowStats(false)}>
+          <div className="bg-white rounded-xl w-full max-w-sm p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800">활동 실적</h2>
+              <button onClick={() => setShowStats(false)}>
+                <FaTimes className="text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <h3 className="font-medium text-gray-700 mb-2">누적 활동</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">총 활동 기간</span>
+                    <span className="text-sm font-medium text-primary-dark">87일</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">연속 활동</span>
+                    <span className="text-sm font-medium text-primary-dark">12일 🔥</span>
+                  </div>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">도보 이용</span>
+                    <span className="text-sm font-medium text-primary-dark">32회 (25.5kg)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">텀블러 사용</span>
+                    <span className="text-sm font-medium text-primary-dark">25회 (12.3kg)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">전자영수증</span>
+                    <span className="text-sm font-medium text-primary-dark">18회 (3.2kg)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">다회용기</span>
+                    <span className="text-sm font-medium text-primary-dark">12회 (8.7kg)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">대중교통 이용</span>
+                    <span className="text-sm font-medium text-primary-dark">45회 (36.2kg)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">분리수거</span>
+                    <span className="text-sm font-medium text-primary-dark">28회 (14.8kg)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">에너지 절약</span>
+                    <span className="text-sm font-medium text-primary-dark">15회 (15.7kg)</span>
+                  </div>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700">총 활동 횟수</span>
+                    <span className="font-medium text-primary-dark">175회</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-700">총 절감량</span>
+                    <span className="font-bold text-primary">116.4kg CO₂</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-primary-light rounded-lg p-3">
+                <h3 className="font-medium text-primary-dark mb-2">환경 기여도</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-700">나무 심기 효과</span>
+                    <span className="text-sm font-medium text-primary-dark">5.8그루</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-700">자동차 주행 감소</span>
+                    <span className="text-sm font-medium text-primary-dark">약 580km</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-700">전체 사용자 중 순위</span>
+                    <span className="text-sm font-medium text-primary-dark">상위 15%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
