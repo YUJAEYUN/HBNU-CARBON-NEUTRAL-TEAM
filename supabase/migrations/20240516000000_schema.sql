@@ -1,3 +1,14 @@
+-- 기존 테이블 삭제
+DROP TABLE IF EXISTS public.timetable_classes;
+DROP TABLE IF EXISTS public.timetables;
+DROP TABLE IF EXISTS public.comments;
+DROP TABLE IF EXISTS public.post_images;
+DROP TABLE IF EXISTS public.posts;
+DROP TABLE IF EXISTS public.user_activities;
+DROP TABLE IF EXISTS public.character_stages;
+DROP TABLE IF EXISTS public.activity_types;
+DROP TABLE IF EXISTS public.profiles;
+
 -- 사용자 테이블 (Supabase Auth와 연동)
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
@@ -40,6 +51,31 @@ CREATE TABLE IF NOT EXISTS public.character_stages (
     required_points INTEGER NOT NULL,
     image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 시간표 테이블 생성
+CREATE TABLE IF NOT EXISTS public.timetables (
+    id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    semester TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 시간표 수업 테이블 생성
+CREATE TABLE IF NOT EXISTS public.timetable_classes (
+    id SERIAL PRIMARY KEY,
+    timetable_id INTEGER REFERENCES public.timetables(id) ON DELETE CASCADE,
+    subject TEXT NOT NULL,
+    location TEXT,
+    day TEXT NOT NULL,
+    start_hour INTEGER NOT NULL,
+    end_hour INTEGER NOT NULL,
+    color TEXT DEFAULT '#9FC5E8',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 커뮤니티 게시글 테이블
