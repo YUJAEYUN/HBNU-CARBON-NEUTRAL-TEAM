@@ -317,9 +317,9 @@ export default function CarpoolPage() {
 
       {/* 카풀 등록 모달 */}
       {showRegistrationForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <motion.div
-            className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-lg w-[375px] max-h-[700px] overflow-y-auto"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -525,12 +525,14 @@ export default function CarpoolPage() {
               </div>
 
               {/* 제출 버튼 */}
-              <button
-                type="submit"
-                className="w-full bg-primary text-white py-3 rounded-lg font-medium shadow-sm"
-              >
-                카풀 등록하기
-              </button>
+              <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-3 w-full">
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-white py-3 rounded-lg font-medium shadow-sm"
+                >
+                  카풀 등록하기
+                </button>
+              </div>
             </form>
           </motion.div>
         </div>
@@ -757,7 +759,7 @@ export default function CarpoolPage() {
       </div>
 
       {/* 하단 정보 */}
-      <div className="mt-auto">
+      <div className="fixed bottom-[76px] left-1/2 transform -translate-x-1/2 w-full max-w-[375px]">
         <div className="bg-gray-100 p-3 text-center text-xs text-gray-500">
           다음 수업 · 환경공학 (공학관 201호)
         </div>

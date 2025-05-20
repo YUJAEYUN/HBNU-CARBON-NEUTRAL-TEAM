@@ -1,11 +1,13 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FaFileAlt, FaInfoCircle, FaComment, FaTimes } from "react-icons/fa";
+import { FaInfoCircle, FaComment, FaFileAlt, FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { ChatMessage } from "@/lib/openai";
+import axiosInstance from "@/lib/axios";
+import { useVoiceStore } from "@/store/voiceStore";
 
 // 캐릭터 성장 단계 정보
 const CHARACTER_STAGES = [
@@ -83,16 +85,32 @@ export default function CharacterPage() {
   const { isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
+  const [showVoiceChat, setShowVoiceChat] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "monthly">("daily");
   const [showStats, setShowStats] = useState(false); // 활동 실적 모달 표시 여부
 
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "안녕하세요! 오늘 어떤 친환경 활동을 하셨나요?" }
+    { role: "assistant", content: "안녕하세요! 저는 탄소중립을 도와주는 대나무예요 🌱 오늘은 어떤 친환경 활동을 하셨나요? 작은 실천도 정말 소중해요!" }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Zustand 스토어에서 음성 인식 관련 상태와 함수 가져오기
+  const {
+    isListening,
+    isSpeaking,
+    voiceMode,
+    recognizedText,
+    initialize,
+    startVoiceRecognition,
+    stopVoiceRecognition,
+    stopSpeakingVoice: handleStopSpeaking, // 이름 변경하여 사용
+    setVoiceMode,
+    setRecognizedText, // 인식된 텍스트 설정 함수 추가
+    speakMessage
+  } = useVoiceStore();
 
   // 채팅창이 열릴 때마다 스크롤을 아래로 이동
   useEffect(() => {
@@ -100,6 +118,116 @@ export default function CharacterPage() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [showChatbot, chatMessages]);
+
+  // 음성 인식 초기화 (컴포넌트 마운트 시 한 번만 실행)
+  useEffect(() => {
+    initialize();
+
+    // 컴포넌트 언마운트 시 정리는 필요 없음 (Zustand에서 관리)
+  }, [initialize]);
+
+  // 새 메시지가 추가될 때 TTS로 읽기
+  useEffect(() => {
+    // 마지막 메시지가 어시스턴트의 메시지이고, 음성 모드가 활성화되어 있을 때만 TTS 실행
+    const lastMessage = chatMessages[chatMessages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant' && voiceMode) {
+      speakMessage(lastMessage.content);
+    }
+  }, [chatMessages, voiceMode, speakMessage]);
+
+  // 챗봇 메시지 전송 처리 (useCallback으로 감싸서 의존성 문제 해결)
+  const handleSendMessage = useCallback(async (messageText?: string) => {
+    const textToSend = messageText || chatMessage;
+
+    if (textToSend.trim()) {
+      try {
+        // 사용자 메시지 추가
+        const userMessage: ChatMessage = { role: "user", content: textToSend };
+        const updatedMessages = [...chatMessages, userMessage];
+        setChatMessages(updatedMessages);
+        setChatMessage("");
+        setChatLoading(true);
+
+        // axiosInstance를 사용한 API 호출
+        const response = await axiosInstance.post("/api/chat", {
+          messages: updatedMessages
+        });
+
+        // 응답 메시지 추가
+        if (response.data.message) {
+          setChatMessages([...updatedMessages, response.data.message]);
+        }
+      } catch (error) {
+        console.error("채팅 오류:", error);
+        // 오류 메시지 추가
+        setChatMessages([
+          ...chatMessages,
+          { role: "assistant", content: "죄송합니다. 대화 처리 중 오류가 발생했습니다." }
+        ]);
+      } finally {
+        setChatLoading(false);
+      }
+    }
+  }, [chatMessage, chatMessages, setChatMessages, setChatMessage, setChatLoading]);
+
+  // 음성 인식 토글 핸들러
+  const handleVoiceToggle = useCallback(() => {
+    if (isListening) {
+      // 음성 인식 중지 및 텍스트 전송
+      const text = stopVoiceRecognition();
+      if (text && text.trim()) {
+        // [en] 태그 제거하고 음성입력 태그 추가
+        const cleanText = text.replace('[en] ', '');
+
+        // 영어로 인식된 경우 표시 (짧은 접두사 사용)
+        const isEnglish = text.includes('[en]');
+        // 토큰 수를 줄이기 위해 접두사를 최소화
+        const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
+
+        // 메시지 전송 (토큰 수를 줄이기 위해 접두사 최소화)
+        handleSendMessage(`${messagePrefix}${cleanText}`);
+      }
+    } else {
+      // 음성 인식 시작 전 상태 표시
+      setChatLoading(true);
+
+      // 인식된 텍스트 초기화
+      setRecognizedText('');
+
+      // 음성 인식 시작 (약간의 지연으로 UI 업데이트 시간 확보)
+      setTimeout(() => {
+        startVoiceRecognition();
+        setChatLoading(false);
+      }, 100);
+    }
+  }, [isListening, startVoiceRecognition, stopVoiceRecognition, handleSendMessage, setChatLoading, setRecognizedText]);
+
+  // 음성 대화창 열기 시 음성 모드 활성화
+  useEffect(() => {
+    if (showVoiceChat) {
+      setVoiceMode(true);
+    }
+  }, [showVoiceChat, setVoiceMode]);
+
+  // 음성 대화창 닫기 시 음성 인식 중지
+  useEffect(() => {
+    // 음성 대화창이 닫힐 때만 실행
+    if (!showVoiceChat && isListening) {
+      const text = stopVoiceRecognition();
+      if (text && text.trim()) {
+        // [en] 태그 제거하고 음성입력 태그 추가
+        const cleanText = text.replace('[en] ', '');
+
+        // 영어로 인식된 경우 표시 (짧은 접두사 사용)
+        const isEnglish = text.includes('[en]');
+        // 토큰 수를 줄이기 위해 접두사를 최소화
+        const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
+
+        // 메시지 전송 (토큰 수를 줄이기 위해 접두사 최소화)
+        handleSendMessage(`${messagePrefix}${cleanText}`);
+      }
+    }
+  }, [showVoiceChat, isListening, stopVoiceRecognition, handleSendMessage]);
 
   // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
   const currentPoints = 180;
@@ -125,49 +253,6 @@ export default function CharacterPage() {
   if (isLoading) {
     return <LoadingScreen />;
   }
-
-  // 챗봇 메시지 전송 처리
-  const handleSendMessage = async () => {
-    if (chatMessage.trim()) {
-      try {
-        // 사용자 메시지 추가
-        const userMessage: ChatMessage = { role: "user", content: chatMessage };
-        const updatedMessages = [...chatMessages, userMessage];
-        setChatMessages(updatedMessages);
-        setChatMessage("");
-        setChatLoading(true);
-
-        // API 호출
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: updatedMessages }),
-        });
-
-        if (!response.ok) {
-          throw new Error("API 응답 오류");
-        }
-
-        const data = await response.json();
-
-        // 응답 메시지 추가
-        if (data.message) {
-          setChatMessages([...updatedMessages, data.message]);
-        }
-      } catch (error) {
-        console.error("채팅 오류:", error);
-        // 오류 메시지 추가
-        setChatMessages([
-          ...chatMessages,
-          { role: "assistant", content: "죄송합니다. 대화 처리 중 오류가 발생했습니다." }
-        ]);
-      } finally {
-        setChatLoading(false);
-      }
-    }
-  };
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">
@@ -253,14 +338,30 @@ export default function CharacterPage() {
               <span className="text-7xl">{currentStage.image}</span>
             </div>
 
-            {/* 챗봇 버튼 */}
+            {/* 텍스트 챗봇 버튼 */}
             <motion.button
               className="absolute -right-6 -bottom-8 bg-white p-2 rounded-full shadow-lg"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => setShowChatbot(!showChatbot)}
+              onClick={() => {
+                setShowChatbot(!showChatbot);
+                if (showVoiceChat) setShowVoiceChat(false);
+              }}
             >
               <FaComment className="text-primary text-xl" />
+            </motion.button>
+
+            {/* 음성 챗봇 버튼 */}
+            <motion.button
+              className="absolute -left-8 -bottom-4 bg-white p-2 rounded-full shadow-lg"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                setShowVoiceChat(!showVoiceChat);
+                if (showChatbot) setShowChatbot(false);
+              }}
+            >
+              <FaMicrophone className={`text-xl ${voiceMode ? 'text-green-500' : 'text-blue-500'}`} />
             </motion.button>
           </div>
         </motion.div>
@@ -347,7 +448,7 @@ export default function CharacterPage() {
         </motion.div>
       </div>
 
-      {/* 챗봇 대화창 */}
+      {/* 텍스트 챗봇 대화창 */}
       {showChatbot && (
         <motion.div
           className="fixed bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 max-w-[375px] mx-auto"
@@ -371,6 +472,11 @@ export default function CharacterPage() {
             {chatMessages.map((msg, idx) => {
               // 고유한 ID 생성 (메시지 내용과 인덱스 조합)
               const messageId = `${msg.role}-${msg.content.substring(0, 10)}-${idx}`;
+              // 음성 입력 태그 제거 (모든 종류의 음성 입력 태그 처리)
+              const displayContent = msg.content
+                .replace('🎤 ', '')
+                .replace('🇺🇸 ', '');
+
               return (
                 <div
                   key={messageId}
@@ -380,7 +486,7 @@ export default function CharacterPage() {
                       : 'bg-gray-100 ml-auto'
                   }`}
                 >
-                  <p className="text-sm">{msg.content}</p>
+                  <p className="text-sm">{displayContent}</p>
                 </div>
               );
             })}
@@ -402,13 +508,15 @@ export default function CharacterPage() {
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               disabled={chatLoading}
             />
+
+            {/* 메시지 전송 버튼 */}
             <button
               className={`p-2 rounded-r-lg ${
                 chatLoading
                   ? 'bg-gray-400 text-white'
                   : 'bg-primary text-white'
               }`}
-              onClick={handleSendMessage}
+              onClick={() => handleSendMessage()}
               disabled={chatLoading}
             >
               전송
@@ -417,92 +525,121 @@ export default function CharacterPage() {
         </motion.div>
       )}
 
-      {/* 활동 실적 모달 */}
-      {showStats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 flex items-center justify-center p-4" onClick={() => setShowStats(false)}>
-          <div className="bg-white rounded-xl w-full max-w-sm p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-800">활동 실적</h2>
-              <button onClick={() => setShowStats(false)}>
-                <FaTimes className="text-gray-500" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <h3 className="font-medium text-gray-700 mb-2">누적 활동</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">총 활동 기간</span>
-                    <span className="text-sm font-medium text-primary-dark">87일</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">연속 활동</span>
-                    <span className="text-sm font-medium text-primary-dark">12일 🔥</span>
-                  </div>
-                  <div className="border-t border-gray-200 my-2"></div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">도보 이용</span>
-                    <span className="text-sm font-medium text-primary-dark">32회 (25.5kg)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">텀블러 사용</span>
-                    <span className="text-sm font-medium text-primary-dark">25회 (12.3kg)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">전자영수증</span>
-                    <span className="text-sm font-medium text-primary-dark">18회 (3.2kg)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">다회용기</span>
-                    <span className="text-sm font-medium text-primary-dark">12회 (8.7kg)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">대중교통 이용</span>
-                    <span className="text-sm font-medium text-primary-dark">45회 (36.2kg)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">분리수거</span>
-                    <span className="text-sm font-medium text-primary-dark">28회 (14.8kg)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">에너지 절약</span>
-                    <span className="text-sm font-medium text-primary-dark">15회 (15.7kg)</span>
-                  </div>
-                  <div className="border-t border-gray-200 my-2"></div>
-                  
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-700">총 활동 횟수</span>
-                    <span className="font-medium text-primary-dark">175회</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-700">총 절감량</span>
-                    <span className="font-bold text-primary">116.4kg CO₂</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-primary-light rounded-lg p-3">
-                <h3 className="font-medium text-primary-dark mb-2">환경 기여도</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-700">나무 심기 효과</span>
-                    <span className="text-sm font-medium text-primary-dark">5.8그루</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-700">자동차 주행 감소</span>
-                    <span className="text-sm font-medium text-primary-dark">약 580km</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-700">전체 사용자 중 순위</span>
-                    <span className="text-sm font-medium text-primary-dark">상위 15%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* 음성 챗봇 대화창 */}
+      {showVoiceChat && (
+        <motion.div
+          className="fixed bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 max-w-[375px] mx-auto"
+          initial={{ y: 300 }}
+          animate={{ y: 0 }}
+          exit={{ y: 300 }}
+        >
+          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+            <p className="font-bold text-primary-dark">대나무와 음성으로 대화하기</p>
+            <button
+              className="text-gray-500"
+              onClick={() => setShowVoiceChat(false)}
+            >
+              닫기
+            </button>
           </div>
-        </div>
+          <div className="h-64 p-3 overflow-y-auto">
+            {/* 음성 인식 상태 표시 - 제거 (하단에 표시) */}
+
+            {/* 음성 출력 상태 표시 */}
+            {isSpeaking && (
+              <div className="mb-4 p-2 bg-green-100 text-green-800 rounded-lg text-center text-sm flex justify-between items-center">
+                <span>🔊 대나무가 말하고 있어요...</span>
+                <button
+                  className="bg-red-500 text-white rounded-full p-1 text-xs"
+                  onClick={handleStopSpeaking}
+                  title="음성 출력 중지"
+                >
+                  <FaVolumeMute />
+                </button>
+              </div>
+            )}
+
+            {chatMessages.map((msg, idx) => {
+              // 고유한 ID 생성 (메시지 내용과 인덱스 조합)
+              const messageId = `voice-${msg.role}-${msg.content.substring(0, 10)}-${idx}`;
+              // 음성 입력 태그 제거 (모든 종류의 음성 입력 태그 처리)
+              const displayContent = msg.content
+                .replace('🎤 ', '')
+                .replace('🇺🇸 ', '');
+
+              return (
+                <div
+                  key={messageId}
+                  className={`p-2 rounded-lg mb-2 max-w-[80%] ${
+                    msg.role === 'assistant'
+                      ? 'bg-primary-light mr-auto'
+                      : 'bg-gray-100 ml-auto'
+                  }`}
+                >
+                  {/* 음성으로 읽기 버튼 (어시스턴트 메시지에만 표시) */}
+                  {msg.role === 'assistant' && !isSpeaking && (
+                    <button
+                      className="float-right ml-2 text-xs text-gray-500 hover:text-gray-700"
+                      onClick={() => {
+                        speakMessage(msg.content);
+                      }}
+                      title="음성으로 듣기"
+                    >
+                      <FaVolumeUp />
+                    </button>
+                  )}
+                  <p className="text-sm">{displayContent}</p>
+                </div>
+              );
+            })}
+            {chatLoading && (
+              <div className="bg-primary-light p-2 rounded-lg mb-2 max-w-[80%] flex">
+                <div className="w-2 h-2 bg-primary rounded-full mr-1 animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full mr-1 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            )}
+          </div>
+          <div className="p-3 border-t border-gray-200 flex justify-center items-center">
+            {/* 인식된 텍스트 표시 (인식 중일 때만) */}
+            {isListening && recognizedText && (
+              <div className="flex-1 text-center text-sm text-gray-600 mx-2 max-w-[70%] overflow-hidden">
+                <div className="animate-typing whitespace-nowrap overflow-hidden">
+                  {recognizedText.includes('[en]') ?
+                    <span className="text-blue-500">{recognizedText.replace('[en] ', '')}</span> :
+                    recognizedText}
+                </div>
+              </div>
+            )}
+
+            {/* 음성 인식 상태 표시 (인식 중이지만 텍스트가 없을 때) */}
+            {isListening && !recognizedText && (
+              <div className="flex-1 text-center text-sm text-gray-500 mx-2">
+                <span className="animate-pulse inline-block mr-1">●</span>
+                {recognizedText.includes('[en]')
+                  ? '영어로 인식 중...'
+                  : '말씀해주세요...'}
+              </div>
+            )}
+
+            {/* 음성 인식 토글 버튼 */}
+            <button
+              className={`p-4 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-blue-500'} text-white shadow-md transition-all duration-300 hover:scale-105`}
+              onClick={handleVoiceToggle}
+              disabled={chatLoading || isSpeaking}
+              title={isListening ? "음성 인식 중지 및 전송" : "음성 인식 시작"}
+            >
+              {isListening ? <FaMicrophoneSlash className="text-2xl" /> : <FaMicrophone className="text-2xl" />}
+            </button>
+
+            {/* 음성 인식 안내 (인식 중이 아닐 때) */}
+            {!isListening && (
+              <div className="flex-1 text-center text-xs text-gray-500 mx-2">
+                버튼을 눌러 대화를 시작하세요
+              </div>
+            )}
+          </div>
+        </motion.div>
       )}
     </div>
   );
