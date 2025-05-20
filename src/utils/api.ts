@@ -1,6 +1,8 @@
 // src/utils/api.ts
 // FastAPI 백엔드와 통신하기 위한 유틸리티 함수들
 
+import { CreateCertificationRequest, CreateCertificationResponse, CertificationType, CERTIFICATION_TYPE_INFO } from '@/types/certification';
+
 // API 기본 URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 // 파이썬 백엔드 API URL
@@ -85,53 +87,33 @@ export interface CertificationAnalysisResult {
 }
 
 /**
- * 이미지를 FastAPI 백엔드로 업로드하여 분석하는 함수
+ * 이미지를 분석하는 함수 (데모 버전)
  * @param imageFile 분석할 이미지 파일
  * @returns 분석 결과
  */
 export async function analyzeImage(imageFile: File): Promise<CertificationAnalysisResult> {
   try {
-    // FormData 객체 생성
-    const formData = new FormData();
-    formData.append('file', imageFile);
+    // 데모 버전에서는 실제 이미지 분석 대신 성공 응답 반환
+    // 실제 구현에서는 백엔드 API 호출로 대체
 
-    // FastAPI 백엔드 엔드포인트로 이미지 전송
-    const response = await fetch(`${PYTHON_API_URL}/analyze-image`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Accept': 'application/json',
-      },
-      mode: 'cors',
-    });
-
-    if (!response.ok) {
-      throw new Error(`서버 오류: ${response.status}`);
+    // 이미지 파일 크기 확인 (최소 유효성 검사)
+    if (imageFile.size === 0) {
+      throw new Error('유효하지 않은 이미지 파일입니다.');
     }
 
-    const data = await response.json();
-
-    // 서버 응답 형식 확인 및 변환
-    if (data.labels && Array.isArray(data.labels)) {
-      // 라벨 정보를 기반으로 인증 타입 결정
-      const certType = determineCertificationType(data.labels);
-
-      return {
-        success: true,
-        certification_type: certType.type,
-        carbon_reduction: certType.carbonReduction,
-        points: certType.points,
-        message: "이미지 분석에 성공했습니다.",
-        details: {
-          detected_labels: data.labels.map((label: any) => ({
-            name: label.description,
-            confidence: label.score
-          }))
-        }
-      };
+    // 이미지 타입 확인
+    if (!imageFile.type.startsWith('image/')) {
+      throw new Error('이미지 파일만 업로드 가능합니다.');
     }
 
-    return data;
+    // 이미지 처리 시간을 시뮬레이션하기 위한 지연
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    return {
+      success: true,
+      message: "이미지가 성공적으로 분석되었습니다.",
+      // 실제 분석 결과는 사용하지 않고 선택한 카테고리 정보를 사용할 예정
+    };
   } catch (error) {
     console.error('이미지 분석 오류:', error);
     return {
@@ -265,4 +247,80 @@ function determineCertificationType(labels: any[]): { type: string; carbonReduct
 
   // 기본값 (기타)
   return { type: 'other', carbonReduction: 0.10, points: 10 };
+}
+
+/**
+ * 인증 추가 함수
+ *
+ * @param certificationData 인증 데이터
+ * @param userId 사용자 ID (선택 사항)
+ * @returns 인증 추가 결과
+ */
+export async function createCertification(
+  certificationData: CreateCertificationRequest,
+  userId?: string
+): Promise<CreateCertificationResponse> {
+  try {
+    // 현재 날짜와 시간 생성
+    const now = new Date();
+    const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const time = now.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+
+    // 인증 유형에 따른 탄소 절감량과 포인트 계산
+    const typeInfo = CERTIFICATION_TYPE_INFO[certificationData.type];
+    const carbonReduction = typeInfo.carbonReduction;
+    const points = typeInfo.points;
+
+    // 로컬 데모 기능을 위한 모의 응답
+    // 실제 구현에서는 API 호출로 대체
+    return {
+      success: true,
+      certification: {
+        id: Date.now(), // 임시 ID
+        type: certificationData.type,
+        title: certificationData.title,
+        description: certificationData.description,
+        date,
+        time,
+        timeAgo: '방금 전',
+        location: certificationData.location,
+        carbonReduction,
+        verified: true,
+        status: '인증됨',
+        points,
+        userId: userId || 'demo-user'
+      },
+      message: '인증이 성공적으로 등록되었습니다.'
+    };
+
+    // 실제 API 호출 코드 (백엔드 구현 시 주석 해제)
+    /*
+    const response = await fetch(`${API_BASE_URL}/certifications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        ...certificationData,
+        userId: userId || 'demo-user',
+        date,
+        time
+      }),
+      mode: 'cors',
+    });
+
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+
+    return await response.json();
+    */
+  } catch (error) {
+    console.error('인증 추가 오류:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : '인증 추가 중 오류가 발생했습니다.'
+    };
+  }
 }
