@@ -2,29 +2,31 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
-import { ChatMessage } from "@/lib/openai";
 import axiosInstance from "@/lib/axios";
 import { useVoiceStore } from "@/store/voiceStore";
 import { CHARACTER_STAGES, ActivityTabType } from "./constants";
+import { ChatMessage, TextMessage } from "@/types/chat";
 
 // 컴포넌트 임포트
 import CharacterHeader from "./components/CharacterHeader";
 import CharacterInfo from "./components/CharacterInfo";
 import CharacterDisplay from "./components/CharacterDisplay";
 import ActivityTabs from "./components/ActivityTabs";
-import TextChatbot from "./components/TextChatbot";
-import VoiceChatbot from "./components/VoiceChatbot";
+import UnifiedChatbot from "./components/UnifiedChatbot";
 
 export default function CharacterPage() {
   const { isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
-  const [showVoiceChat, setShowVoiceChat] = useState(false);
   const [activeTab, setActiveTab] = useState<ActivityTabType>("daily");
 
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "안녕하세요! 저는 탄소중립을 도와주는 대나무예요 🌱 오늘은 어떤 친환경 활동을 하셨나요? 작은 실천도 정말 소중해요!" }
+    {
+      role: "assistant",
+      type: "text",
+      content: "안녕하세요! 저는 탄소중립을 도와주는 대나무예요 🌱 오늘은 어떤 친환경 활동을 하셨나요? 작은 실천도 정말 소중해요!"
+    }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
 
@@ -50,9 +52,9 @@ export default function CharacterPage() {
 
   // 새 메시지가 추가될 때 TTS로 읽기
   useEffect(() => {
-    // 마지막 메시지가 어시스턴트의 메시지이고, 음성 모드가 활성화되어 있을 때만 TTS 실행
+    // 마지막 메시지가 어시스턴트의 텍스트 메시지이고, 음성 모드가 활성화되어 있을 때만 TTS 실행
     const lastMessage = chatMessages[chatMessages.length - 1];
-    if (lastMessage && lastMessage.role === 'assistant' && voiceMode) {
+    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.type === 'text' && voiceMode) {
       speakMessage(lastMessage.content);
     }
   }, [chatMessages, voiceMode, speakMessage]);
@@ -63,7 +65,11 @@ export default function CharacterPage() {
 
     try {
       // 사용자 메시지 추가
-      const userMessage: ChatMessage = { role: "user", content: messageText };
+      const userMessage: TextMessage = {
+        role: "user",
+        type: "text",
+        content: messageText
+      };
       const updatedMessages = [...chatMessages, userMessage];
       setChatMessages(updatedMessages);
       setChatLoading(true);
@@ -75,14 +81,23 @@ export default function CharacterPage() {
 
       // 응답 메시지 추가
       if (response.data.message) {
-        setChatMessages([...updatedMessages, response.data.message]);
+        // API 응답에 type 필드가 없을 경우 추가
+        const assistantMessage = response.data.message.type
+          ? response.data.message
+          : { ...response.data.message, type: "text" };
+
+        setChatMessages([...updatedMessages, assistantMessage]);
       }
     } catch (error) {
       console.error("채팅 오류:", error);
       // 오류 메시지 추가
       setChatMessages([
         ...chatMessages,
-        { role: "assistant", content: "죄송합니다. 대화 처리 중 오류가 발생했습니다." }
+        {
+          role: "assistant",
+          type: "text",
+          content: "죄송합니다. 대화 처리 중 오류가 발생했습니다."
+        }
       ]);
     } finally {
       setChatLoading(false);
@@ -121,17 +136,17 @@ export default function CharacterPage() {
     }
   }, [isListening, startVoiceRecognition, stopVoiceRecognition, handleSendMessage, setChatLoading, setRecognizedText]);
 
-  // 음성 대화창 열기 시 음성 모드 활성화
+  // 챗봇 창 열기 시 음성 모드 활성화
   useEffect(() => {
-    if (showVoiceChat) {
+    if (showChatbot) {
       setVoiceMode(true);
     }
-  }, [showVoiceChat, setVoiceMode]);
+  }, [showChatbot, setVoiceMode]);
 
-  // 음성 대화창 닫기 시 음성 인식 중지
+  // 챗봇 창 닫기 시 음성 인식 중지
   useEffect(() => {
-    // 음성 대화창이 닫힐 때만 실행
-    if (!showVoiceChat && isListening) {
+    // 챗봇 창이 닫힐 때만 실행
+    if (!showChatbot && isListening) {
       const text = stopVoiceRecognition();
       if (text && text.trim()) {
         // [en] 태그 제거하고 음성입력 태그 추가
@@ -146,7 +161,7 @@ export default function CharacterPage() {
         handleSendMessage(`${messagePrefix}${cleanText}`);
       }
     }
-  }, [showVoiceChat, isListening, stopVoiceRecognition, handleSendMessage]);
+  }, [showChatbot, isListening, stopVoiceRecognition, handleSendMessage]);
 
   // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
   const currentPoints = 180;
@@ -198,15 +213,7 @@ export default function CharacterPage() {
           nextStage={nextStage}
           progressPercentage={progressPercentage}
           pointsToNextLevel={pointsToNextLevel}
-          voiceMode={voiceMode}
-          onChatbotToggle={() => {
-            setShowChatbot(!showChatbot);
-            if (showVoiceChat) setShowVoiceChat(false);
-          }}
-          onVoiceChatToggle={() => {
-            setShowVoiceChat(!showVoiceChat);
-            if (showChatbot) setShowChatbot(false);
-          }}
+          onChatbotToggle={() => setShowChatbot(!showChatbot)}
         />
 
         {/* 활동량 표시 탭 */}
@@ -216,27 +223,22 @@ export default function CharacterPage() {
         />
       </div>
 
-      {/* 텍스트 챗봇 대화창 */}
+      {/* 통합된 챗봇 대화창 */}
       {showChatbot && (
-        <TextChatbot
+        <UnifiedChatbot
           chatMessages={chatMessages}
           setChatMessages={setChatMessages}
-          onClose={() => setShowChatbot(false)}
-        />
-      )}
-
-      {/* 음성 챗봇 대화창 */}
-      {showVoiceChat && (
-        <VoiceChatbot
-          chatMessages={chatMessages}
           chatLoading={chatLoading}
+          setChatLoading={setChatLoading}
           isListening={isListening}
           isSpeaking={isSpeaking}
+          voiceMode={voiceMode}
           recognizedText={recognizedText}
           handleVoiceToggle={handleVoiceToggle}
           handleStopSpeaking={handleStopSpeaking}
           speakMessage={speakMessage}
-          onClose={() => setShowVoiceChat(false)}
+          handleSendMessage={handleSendMessage}
+          onClose={() => setShowChatbot(false)}
         />
       )}
     </div>

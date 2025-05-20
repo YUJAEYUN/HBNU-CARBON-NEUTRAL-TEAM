@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { FaComment, FaMicrophone } from "react-icons/fa";
+import { FaComment } from "react-icons/fa";
 import { CharacterStage } from "../constants";
 
 interface CharacterDisplayProps {
@@ -9,9 +9,7 @@ interface CharacterDisplayProps {
   nextStage: CharacterStage | null;
   progressPercentage: number;
   pointsToNextLevel: number;
-  voiceMode: boolean;
   onChatbotToggle: () => void;
-  onVoiceChatToggle: () => void;
 }
 
 export default function CharacterDisplay({
@@ -20,9 +18,7 @@ export default function CharacterDisplay({
   nextStage,
   progressPercentage,
   pointsToNextLevel,
-  voiceMode,
-  onChatbotToggle,
-  onVoiceChatToggle
+  onChatbotToggle
 }: CharacterDisplayProps) {
   return (
     <>
@@ -38,24 +34,14 @@ export default function CharacterDisplay({
             <span className="text-7xl">{currentStage.image}</span>
           </div>
 
-          {/* 텍스트 챗봇 버튼 */}
+          {/* 통합 챗봇 버튼 */}
           <motion.button
-            className="absolute -right-6 -bottom-8 bg-white p-2 rounded-full shadow-lg"
+            className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 bg-white p-3 rounded-full shadow-lg"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onChatbotToggle}
           >
             <FaComment className="text-primary text-xl" />
-          </motion.button>
-
-          {/* 음성 챗봇 버튼 */}
-          <motion.button
-            className="absolute -left-8 -bottom-4 bg-white p-2 rounded-full shadow-lg"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onVoiceChatToggle}
-          >
-            <FaMicrophone className={`text-xl ${voiceMode ? 'text-green-500' : 'text-blue-500'}`} />
           </motion.button>
         </div>
       </motion.div>
@@ -74,7 +60,7 @@ export default function CharacterDisplay({
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>
-        
+
         {/* 포인트 정보 */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-xs text-gray-500">{currentPoints}P</p>
