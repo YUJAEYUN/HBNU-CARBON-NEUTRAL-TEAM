@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaThumbsUp, FaTrophy, FaTimes, FaPlus } from "react-icons/fa";
+import { FaThumbsUp, FaTrophy, FaTimes, FaPlus, FaSearch, FaEnvelope } from "react-icons/fa";
 
 const CommunityPage = () => {
   const router = useRouter();
@@ -35,6 +35,34 @@ const CommunityPage = () => {
   
   // 사용자 소속 학과 (실제로는 API에서 가져올 수 있음)
   const userDepartment = "에너지시스템공학과";
+
+  // 현재 시간 상태 추가
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [updateTime, setUpdateTime] = useState<string>("06:00"); // 포인트 반영 기준 시간
+
+  // 현재 시간 설정을 위한 useEffect 추가
+  useEffect(() => {
+    // 현재 시간 포맷팅 함수
+    const formatCurrentTime = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    };
+
+    // 초기 시간 설정
+    setCurrentTime(formatCurrentTime());
+
+    // 1분마다 시간 업데이트
+    const interval = setInterval(() => {
+      setCurrentTime(formatCurrentTime());
+    }, 60000); // 1분마다 업데이트
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // 검색어 상태 추가
+  const [searchTerm, setSearchTerm] = useState("");
 
   // 게시글 데이터 타입 정의
   interface Post {
@@ -146,11 +174,41 @@ const CommunityPage = () => {
       // 로컬 스토리지에서 게시글 데이터 가져오기
       const storedPostsString = localStorage.getItem('community_posts');
       
+      // 기본 게시글 좋아요 상태 불러오기
+      const defaultPostsLikesString = localStorage.getItem('default_posts_likes');
+      let defaultPostsLikes = [];
+      
+      if (defaultPostsLikesString) {
+        try {
+          defaultPostsLikes = JSON.parse(defaultPostsLikesString);
+          if (!Array.isArray(defaultPostsLikes)) {
+            defaultPostsLikes = [];
+          }
+        } catch (error) {
+          console.error("기본 게시글 좋아요 상태 파싱 오류:", error);
+          defaultPostsLikes = [];
+        }
+      }
+      
+      // 기본 게시글에 좋아요 상태 적용
+      const updatedPosts = posts.map(post => {
+        const likeInfo = defaultPostsLikes.find(p => p.id === post.id);
+        if (likeInfo) {
+          return {
+            ...post,
+            likes: likeInfo.likes,
+            likedByCurrentUser: likeInfo.likedByCurrentUser
+          };
+        }
+        return post;
+      });
+      
+      // 로컬 스토리지에 저장된 게시글이 있으면 추가
       if (storedPostsString) {
         const storedPosts = JSON.parse(storedPostsString);
         if (Array.isArray(storedPosts) && storedPosts.length > 0) {
           // 기존 게시글과 저장된 게시글 합치기
-          const allPosts = [...posts, ...storedPosts];
+          const allPosts = [...updatedPosts, ...storedPosts];
           
           // ID 중복 제거 (ID가 같은 경우 로컬 스토리지의 게시글 우선)
           const uniquePosts = allPosts.reduce<Post[]>((acc, current) => {
@@ -164,7 +222,13 @@ const CommunityPage = () => {
           
           setPosts(uniquePosts);
           console.log("로컬 스토리지에서 게시글을 불러왔습니다:", uniquePosts.length);
+        } else {
+          // 저장된 게시글이 없으면 기본 게시글만 업데이트
+          setPosts(updatedPosts);
         }
+      } else {
+        // 저장된 게시글이 없으면 기본 게시글만 업데이트
+        setPosts(updatedPosts);
       }
       
       // 초기화 완료 표시
@@ -174,7 +238,7 @@ const CommunityPage = () => {
       // 오류가 발생해도 초기화 완료 표시
       initializedRef.current = true;
     }
-  }, [posts]); // posts를 의존성 배열에 추가
+  }, []);  // 의존성 배열에서 posts 제거
 
   // 단과대 랭킹 데이터
   const collegeRankings = [
@@ -223,12 +287,23 @@ const CommunityPage = () => {
   };
 
   // 현재 탭에 해당하는 게시글만 필터링
-  const filteredPosts = posts.filter(post => 
-    activeTab === "자유" ? post.category === "자유" :
-    activeTab === "비밀" ? post.category === "비밀" :
-    activeTab === "랭킹" ? post.isEvent === true :
-    true // 기본값 (모든 게시글 표시)
-  );
+  const filteredPosts = posts.filter(post => {
+    // 탭 필터링
+    const matchesTab = 
+      activeTab === "전체" ? true :
+      activeTab === "자유" ? post.category === "자유" :
+      activeTab === "비밀" ? post.category === "비밀" :
+      activeTab === "랭킹" ? post.isEvent === true :
+      true; // 기본값 (모든 게시글 표시)
+    
+    // 검색어 필터링
+    const matchesSearch = searchTerm === "" || 
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.author.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesTab && matchesSearch;
+  });
 
   // 학과별 위치 계산 (트리에 사과 배치)
   const getDepartmentPositions = () => {
@@ -480,7 +555,7 @@ const CommunityPage = () => {
         top: `${3 + Math.random() * 25}%`, // 더 넓은 범위로 분산 (3% ~ 28%)
         left: `${-20 + Math.random() * 40}%`, // 시작 위치를 -20% ~ 20% 사이로 랜덤하게 설정
         size: 50 + Math.random() * 40, // 50px ~ 90px
-        speed: 60 + Math.random() * 40, // 60초 ~ 100초 (더 빠르게)
+        speed: 40 + Math.random() * 30, // 40초 ~ 70초 (더 빠르게)
         delay: Math.random() * 5, // 지연 시간 줄임 (0 ~ 5초)
         zIndex: Math.random() > 0.5 ? 1 : 2
       };
@@ -491,32 +566,51 @@ const CommunityPage = () => {
         // 구름이 6개를 초과하면 가장 오래된 구름 제거
         return updated.length > 6 ? updated.slice(-6) : updated;
       });
-    }, 20000); // 20초마다 새 구름 생성 (더 자주 생성)
+    }, 15000); // 20초에서 15초로 줄여 더 자주 생성
     
     return () => clearInterval(cloudInterval);
   }, []);
+
+  // 이벤트 팝업 상태 추가
+  const [showEventPopup, setShowEventPopup] = useState(false);
+
+  // 이벤트 배너 클릭 핸들러
+  const handleEventBannerClick = () => {
+    setShowEventPopup(true);
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[50px]">
       {/* 상단 헤더 */}
       <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md">
         <h1 className="text-2xl font-bold text-white">커뮤니티</h1>
+        <button 
+          className="text-white p-2 rounded-full hover:bg-primary-dark transition-colors"
+          onClick={() => router.push("/messages")}
+          aria-label="쪽지함"
+        >
+          <FaEnvelope className="text-xl" />
+        </button>
       </div>
 
       {/* 이벤트 배너 */}
       {showEventBanner && (
         <motion.div
-          className="bg-primary-light p-3 flex justify-between items-center"
+          className="bg-primary-light p-3 flex justify-between items-center cursor-pointer"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          onClick={handleEventBannerClick}
         >
           <p className="text-sm text-primary-dark">
-            <span className="font-bold">🎉 5월 환경 챌린지</span> - 참여하고 에코 포인트 받으세요!
+            <span className="font-bold">🎉 5월 환경 챌린지</span> - 학과 대항전에 참여하세요!
           </p>
           <button
             className="text-xs text-gray-500"
-            onClick={() => setShowEventBanner(false)}
+            onClick={(e) => {
+              e.stopPropagation(); // 이벤트 버블링 방지
+              setShowEventBanner(false);
+            }}
           >
             닫기
           </button>
@@ -545,6 +639,28 @@ const CommunityPage = () => {
             )}
           </button>
         ))}
+      </div>
+
+      {/* 검색 바 추가 */}
+      <div className="bg-white p-3 border-b">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="제목, 내용, 작성자 검색"
+            className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          {searchTerm && (
+            <button
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              onClick={() => setSearchTerm("")}
+            >
+              <FaTimes />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 글쓰기 버튼 (랭킹 탭이 아닐 때만 표시) */}
@@ -711,6 +827,108 @@ const CommunityPage = () => {
                     priority
                   />
                   
+                  {/* 바닥에 꽃 이미지 추가 */}
+                  <div className="absolute bottom-[10%] left-0 w-full h-[25%] z-1">
+                    {/* 왼쪽 꽃 */}
+                    <div className="absolute bottom-[20%] left-[5%]">
+                      <Image
+                        src="/flower1.png"
+                        alt="꽃1"
+                        width={60}
+                        height={40}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 중앙 꽃 */}
+                    <div className="absolute bottom-[15%] left-[40%]">
+                      <Image
+                        src="/flower2.png"
+                        alt="꽃2"
+                        width={50}
+                        height={35}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 오른쪽 꽃 */}
+                    <div className="absolute bottom-[25%] right-[10%]">
+                      <Image
+                        src="/flower1.png"
+                        alt="꽃1"
+                        width={55}
+                        height={38}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 추가 꽃 */}
+                    <div className="absolute bottom-[10%] right-[30%]">
+                      <Image
+                        src="/flower2.png"
+                        alt="꽃2"
+                        width={45}
+                        height={30}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 추가 꽃 */}
+                    <div className="absolute bottom-[30%] left-[20%]">
+                      <Image
+                        src="/flower2.png"
+                        alt="꽃2"
+                        width={40}
+                        height={28}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 추가 꽃 */}
+                    <div className="absolute bottom-[5%] left-[70%]">
+                      <Image
+                        src="/flower1.png"
+                        alt="꽃1"
+                        width={50}
+                        height={35}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 추가 꽃 (새로 추가) */}
+                    <div className="absolute bottom-[35%] left-[55%]">
+                      <Image
+                        src="/flower1.png"
+                        alt="꽃1"
+                        width={45}
+                        height={30}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 추가 꽃 (새로 추가) */}
+                    <div className="absolute bottom-[40%] right-[45%]">
+                      <Image
+                        src="/flower2.png"
+                        alt="꽃2"
+                        width={55}
+                        height={38}
+                        className="object-contain"
+                      />
+                    </div>
+                    
+                    {/* 추가 꽃 (새로 추가) */}
+                    <div className="absolute bottom-[20%] right-[60%]">
+                      <Image
+                        src="/flower1.png"
+                        alt="꽃1"
+                        width={40}
+                        height={28}
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                  
                   {/* 움직이는 구름 애니메이션 */}
                   <div className="absolute inset-0 overflow-hidden">
                     {clouds.map((cloud) => (
@@ -722,17 +940,29 @@ const CommunityPage = () => {
                           left: cloud.left,
                           zIndex: cloud.zIndex
                         }}
-                        initial={{ x: "0%" }}
-                        animate={{ x: "120%" }}
-                        transition={{
-                          duration: cloud.speed,
-                          delay: cloud.delay,
-                          repeat: 0, // 반복 없음
-                          ease: "linear"
+                        initial={{ x: "0%", y: 0 }}
+                        animate={{ 
+                          x: "120%",
+                          y: [0, -10, 5, -5, 0, 10, -5, 0] // 위아래로 살짝 움직이는 애니메이션 추가
                         }}
+                        transition={{
+                          x: {
+                            duration: cloud.speed * 0.7,
+                            delay: cloud.delay,
+                            ease: "linear"
+                          },
+                          y: {
+                            duration: cloud.speed * 0.3, // 위아래 움직임은 더 빠르게
+                            repeat: Infinity,
+                            repeatType: "mirror",
+                            ease: "easeInOut"
+                          }
+                        }}
+                        exit={{ opacity: 0 }}
                         onAnimationComplete={() => {
-                          // 애니메이션이 완료된 구름 제거
-                          setClouds(prev => prev.filter(c => c.id !== cloud.id));
+                          setTimeout(() => {
+                            setClouds(prev => prev.filter(c => c.id !== cloud.id));
+                          }, 300);
                         }}
                       >
                         <Image
@@ -740,7 +970,7 @@ const CommunityPage = () => {
                           alt="구름"
                           width={cloud.size}
                           height={cloud.size / 2}
-                          className="object-contain opacity-70" // 투명도 약간 증가
+                          className="object-contain opacity-70"
                         />
                       </motion.div>
                     ))}
@@ -748,7 +978,14 @@ const CommunityPage = () => {
                 </div>
                 
                 <div className="relative z-10 p-3">
-                  <h3 className="text-base font-bold text-primary-dark mb-3 bg-white p-2 rounded-lg inline-block">학과별 에코 포인트</h3>
+                  <h3 className="text-base font-bold text-primary-dark mb-1 bg-white p-2 rounded-lg shadow-sm inline-flex items-center">
+                    학과별 에코 포인트
+                  </h3>
+                  
+                  <div className="text-xs text-gray-600 mb-3 bg-white bg-opacity-90 px-2 py-1 rounded-full shadow-sm border border-gray-100 inline-flex items-center">
+                    <span className="mr-1 text-primary">🕒</span>
+                    <span className="font-medium">현재:</span> {currentTime} <span className="mx-1 text-gray-300">|</span> <span className="font-medium">갱신:</span> {updateTime}
+                  </div>
                   
                   {/* 큰 나무 이미지 - 학교 표현 - 더 크게 수정 */}
                   <div className="w-[300px] h-[400px] mx-auto relative">
@@ -969,27 +1206,6 @@ const CommunityPage = () => {
                       }}
                     >
                       <div className="flex items-center">
-                        {/* 세 가지 사과 이미지를 모두 표시 */}
-                        <div className="flex -space-x-2 mr-2">
-                          <Image
-                            src="/apple/apple.png"
-                            alt="빨간 사과"
-                            width={20}
-                            height={20}
-                          />
-                          <Image
-                            src="/yellow_apple.png"
-                            alt="노란 사과"
-                            width={18}
-                            height={18}
-                          />
-                          <Image
-                            src="/green_apple.png"
-                            alt="녹색 사과"
-                            width={16}
-                            height={16}
-                          />
-                        </div>
                         <p className="text-sm font-medium text-primary-dark">
                           사과를 클릭하여 랭킹을 확인하세요!
                         </p>
@@ -1291,7 +1507,7 @@ const CommunityPage = () => {
               {/* 쪼개진 사과 이미지 */}
               {showCuttingApple && (
                 <motion.div 
-                  className="relative w-[350px] h-[350px] md:w-[500px] md:h-[500px]"
+                  className="relative w-[280px] h-[280px] md:w-[500px] md:h-[500px]"
                   initial={{ scale: 0.2, opacity: 0 }}
                   animate={{ 
                     scale: 1, 
@@ -1304,12 +1520,25 @@ const CommunityPage = () => {
                     duration: 0.8
                   }}
                 >
-                  <Image
-                    src="/cutting_apple.png"
-                    alt="쪼개진 사과"
-                    fill
-                    className="object-contain"
-                  />
+                  {selectedDept && (() => {
+                    const dept = departmentRankings.find(d => d.id === selectedDept);
+                    if (!dept) return null;
+                    
+                    // 점수에 따라 다른 쪼개진 사과 이미지 선택
+                    const cuttingAppleImage = 
+                      dept.score >= 400 ? "/cutting_apple.png" : 
+                      dept.score >= 350 ? "/cutting_yellow_apple.png" : 
+                      "/cutting_green_apple.png";
+                    
+                    return (
+                      <Image
+                        src={cuttingAppleImage}
+                        alt="쪼개진 사과"
+                        fill
+                        className="object-contain"
+                      />
+                    );
+                  })()}
                   
                   {/* 랭킹 내용 - 사과 이미지 위에 직접 표시 */}
                   <AnimatePresence>
@@ -1323,14 +1552,14 @@ const CommunityPage = () => {
                         transition={{ duration: 0.5 }}
                       >
                         {/* 헤더 - 배경 있는 컨테이너 */}
-                        <div className="w-[200px] bg-white bg-opacity-80 rounded-t-lg p-2 shadow-md">
-                          <h3 className="text-base font-bold text-primary-dark text-center">
+                        <div className="w-[200px] md:w-[250px] bg-white bg-opacity-80 rounded-t-lg p-2 shadow-md">
+                          <h3 className="text-base md:text-lg font-bold text-primary-dark text-center">
                             {selectedDept && departmentRankings.find(d => d.id === selectedDept)?.name} 개인 랭킹
                           </h3>
                         </div>
                         
                         {/* 랭킹 목록 */}
-                        <div className="w-[200px] bg-white bg-opacity-80 p-2 rounded-b-lg shadow-md">
+                        <div className="w-[200px] md:w-[250px] bg-white bg-opacity-80 p-2 rounded-b-lg shadow-md">
                           {selectedDept && (() => {
                             const deptName = departmentRankings.find(d => d.id === selectedDept)?.name || "";
                             const deptUsers = getDepartmentUserRankings(deptName);
@@ -1338,7 +1567,7 @@ const CommunityPage = () => {
                             // 해당 학과의 사용자가 없는 경우 메시지 표시
                             if (deptUsers.length === 0) {
                               return (
-                                <div className="text-center py-2 text-gray-500 text-sm">
+                                <div className="text-center py-2 text-gray-500 text-sm md:text-base">
                                   이 학과의 개인 랭킹 데이터가 없습니다.
                                 </div>
                               );
@@ -1346,17 +1575,17 @@ const CommunityPage = () => {
                             
                             return deptUsers.map((user, index) => (
                               <div key={user.id} className="flex items-center py-1 border-b border-gray-100 last:border-0">
-                                <div className="w-5 h-5 flex items-center justify-center text-sm">
+                                <div className="w-6 h-6 flex items-center justify-center text-sm md:text-base">
                                   {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`}
                                 </div>
-                                <div className="w-5 h-5 flex items-center justify-center text-base">
+                                <div className="w-6 h-6 flex items-center justify-center text-base md:text-lg">
                                   {user.avatar}
                                 </div>
                                 <div className="ml-1 flex-1">
-                                  <div className="font-medium text-sm">{user.name}</div>
-                                  <div className="text-xs text-gray-500">{user.dept}</div>
+                                  <div className="font-medium text-sm md:text-base">{user.name}</div>
+                                  <div className="text-xs md:text-sm text-gray-500">{user.dept}</div>
                                 </div>
-                                <div className="font-bold text-primary-dark text-sm">{user.score}점</div>
+                                <div className="font-bold text-primary-dark text-sm md:text-base">{user.score}점</div>
                               </div>
                             ));
                           })()}
@@ -1469,6 +1698,83 @@ const CommunityPage = () => {
           </motion.div>
         )}
       </AnimatePresence> */}
+      {/* 이벤트 팝업 */}
+      <AnimatePresence>
+        {showEventPopup && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowEventPopup(false)}
+          >
+            <motion.div
+              className="bg-white rounded-xl w-full max-w-md p-5"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-primary-dark flex items-center">
+                  <span className="text-2xl mr-2">🏆</span> 5월 환경 챌린지: 학과 대항전
+                </h2>
+                <button
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowEventPopup(false)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <div className="bg-primary-light p-3 rounded-lg mb-3">
+                  <p className="text-primary-dark font-medium">
+                    여러분의 환경 활동이 학과의 승리를 결정합니다!
+                  </p>
+                </div>
+                
+                <p className="text-gray-700 mb-3">
+                  5월 한 달 동안 진행되는 학과 대항전에 참여하여 여러분의 학과가 1등을 차지할 수 있도록 도와주세요.
+                </p>
+                
+                <h3 className="font-bold text-gray-800 mb-2">참여 방법</h3>
+                <ul className="list-disc pl-5 mb-3 text-gray-700 space-y-1">
+                  <li>환경 관련 활동을 하고 인증하기</li>
+                  <li>커뮤니티에 환경 활동 게시글 작성하기</li>
+                  <li>캠퍼스 내 분리수거 참여하기</li>
+                  <li>친환경 제품 사용 인증하기</li>
+                  <li>대중교통 이용 인증하기</li>
+                </ul>
+                
+                <h3 className="font-bold text-gray-800 mb-2">상품</h3>
+                <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                  <p className="font-medium text-gray-800 mb-1">🥇 1등 학과</p>
+                  <p className="text-gray-700 mb-2">학과 전체 에코 포인트 5,000점 + 친환경 텀블러 제공</p>
+                  
+                  <p className="font-medium text-gray-800 mb-1">🥈 2등 학과</p>
+                  <p className="text-gray-700 mb-2">학과 전체 에코 포인트 3,000점</p>
+                  
+                  <p className="font-medium text-gray-800 mb-1">🥉 3등 학과</p>
+                  <p className="text-gray-700">학과 전체 에코 포인트 1,000점</p>
+                </div>
+                
+                <p className="text-sm text-gray-500">
+                  * 대회 기간: 2023년 5월 1일 ~ 5월 31일<br />
+                  * 결과 발표: 2023년 6월 5일
+                </p>
+              </div>
+              
+              <button
+                className="w-full py-3 bg-primary text-white rounded-lg font-medium"
+                onClick={() => setShowEventPopup(false)}
+              >
+                확인
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

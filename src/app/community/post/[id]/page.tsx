@@ -17,6 +17,7 @@ interface Post {
   postType: "일반" | "환경활동"; // 게시글 타입 추가
   isEvent?: boolean;
   images?: string[];
+  likedByCurrentUser?: boolean; // 현재 사용자가 좋아요 눌렀는지 여부
 }
 
 interface Comment {
@@ -204,6 +205,31 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       // 기본 게시글 데이터
       let allPosts = [...POSTS]; 
       
+      // 기본 게시글 좋아요 상태 불러오기
+      const defaultPostsLikesString = localStorage.getItem('default_posts_likes');
+      if (defaultPostsLikesString) {
+        try {
+          const defaultPostsLikes = JSON.parse(defaultPostsLikesString);
+          if (Array.isArray(defaultPostsLikes)) {
+            // 기본 게시글에 좋아요 상태 적용
+            allPosts = allPosts.map(post => {
+              const likeInfo = defaultPostsLikes.find(p => p.id === post.id);
+              if (likeInfo) {
+                return {
+                  ...post,
+                  likes: likeInfo.likes,
+                  likedByCurrentUser: likeInfo.likedByCurrentUser
+                };
+              }
+              return post;
+            });
+            console.log("기본 게시글 좋아요 상태 적용:", defaultPostsLikes.length);
+          }
+        } catch (parseError) {
+          console.error("기본 게시글 좋아요 상태 파싱 오류:", parseError);
+        }
+      }
+      
       // 로컬 스토리지에 저장된 게시글 가져오기
       const storedPostsString = localStorage.getItem('community_posts');
       
@@ -228,19 +254,24 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       console.log("Found post:", foundPost);
       
       if (foundPost) {
+        // 로컬 스토리지에서 좋아요 상태 불러오기
+        const savedPostLike = localStorage.getItem(`post_like_${postId}`);
+        
+        // 좋아요 상태에 따라 게시글 객체 업데이트
+        if (savedPostLike === 'true') {
+          foundPost.likedByCurrentUser = true;
+          setIsLiked(true);
+        } else {
+          foundPost.likedByCurrentUser = false;
+        }
+        
         setPost(foundPost);
-        console.log("게시글 타입:", foundPost.postType); // 로그 추가
+        console.log("게시글 타입:", foundPost.postType, "좋아요 상태:", foundPost.likedByCurrentUser);
         
         // 해당 게시글의 댓글 가져오기
         const postComments = COMMENTS[postId] || [];
         console.log("Setting comments for post ID:", postId, postComments);
         setComments(postComments);
-        
-        // 로컬 스토리지에서 좋아요 상태 불러오기
-        const savedPostLike = localStorage.getItem(`post_like_${postId}`);
-        if (savedPostLike === 'true') {
-          setIsLiked(true);
-        }
         
         // 로컬 스토리지에서 댓글 좋아요 상태 불러오기
         const savedCommentLikes = localStorage.getItem(`comment_likes_${postId}`);
@@ -278,10 +309,66 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     localStorage.setItem(`post_like_${postId}`, newLikedState.toString());
     
     if (post) {
-      setPost({
+      // 게시글 객체에 좋아요 상태 저장 (새로운 필드 추가)
+      const updatedPost = {
         ...post,
-        likes: isLiked ? post.likes - 1 : post.likes + 1
-      });
+        likes: isLiked ? post.likes - 1 : post.likes + 1,
+        likedByCurrentUser: newLikedState
+      };
+      setPost(updatedPost);
+      
+      // 로컬 스토리지의 게시글 목록에서도 좋아요 수 업데이트
+      updatePostInLocalStorage(updatedPost);
+    }
+  };
+
+  // 로컬 스토리지의 게시글 정보 업데이트 함수
+  const updatePostInLocalStorage = (updatedPost: Post) => {
+    try {
+      // 로컬 스토리지에서 게시글 목록 가져오기
+      const storedPostsString = localStorage.getItem('community_posts');
+      let updated = false;
+      
+      if (storedPostsString) {
+        const storedPosts = JSON.parse(storedPostsString);
+        if (Array.isArray(storedPosts)) {
+          // 해당 게시글 찾아서 업데이트
+          const updatedPosts = storedPosts.map(p => {
+            if (p.id === updatedPost.id) {
+              updated = true;
+              return { ...p, likes: updatedPost.likes, likedByCurrentUser: updatedPost.likedByCurrentUser };
+            }
+            return p;
+          });
+          
+          // 업데이트된 게시글 목록 저장
+          localStorage.setItem('community_posts', JSON.stringify(updatedPosts));
+          console.log("게시글 좋아요 수가 로컬 스토리지에 업데이트되었습니다:", updatedPost.id, updatedPost.likes);
+        }
+      }
+      
+      // 기본 게시글 목록(POSTS)에 있는 경우도 처리
+      // 로컬 스토리지에서 업데이트되지 않은 경우 (기본 게시글인 경우)
+      if (!updated) {
+        // 기본 게시글 목록에서 해당 게시글 찾기
+        const defaultPostIndex = POSTS.findIndex(p => p.id === updatedPost.id);
+        if (defaultPostIndex !== -1) {
+          // 기본 게시글 업데이트 (메모리에만 반영)
+          POSTS[defaultPostIndex] = {
+            ...POSTS[defaultPostIndex],
+            likes: updatedPost.likes,
+            likedByCurrentUser: updatedPost.likedByCurrentUser
+          };
+          console.log("기본 게시글 좋아요 수가 업데이트되었습니다:", updatedPost.id, updatedPost.likes);
+          
+          // 기본 게시글 목록의 변경사항을 로컬 스토리지에 저장
+          localStorage.setItem('default_posts_likes', JSON.stringify(
+            POSTS.map(p => ({ id: p.id, likes: p.likes, likedByCurrentUser: p.likedByCurrentUser }))
+          ));
+        }
+      }
+    } catch (error) {
+      console.error("로컬 스토리지 업데이트 오류:", error);
     }
   };
 
