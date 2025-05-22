@@ -23,6 +23,11 @@ const NavBar = () => {
     }
   };
 
+  // 로그인하지 않은 상태에서는 네비게이션 바를 표시하지 않음
+  if (!isLoggedIn) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 flex justify-center w-full z-50">
       <div className="w-full max-w-[375px] relative">
@@ -66,13 +71,7 @@ const NavBar = () => {
           {/* 인증 버튼 */}
           <motion.button
             className={`flex flex-col items-center w-1/5 ${pathname.startsWith("/certification") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => {
-              if (isLoggedIn) {
-                router.push("/certification");
-              } else {
-                router.push("/auth/login");
-              }
-            }}
+            onClick={() => router.push("/certification")}
             whileTap={{ scale: 0.9 }}
           >
             <motion.div
@@ -88,13 +87,7 @@ const NavBar = () => {
           {/* 캐릭터 버튼 */}
           <motion.button
             className={`flex flex-col items-center w-1/5 ${pathname === "/character" || pathname.startsWith("/character") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => {
-              if (isLoggedIn) {
-                router.push("/character");
-              } else {
-                router.push("/auth/login");
-              }
-            }}
+            onClick={() => router.push("/character")}
             whileTap={{ scale: 0.9 }}
           >
             <motion.div
@@ -110,13 +103,7 @@ const NavBar = () => {
           {/* 마이 버튼 */}
           <motion.button
             className={`flex flex-col items-center w-1/5 ${pathname === "/dashboard" || pathname.startsWith("/dashboard") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => {
-              if (isLoggedIn) {
-                router.push("/dashboard");
-              } else {
-                router.push("/auth/login");
-              }
-            }}
+            onClick={() => router.push("/dashboard")}
             whileTap={{ scale: 0.9 }}
           >
             <motion.div

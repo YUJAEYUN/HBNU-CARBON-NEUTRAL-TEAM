@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-6 bg-black rounded-b-2xl z-50"></div>
 
             <div className="flex-grow overflow-y-auto">{children}</div>
-            <NavBar /> {/* 항상 네비게이션 바 표시 */}
+            <NavBar /> {/* 네비게이션 바는 Navbar 컴포넌트 내에서 로그인 상태에 따라 표시 여부 결정 */}
           </motion.div>
         </AuthProvider>
       </body>
