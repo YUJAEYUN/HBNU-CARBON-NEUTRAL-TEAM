@@ -14,12 +14,19 @@ import CharacterDisplay from "./components/CharacterDisplay";
 import ActivityTabs from "./components/ActivityTabs";
 import ChatInterface from "./components/ChatInterface";
 
+// 전역 타입 확장 (window.handleVoiceMessage 함수 정의)
+declare global {
+  interface Window {
+    handleVoiceMessage?: (text: string) => void;
+  }
+}
 
 export default function CharacterPage() {
   const { isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [activeTab, setActiveTab] = useState<ActivityTabType>("daily");
+
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -36,12 +43,11 @@ export default function CharacterPage() {
     isSpeaking,
     voiceMode,
     recognizedText,
+    recording,
     initialize,
-    startVoiceRecognition,
-    stopVoiceRecognition,
+    toggleVoiceRecognition,
     stopSpeakingVoice: handleStopSpeaking,
     setVoiceMode,
-    setRecognizedText,
     speakMessage
   } = useVoiceStore();
 
@@ -58,8 +64,6 @@ export default function CharacterPage() {
       speakMessage(lastMessage.content);
     }
   }, [chatMessages, voiceMode, speakMessage]);
-
-
 
   // 챗봇 메시지 전송 처리
   const handleSendMessage = useCallback(async (messageText: string) => {
@@ -104,40 +108,25 @@ export default function CharacterPage() {
     } finally {
       setChatLoading(false);
     }
-  }, [chatMessages, setChatMessages, setChatLoading]);
+  }, [chatMessages]);
 
   // 음성 인식 토글 핸들러
   const handleVoiceToggle = useCallback(() => {
-    if (isListening) {
-      // 음성 인식 중지
-      const text = stopVoiceRecognition();
-      if (text && text.trim()) {
-        // [en] 태그 제거하고 음성입력 태그 추가
-        const cleanText = text.replace('[en] ', '');
+    // 음성 인식 토글 (녹음 시작/중지)
+    toggleVoiceRecognition();
 
-        // 영어로 인식된 경우 표시 (짧은 접두사 사용)
-        const isEnglish = text.includes('[en]');
-        // 토큰 수를 줄이기 위해 접두사를 최소화
-        const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
-
-        // 인식된 텍스트를 입력창에 넣기 위해 UnifiedChatbot 컴포넌트로 전달
-        return `${messagePrefix}${cleanText}`;
-      }
-    } else {
-      // 음성 인식 시작 전 상태 표시
-      setChatLoading(true);
-
-      // 인식된 텍스트 초기화
-      setRecognizedText('');
-
-      // 음성 인식 시작 (약간의 지연으로 UI 업데이트 시간 확보)
-      setTimeout(() => {
-        startVoiceRecognition();
-        setChatLoading(false);
-      }, 100);
+    // 음성 메시지 처리 함수를 전역으로 등록
+    if (typeof window !== 'undefined') {
+      window.handleVoiceMessage = (text: string) => {
+        if (text && text.trim()) {
+          // 인식된 텍스트를 바로 메시지로 전송
+          handleSendMessage(text);
+        }
+      };
     }
+
     return ''; // 텍스트가 없는 경우 빈 문자열 반환
-  }, [isListening, startVoiceRecognition, stopVoiceRecognition, setChatLoading, setRecognizedText]);
+  }, [toggleVoiceRecognition, handleSendMessage]);
 
   // 챗봇 창 열기 시 음성 모드 활성화
   useEffect(() => {
@@ -149,11 +138,13 @@ export default function CharacterPage() {
   // 챗봇 창 닫기 시 음성 인식 중지 (텍스트 전송하지 않음)
   useEffect(() => {
     // 챗봇 창이 닫힐 때만 실행
-    if (!showChatbot && isListening) {
-      // 음성 인식 중지 (텍스트 전송하지 않음)
-      stopVoiceRecognition();
+    if (!showChatbot) {
+      // 음성 인식 중이면 중지
+      if (isListening || recording.isRecording) {
+        toggleVoiceRecognition();
+      }
     }
-  }, [showChatbot, isListening, stopVoiceRecognition]);
+  }, [showChatbot, isListening, recording, toggleVoiceRecognition]);
 
   // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
   const currentPoints = 180;

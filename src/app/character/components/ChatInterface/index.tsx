@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ChatMessage, TextMessage, ImageMessage } from "@/types/chat";
 import { useVoiceStore } from "@/store/voiceStore";
-import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import { FaVolumeUp, FaVolumeMute, FaMicrophone, FaMicrophoneAlt } from "react-icons/fa";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import ImageUpload from "./ImageUpload";
@@ -16,7 +16,7 @@ interface ChatInterfaceProps {
   isListening: boolean;
   isSpeaking: boolean;
   recognizedText: string;
-  handleVoiceToggle: () => string;
+  handleVoiceToggle: () => Promise<string> | string;
   handleStopSpeaking: () => void;
   speakMessage: (content: string) => void;
   handleSendMessage: (messageText: string) => void;
@@ -38,7 +38,13 @@ export default function ChatInterface({
   onClose
 }: ChatInterfaceProps) {
   const [showImageUpload, setShowImageUpload] = useState(false);
-  const { voiceEnabled, setVoiceEnabled } = useVoiceStore();
+  const {
+    voiceEnabled,
+    setVoiceEnabled,
+    useWhisperAPI,
+    setUseWhisperAPI,
+    toggleRecording
+  } = useVoiceStore();
 
   // 이미지 메시지 전송
   const handleSendImage = useCallback((imageUrl: string, caption: string) => {

@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
-import { FaMicrophone, FaMicrophoneSlash, FaImage } from "react-icons/fa";
+import { FaMicrophone, FaMicrophoneSlash, FaImage, FaMicrophoneAlt } from "react-icons/fa";
+import { useVoiceStore } from "@/store/voiceStore";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
-  onVoiceToggle: () => string; // 음성인식 결과를 반환하도록 변경
+  onVoiceToggle: () => Promise<string> | string; // 음성인식 결과를 반환하도록 변경
   onImageUpload: () => void;
   isListening: boolean;
   isLoading: boolean;
@@ -20,6 +21,7 @@ export default function ChatInput({
   recognizedText
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
+  const { useWhisperAPI, recording, isProcessingAudio, toggleRecording, stopRecording } = useVoiceStore();
 
   const handleSend = () => {
     if (!message.trim()) return;
@@ -36,7 +38,7 @@ export default function ChatInput({
   return (
     <div className="p-3 border-t border-gray-200">
       {/* 음성 인식 중일 때 인식된 텍스트 표시 */}
-      {isListening && (
+      {(isListening || recording.isRecording || isProcessingAudio) && (
         <div className="mb-2 text-center text-sm text-gray-600 overflow-hidden">
           {recognizedText ? (
             <div className="animate-typing whitespace-nowrap overflow-hidden">
@@ -47,7 +49,9 @@ export default function ChatInput({
           ) : (
             <div className="text-gray-500">
               <span className="animate-pulse inline-block mr-1">●</span>
-              말씀해주세요...
+              {useWhisperAPI ?
+                (recording.isRecording ? "녹음 중..." : isProcessingAudio ? "음성 처리 중..." : "Whisper API 준비 중...") :
+                "말씀해주세요..."}
             </div>
           )}
         </div>
@@ -63,7 +67,7 @@ export default function ChatInput({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={isLoading || isListening}
+          disabled={isLoading || isListening || recording.isRecording || isProcessingAudio}
         />
 
         {/* 이미지 업로드 버튼 */}
@@ -71,32 +75,47 @@ export default function ChatInput({
           className="p-2 text-gray-500 hover:text-gray-700"
           onClick={onImageUpload}
           title="이미지 업로드"
-          disabled={isLoading || isListening}
+          disabled={isLoading || isListening || recording.isRecording || isProcessingAudio}
         >
           <FaImage />
         </button>
 
         {/* 음성 버튼 */}
-        <button
-          className={`p-2 ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-500 hover:text-gray-700'}`}
-          onClick={() => {
-            // 음성인식 토글 후 결과 텍스트가 있으면 입력창에 설정
-            const recognizedText = onVoiceToggle();
-            if (recognizedText && !isListening) {
-              setMessage(recognizedText);
-            }
-          }}
-          disabled={isLoading}
-          title={isListening ? "음성 인식 중지" : "음성으로 대화하기"}
-        >
-          {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
-        </button>
+        {useWhisperAPI ? (
+          // Whisper API 사용 시 녹음 버튼
+          <button
+            className={`p-2 ${recording.isRecording ? 'text-red-500 animate-pulse' : isProcessingAudio ? 'text-yellow-500 animate-pulse' : 'text-green-500 hover:text-green-700'}`}
+            onClick={async () => {
+              // 음성 인식 토글 (녹음 시작/중지)
+              await onVoiceToggle();
+              // 결과는 자동으로 메시지로 전송되므로 입력창에 설정하지 않음
+            }}
+            disabled={isLoading || isProcessingAudio}
+            title={recording.isRecording ? "녹음 중지 및 변환" : isProcessingAudio ? "처리 중..." : "OpenAI Whisper로 음성 인식"}
+          >
+            {recording.isRecording ? <FaMicrophoneSlash /> : <FaMicrophoneAlt />}
+          </button>
+        ) : (
+          // 브라우저 Web Speech API 사용 시 기존 버튼
+          <button
+            className={`p-2 ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-500 hover:text-gray-700'}`}
+            onClick={async () => {
+              // 음성 인식 토글 (시작/중지)
+              await onVoiceToggle();
+              // 결과는 자동으로 메시지로 전송되므로 입력창에 설정하지 않음
+            }}
+            disabled={isLoading}
+            title={isListening ? "음성 인식 중지" : "음성으로 대화하기"}
+          >
+            {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
+          </button>
+        )}
 
         {/* 전송 버튼 */}
         <button
           className={`p-2 ${isLoading || !message.trim() ? 'text-gray-400' : 'text-primary hover:text-primary-dark'}`}
           onClick={handleSend}
-          disabled={isLoading || isListening || !message.trim()}
+          disabled={isLoading || isListening || recording.isRecording || isProcessingAudio || !message.trim()}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>

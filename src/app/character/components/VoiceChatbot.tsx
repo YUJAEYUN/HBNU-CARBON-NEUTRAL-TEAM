@@ -36,6 +36,50 @@ export default function VoiceChatbot({
     }
   }, [chatMessages]);
 
+  // 페이지 이동 감지 메시지 필터링 (콘솔 출력 가로채기)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 원래 console.log 메서드 저장
+    const originalConsoleLog = console.log;
+    const originalConsoleDebug = console.debug;
+
+    // console.log 재정의
+    console.log = function(...args) {
+      // 페이지 이동 감지 메시지 필터링
+      if (args[0] && typeof args[0] === 'string' &&
+          (args[0].includes('페이지 이동 감지') ||
+           args[0].includes('음성 인식 세션 종료'))) {
+        // 메시지 무시 (출력하지 않음)
+        return;
+      }
+
+      // 다른 메시지는 정상적으로 출력
+      originalConsoleLog.apply(console, args);
+    };
+
+    // console.debug 재정의
+    console.debug = function(...args) {
+      // 페이지 이동 감지 메시지 필터링
+      if (args[0] && typeof args[0] === 'string' &&
+          (args[0].includes('페이지 이동 감지') ||
+           args[0].includes('음성 인식 세션 종료'))) {
+        // 메시지 무시 (출력하지 않음)
+        return;
+      }
+
+      // 다른 메시지는 정상적으로 출력
+      originalConsoleDebug.apply(console, args);
+    };
+
+    // 정리 함수
+    return () => {
+      // 원래 console 메서드 복원
+      console.log = originalConsoleLog;
+      console.debug = originalConsoleDebug;
+    };
+  }, []);
+
   return (
     <motion.div
       className="fixed bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 max-w-[375px] mx-auto"
@@ -52,7 +96,7 @@ export default function VoiceChatbot({
           닫기
         </button>
       </div>
-      <div 
+      <div
         ref={chatContainerRef}
         className="h-64 p-3 overflow-y-auto"
       >
