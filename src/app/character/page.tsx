@@ -191,7 +191,7 @@ export default function CharacterPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[160px] overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full pb-[60px] overflow-y-auto">
       {/* 상단 헤더 */}
       <CharacterHeader
         onInfoClick={() => setShowInfo(!showInfo)}

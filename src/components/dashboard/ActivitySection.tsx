@@ -59,31 +59,31 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ user }) => {
     // 연속 활동일 계산
     const randomStreak = Math.floor(Math.random() * 20) + 5; // 5~24일 사이의 랜덤 값
     setStreakDays(randomStreak);
-    
+
     // 참여 시작일 이후 경과일 계산 - 100일로 고정
     setDaysSinceStart(100);
   }, []);
 
   return (
-    <div className="p-4 pb-20 overflow-y-auto h-full">
+    <div className="p-4 pb-16 overflow-y-auto h-full">
       {/* 통계 카드 */}
-      <StatsCard 
-        totalReduction={22.8} 
-        streakDays={streakDays} 
-        daysSinceStart={daysSinceStart} 
-        treesPlanted={2} 
+      <StatsCard
+        totalReduction={22.8}
+        streakDays={streakDays}
+        daysSinceStart={daysSinceStart}
+        treesPlanted={2}
       />
 
       {/* 분석 섹션 */}
-      <AnalysisSection 
-        activityAnalysis={activityAnalysis} 
-        weeklyData={weeklyData} 
+      <AnalysisSection
+        activityAnalysis={activityAnalysis}
+        weeklyData={weeklyData}
       />
 
       {/* 뱃지 섹션 */}
-      <BadgeSection 
-        badges={badges} 
-        categories={badgeCategories} 
+      <BadgeSection
+        badges={badges}
+        categories={badgeCategories}
       />
     </div>
   );

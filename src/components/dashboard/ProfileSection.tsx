@@ -22,7 +22,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
   const toggleAppSettings = () => setShowAppSettings(!showAppSettings);
 
   return (
-    <div className="p-4 pb-20">
+    <div className="p-4 pb-16">
       {/* 프로필 카드 - iOS 스타일 */}
       <div className="bg-white rounded-xl p-4 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
         <div className="flex items-center">
@@ -45,14 +45,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
 
       {/* 계정 관리 - iOS 스타일 */}
       <div className="bg-white rounded-xl p-4 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <button 
+        <button
           className="w-full flex justify-between items-center"
           onClick={toggleAccountSettings}
         >
           <h3 className="text-primary-dark font-bold">계정 관리</h3>
           <FaChevronRight className={`text-primary transition-transform duration-300 ${showAccountSettings ? 'transform rotate-90' : ''}`} />
         </button>
-        
+
         {showAccountSettings && (
           <div className="mt-4 space-y-3">
             <div className="border-b pb-3">
@@ -64,7 +64,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 </button>
               </div>
             </div>
-            
+
             <div className="border-b pb-3">
               <p className="text-sm text-gray-600 mb-1">캐릭터 별명</p>
               <div className="flex justify-between items-center">
@@ -74,7 +74,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 </button>
               </div>
             </div>
-            
+
             <div className="border-b pb-3">
               <p className="text-sm text-gray-600 mb-1">아이디(이메일)</p>
               <div className="flex justify-between items-center">
@@ -84,7 +84,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 </button>
               </div>
             </div>
-            
+
             <div>
               <p className="text-sm text-gray-600 mb-1">비밀번호</p>
               <div className="flex justify-between items-center">
@@ -100,14 +100,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
 
       {/* 고객 지원 - iOS 스타일 */}
       <div className="bg-white rounded-xl p-4 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <button 
+        <button
           className="w-full flex justify-between items-center"
           onClick={toggleCustomerSupport}
         >
           <h3 className="text-primary-dark font-bold">고객 지원</h3>
           <FaChevronRight className={`text-primary transition-transform duration-300 ${showCustomerSupport ? 'transform rotate-90' : ''}`} />
         </button>
-        
+
         {showCustomerSupport && (
           <div className="mt-4 space-y-3">
             <div className="border-b pb-3">
@@ -118,7 +118,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 </div>
               </div>
             </div>
-            
+
             <div className="border-b pb-3">
               <div className="flex justify-between items-center">
                 <div>
@@ -128,7 +128,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 <FaChevronRight className="text-gray-400" />
               </div>
             </div>
-            
+
             <div className="border-b pb-3">
               <div className="flex justify-between items-center">
                 <div>
@@ -138,7 +138,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 <FaChevronRight className="text-gray-400" />
               </div>
             </div>
-            
+
             <div className="border-b pb-3">
               <div className="flex justify-between items-center">
                 <div>
@@ -148,7 +148,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
                 <FaChevronRight className="text-gray-400" />
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between items-center">
                 <div>
@@ -164,14 +164,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
 
       {/* 앱 설정 - iOS 스타일 */}
       <div className="bg-white rounded-xl p-4 mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <button 
+        <button
           className="w-full flex justify-between items-center"
           onClick={toggleAppSettings}
         >
           <h3 className="text-primary-dark font-bold">앱 설정</h3>
           <FaChevronRight className={`text-primary transition-transform duration-300 ${showAppSettings ? 'transform rotate-90' : ''}`} />
         </button>
-        
+
         {showAppSettings && (
           <div className="mt-4 space-y-3">
             <div className="flex items-center justify-between">
@@ -203,14 +203,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user, handleLogout }) =
       {/* 친구 초대하기 - iOS 스타일 */}
       <div className="space-y-2">
         <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-          <button 
+          <button
             className="w-full p-4 flex justify-between items-center"
             onClick={toggleInviteFriends}
           >
             <h3 className="text-primary-dark font-bold">친구 초대하기</h3>
             <FaChevronRight className={`text-primary transition-transform duration-300 ${showInviteFriends ? 'transform rotate-90' : ''}`} />
           </button>
-          
+
           {showInviteFriends && (
             <div className="px-4 pb-4 pt-2 border-t border-gray-100">
               <button className="w-full mt-2 py-3 flex justify-between items-center hover:bg-primary-light rounded-lg px-3">

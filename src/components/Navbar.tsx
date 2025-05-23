@@ -30,7 +30,7 @@ const NavbarBackground = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  height: 5rem;
+  height: 4.5rem;
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(229, 231, 235, 0.8);
@@ -43,7 +43,7 @@ const NavButtonsContainer = styled.div`
   display: flex;
   justify-content: space-evenly;
   align-items: center;
-  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+  padding: 0.5rem 0.5rem 1rem 0.5rem;
 `;
 
 // 아이콘 애니메이션 설정

@@ -580,9 +580,9 @@ const CommunityPage = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[160px]">
-      {/* 상단 헤더 */}
-      <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md">
+    <div className="flex-1 flex flex-col h-full">
+      {/* 상단 헤더 - 고정 */}
+      <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md sticky top-0 z-50">
         <h1 className="text-2xl font-bold text-white">커뮤니티</h1>
         <button
           className="text-white p-2 rounded-full hover:bg-primary-dark transition-colors"
@@ -617,8 +617,8 @@ const CommunityPage = () => {
         </motion.div>
       )}
 
-      {/* 탭 메뉴 */}
-      <div className="flex bg-gray-100 p-2 space-x-2">
+      {/* 탭 메뉴 - 고정 */}
+      <div className="flex bg-gray-100 p-2 space-x-2 sticky top-[60px] z-40 shadow-sm">
         {["전체", "자유", "비밀", "랭킹"].map((tab) => (
           <button
             key={tab}
@@ -641,8 +641,8 @@ const CommunityPage = () => {
         ))}
       </div>
 
-      {/* 검색 바 추가 */}
-      <div className="bg-white p-3 border-b">
+      {/* 검색 바 추가 - 고정 */}
+      <div className="bg-white p-3 border-b sticky top-[112px] z-30 shadow-sm">
         <div className="relative">
           <input
             type="text"
@@ -663,9 +663,9 @@ const CommunityPage = () => {
         </div>
       </div>
 
-      {/* 글쓰기 버튼 (랭킹 탭이 아닐 때만 표시) */}
+      {/* 글쓰기 버튼 (랭킹 탭이 아닐 때만 표시) - 고정 */}
       {activeTab !== "랭킹" && !isWritingPost && (
-        <div className="bg-white p-3 border-b">
+        <div className="bg-white p-3 border-b sticky top-[164px] z-20 shadow-sm">
           <button
             className="w-full py-2 bg-primary text-white rounded-lg font-medium flex items-center justify-center"
             onClick={() => setIsWritingPost(true)}
@@ -677,7 +677,7 @@ const CommunityPage = () => {
       )}
 
       {/* 랭킹 또는 게시글 목록 또는 글쓰기 화면 */}
-      <div className="flex-1 overflow-y-auto bg-gray-100 p-2">
+      <div className="flex-1 overflow-y-auto bg-gray-100 p-2 pb-20">
         {isWritingPost ? (
           // 게시글 작성 화면
           <div className="bg-white rounded-lg p-4 shadow-sm">

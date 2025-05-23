@@ -172,7 +172,7 @@ function LoggedInHome({
   }, [targetValue]);
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[76px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
+    <div className="flex-1 flex flex-col h-full pb-[60px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
       {/* 상단 타이틀 - iOS 스타일 헤더 */}
       <motion.div
         className="ios-header sticky top-0 z-10"
