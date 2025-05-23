@@ -9,19 +9,19 @@ import { Tab } from "@headlessui/react";
 
 // 스타일드 컴포넌트 정의
 const NavbarContainer = styled.div`
-  position: absolute;
+  position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   width: 100%;
+  max-width: 448px;
   z-index: 50;
 `;
 
 const NavbarInner = styled.div`
   width: 100%;
-  max-width: 375px;
   position: relative;
 `;
 
@@ -31,10 +31,11 @@ const NavbarBackground = styled.div`
   left: 0;
   right: 0;
   height: 4.5rem;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(229, 231, 235, 0.8);
   box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+  width: 100%;
 `;
 
 const NavButtonsContainer = styled.div`
@@ -44,6 +45,7 @@ const NavButtonsContainer = styled.div`
   justify-content: space-evenly;
   align-items: center;
   padding: 0.5rem 0.5rem 1rem 0.5rem;
+  z-index: 2;
 `;
 
 // 아이콘 애니메이션 설정
@@ -73,6 +75,7 @@ const NavButton = styled(motion.button)`
   border: none;
   outline: none;
   cursor: pointer;
+  padding: 0.25rem 0;
 `;
 
 const IconContainer = styled(motion.div)`
@@ -83,6 +86,11 @@ const IconContainer = styled(motion.div)`
   justify-content: center;
   margin-bottom: 0.25rem;
   position: relative;
+
+  @media (max-width: 360px) {
+    width: 2rem;
+    height: 2rem;
+  }
 `;
 
 const IconBackground = styled.div<{ isActive: boolean }>`
@@ -99,6 +107,11 @@ const Label = styled.p<{ isActive: boolean }>`
   font-weight: 500;
   color: ${props => props.isActive ? 'var(--color-primary, #34D399)' : '#9CA3AF'};
   transition: color 0.2s ease;
+  white-space: nowrap;
+
+  @media (max-width: 360px) {
+    font-size: 0.5rem;
+  }
 `;
 
 const TabsContainer = styled(Tab.Group)`

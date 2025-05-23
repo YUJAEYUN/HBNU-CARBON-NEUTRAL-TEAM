@@ -13,26 +13,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="theme-color" content="#ffffff" />
       </head>
-      <body className="bg-gray-100 text-gray-900 flex justify-center items-center min-h-screen p-4">
+      <body className="bg-white text-gray-900 min-h-screen">
         <AuthProvider>
-          {/* 모바일 화면 크기 고정 - iOS 스타일 적용 */}
+          {/* 반응형 레이아웃 - 모든 화면 크기에 맞게 조정 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-[375px] h-[812px] bg-white shadow-ios relative flex flex-col"
-            style={{
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
-              borderRadius: "38px" // iOS 스타일 둥근 모서리
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="w-full max-w-md mx-auto h-full min-h-screen bg-white relative flex flex-col pb-[4.5rem]"
           >
-            {/* 상태 표시줄 */}
-            <div className="h-6 w-full bg-white z-50"></div>
-
-            {/* 노치 (iPhone 스타일) */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-6 bg-black rounded-b-2xl z-50"></div>
-
-            <div className="flex-grow overflow-y-auto overflow-x-hidden" style={{ maxHeight: 'calc(100% - 60px)' }}>{children}</div>
+            <div className="flex-grow overflow-y-auto overflow-x-hidden">{children}</div>
             <NavBar /> {/* 네비게이션 바는 Navbar 컴포넌트 내에서 로그인 상태에 따라 표시 여부 결정 */}
           </motion.div>
         </AuthProvider>
