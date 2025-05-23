@@ -57,12 +57,12 @@ export default function ChatInterface({
 
   return (
     <motion.div
-      className="absolute bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 mx-auto"
+      className="absolute bottom-24 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 mx-auto"
       initial={{ y: 300 }}
       animate={{ y: 0 }}
       exit={{ y: 300 }}
       style={{
-        maxHeight: 'calc(100% - 140px)',
+        maxHeight: 'calc(100% - 180px)',
         display: 'flex',
         flexDirection: 'column',
         width: 'calc(100% - 32px)',

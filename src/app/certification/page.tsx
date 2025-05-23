@@ -2,8 +2,8 @@
 import React from 'react';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FaCamera, FaSearch, FaCalendarAlt, FaFilter, FaCheck, FaTimes, FaChevronDown, FaExclamationTriangle, FaMapMarkerAlt } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { FaCamera, FaSearch, FaChevronDown, FaExclamationTriangle } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { getCertifications } from "@/utils/api";
@@ -279,14 +279,12 @@ export default function CertificationPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [certifications, setCertifications] = useState<any[]>([]);
-  const [selectedType, setSelectedType] = useState(null);
   const [showTypeList, setShowTypeList] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [selectedCertImage, setSelectedCertImage] = useState<string | null>(null);
   const [selectedCertImageIndex, setSelectedCertImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   useEffect(() => {
     const fetchCertifications = async () => {
@@ -351,7 +349,6 @@ export default function CertificationPage() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative">
-    <div className="flex-1 flex flex-col h-full pb-[60px]">
       {/* 상단 헤더 - iOS 스타일 */}
       <div className="ios-header sticky top-0 z-10">
         <h1 className="text-xl font-semibold text-gray-800">환경을 위한 작은 실천</h1>
