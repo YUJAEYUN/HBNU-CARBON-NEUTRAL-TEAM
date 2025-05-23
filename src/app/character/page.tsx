@@ -6,6 +6,8 @@ import axiosInstance from "@/lib/axios";
 import { useVoiceStore } from "@/store/voiceStore";
 import { CHARACTER_STAGES, ActivityTabType } from "./constants";
 import { ChatMessage, TextMessage } from "@/types/chat";
+import { Certification } from "@/types/certification";
+import { SAMPLE_CERTIFICATIONS } from "./data/certifications";
 
 // 컴포넌트 임포트
 import CharacterHeader from "./components/CharacterHeader";
@@ -13,6 +15,7 @@ import CharacterInfo from "./components/CharacterInfo";
 import CharacterDisplay from "./components/CharacterDisplay";
 import ActivityTabs from "./components/ActivityTabs";
 import ChatInterface from "./components/ChatInterface";
+import CertificationList from "./components/CertificationList";
 
 // 전역 타입 확장 (window.handleVoiceMessage 함수 정의)
 declare global {
@@ -22,10 +25,13 @@ declare global {
 }
 
 export default function CharacterPage() {
-  const { isLoading } = useAuth();
+  const { isLoading: authLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
+  const [showCertifications, setShowCertifications] = useState(false);
   const [activeTab, setActiveTab] = useState<ActivityTabType>("daily");
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -166,8 +172,23 @@ export default function CharacterPage() {
     ? ((currentPoints - currentStage.requiredPoints) / (nextStage.requiredPoints - currentStage.requiredPoints)) * 100
     : 100;
 
+  // 인증 내역 데이터 로드
+  useEffect(() => {
+    // 인증 페이지에서 가져온 SAMPLE_CERTIFICATIONS 데이터 직접 사용
+    setIsLoading(true);
+    try {
+      console.log('[Character Page] Using SAMPLE_CERTIFICATIONS data');
+      setCertifications(SAMPLE_CERTIFICATIONS);
+    } catch (err) {
+      console.error('인증 목록 가져오기 오류:', err);
+      setCertifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // 로딩 중일 때 로딩 화면 표시
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return <LoadingScreen />;
   }
 
@@ -176,7 +197,7 @@ export default function CharacterPage() {
       {/* 상단 헤더 */}
       <CharacterHeader
         onInfoClick={() => setShowInfo(!showInfo)}
-        onStatsClick={() => alert("활동 실적 기능은 준비 중입니다.")}
+        onStatsClick={() => setShowCertifications(!showCertifications)}
       />
 
       {/* 캐릭터 정보 팝업 */}
@@ -223,6 +244,13 @@ export default function CharacterPage() {
           onClose={() => setShowChatbot(false)}
         />
       )}
+
+      {/* 인증 내역 목록 */}
+      <CertificationList
+        certifications={certifications}
+        isVisible={showCertifications}
+        onClose={() => setShowCertifications(false)}
+      />
     </div>
   );
 }

@@ -14,12 +14,14 @@ export default function CharacterHeader({ onInfoClick, onStatsClick }: Character
         <button
           className="text-white p-2 rounded-full"
           onClick={onStatsClick}
+          aria-label="활동 실적 보기"
         >
           <FaFileAlt className="text-xl" />
         </button>
         <button
           className="text-white p-2 rounded-full"
           onClick={onInfoClick}
+          aria-label="캐릭터 정보 보기"
         >
           <FaInfoCircle className="text-xl" />
         </button>

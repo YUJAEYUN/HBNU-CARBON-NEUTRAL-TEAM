@@ -62,131 +62,216 @@ export default function TumblerCertificationPage() {
 
   const handleUploadCertification = () => {
     if (!imageFile) {
-      alert('인증 이미지를 등록해주세요.');
-      console.log('[Tumbler Upload] 인증 이미지 파일 없음');
+      // 토스 스타일은 버튼 비활성화로 처리하므로 alert 대신 조용히 리턴
       return;
     }
 
+    // 인증 진행 중 UI 표시 로직 추가 가능
+
     const newCertification = {
       id: Date.now(),
-      type: 'tumbler', // 텀블러 카테고리 ID
-      title: title.trim() || '텀블러 인증', // 입력 제목 또는 기본값
+      type: 'tumbler',
+      title: '텀블러 인증', // 고정 타이틀 사용 (토스 스타일은 단순함 추구)
       date: new Date().toISOString().split('T')[0],
       time: new Date().toTimeString().split(' ')[0].substring(0, 5),
-      timeAgo: '방금 전', // 실제 구현에서는 경과 시간 계산 필요
-      location: '위치 정보 없음', // 필요에 따라 위치 정보 추가
-      carbonReduction: Math.round(Math.random() * 30) / 100, // 임시 탄소 절감량
+      timeAgo: '방금 전',
+      location: '내 위치', // 간단한 위치 표시
+      carbonReduction: 0.12, // 고정된 탄소 절감량 (텀블러 사용 시)
       verified: false,
-      status: '검토중', // 초기 상태
-      points: Math.round(Math.random() * 20) + 5, // 임시 포인트
-      image: image, // 미리보기 URL (실제로는 파일 업로드 후 URL 사용)
-      receiptImage: receiptImage, // 영수증 미리보기 URL
-      // 실제 서버 업로드 시 imageFile, receiptImageFile 사용
+      status: '검토중',
+      points: 15, // 고정된 포인트 (텀블러 사용 시)
+      image: image,
+      receiptImage: receiptImage,
     };
 
-    console.log('[Tumbler Upload] Saving certification:', newCertification);
+    // 로컬 스토리지에 저장
+    try {
+      const existing = localStorage.getItem('certifications');
+      const certs = existing ? JSON.parse(existing) : [];
+      localStorage.setItem('certifications', JSON.stringify([newCertification, ...certs]));
 
-    const existing = localStorage.getItem('certifications');
-    const certs = existing ? JSON.parse(existing) : [];
-    
-    console.log('[Tumbler Upload] Existing certifications:', certs);
-
-    localStorage.setItem('certifications', JSON.stringify([newCertification, ...certs]));
-    
-    console.log('[Tumbler Upload] Certifications after saving:', JSON.parse(localStorage.getItem('certifications') || '[]'));
-
-    // 메인 인증 페이지로 이동
-    router.push('/certification');
-    console.log('[Tumbler Upload] Navigating to /certification');
+      // 성공 시 홈으로 이동 (토스는 작업 완료 후 홈으로 이동하는 패턴 사용)
+      router.push('/');
+    } catch (error) {
+      console.error('[Tumbler Upload] Error saving certification:', error);
+      // 오류 처리 로직 추가 가능
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* 상단 헤더 */}
-      <div className="ios-header bg-white text-gray-800 z-20 relative">
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* 상단 헤더 - 토스 스타일 */}
+      <div className="bg-white px-4 py-3 flex items-center justify-between shadow-sm z-20 relative">
         <button
-          className="text-gray-800 text-base"
+          className="text-gray-700 flex items-center"
           onClick={() => router.back()}
         >
-          뒤로
+          <FaArrowLeft className="mr-1" />
+          <span>뒤로</span>
         </button>
-        <h1 className="text-xl font-semibold">텀블러 인증</h1>
-        <div className="flex gap-2 w-10">
-          {/* 우측 여백 */}
-        </div>
+        <h1 className="text-lg font-bold absolute left-1/2 transform -translate-x-1/2">텀블러 인증</h1>
+        <div className="w-10"></div>
       </div>
 
       {/* 페이지 내용 */}
-      <div className="flex-1 p-4 overflow-y-auto min-h-[110vh]">
-        {/* 탄소 절감량 정보 */}
-        <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">탄소 절감량</h2>
-          <p className="text-gray-600">텀블러 사용으로 인해 <span className="font-bold text-primary">0.3kg</span>의 탄소를 절감했습니다.</p>
-        </div>
-        {/* 탄소중립활동 인증 네모 박스 */}
-        <div className="flex items-center justify-between mb-6 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <span className="text-base font-semibold text-gray-800">탄소중립활동 인증하기</span>
-          <div className="flex items-center gap-2">
-            <button
-              className="px-4 py-2 bg-primary text-white rounded-lg font-medium shadow-sm active:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              선택
-            </button>
-            <button
-              className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full border border-gray-200 shadow-sm active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-transform"
-              onClick={() => setShowImageBox((prev) => !prev)}
-            >
-              <FaChevronDown className={`text-gray-600 text-lg transition-transform duration-200 ${showImageBox ? 'rotate-180' : ''}`} />
-            </button>
+      <div className="flex-1 p-5 overflow-y-auto">
+        {/* 탄소 절감량 정보 - 토스 스타일 카드 */}
+        <div className="mb-6 bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-gray-100">
+            <div className="flex items-center mb-1">
+              <span className="text-2xl mr-2">☕</span>
+              <h2 className="text-lg font-bold text-gray-800">텀블러 사용 효과</h2>
+            </div>
+            <p className="text-gray-500 text-sm">일회용컵 대신 텀블러를 사용하면</p>
+          </div>
+          <div className="p-5 bg-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">탄소 절감량</p>
+                <p className="text-2xl font-bold text-primary mt-1">0.3kg</p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-sm">획득 포인트</p>
+                <p className="text-2xl font-bold text-primary mt-1">15P</p>
+              </div>
+            </div>
           </div>
         </div>
-        {/* 선택된 이미지 미리보기 창 (토글) */}
-        {showImageBox && (
-          <div className="w-3/4 aspect-square mx-auto bg-gray-100 border border-gray-300 rounded-md flex items-center justify-center overflow-hidden cursor-pointer mb-6" onClick={() => fileInputRef.current?.click()}>
-            {image ? (
-              <img src={image} alt="인증 이미지 미리보기" className="max-w-full max-h-full object-contain" />
-            ) : (
-              <span className="text-gray-500">사진 선택</span>
-            )}
-          </div>
-        )}
-        {/* 영수증 인증하기 네모 박스 */}
-        <div className="flex items-center justify-between mb-6 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <span className="text-base font-semibold text-gray-800">영수증 인증하기</span>
-          <div className="flex items-center gap-2">
-            <button
-              className="px-4 py-2 bg-primary text-white rounded-lg font-medium shadow-sm active:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary"
-              onClick={() => receiptFileInputRef.current?.click()}
-            >
-              선택
-            </button>
-            <button
-              className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full border border-gray-200 shadow-sm active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-transform"
-              onClick={() => setShowReceiptImageBox((prev) => !prev)}
-            >
-              <FaChevronDown className={`text-gray-600 text-lg transition-transform duration-200 ${showReceiptImageBox ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-        </div>
-        {/* 영수증 이미지 미리보기 창 (토글) */}
-        {showReceiptImageBox && (
-          <div className="w-3/4 aspect-square mx-auto bg-gray-100 border border-gray-300 rounded-md flex items-center justify-center overflow-hidden cursor-pointer mb-6" onClick={() => receiptFileInputRef.current?.click()}>
-            {receiptImage ? (
-              <img src={receiptImage} alt="영수증 이미지 미리보기" className="max-w-full max-h-full object-contain" />
-            ) : (
-              <span className="text-gray-500">영수증 사진 선택</span>
-            )}
-          </div>
-        )}
 
-        {/* 인증 업로드 버튼 */}
-        <div className="mt-4 pb-8">
+        {/* 인증 단계 안내 - 토스 스타일 */}
+        <div className="mb-4">
+          <h3 className="text-lg font-bold text-gray-800 mb-3">인증 방법</h3>
+          <div className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <div className="flex items-start mb-4">
+              <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                1
+              </div>
+              <div className="ml-3">
+                <p className="font-medium text-gray-800">텀블러 사용 사진 촬영</p>
+                <p className="text-gray-500 text-sm mt-1">텀블러와 음료가 함께 보이도록 촬영해주세요.</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                2
+              </div>
+              <div className="ml-3">
+                <p className="font-medium text-gray-800">영수증 촬영 (선택)</p>
+                <p className="text-gray-500 text-sm mt-1">영수증이 있다면 함께 촬영해주세요.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 인증 사진 업로드 섹션 - 토스 스타일 */}
+        <div className="mb-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-3">인증 사진 업로드</h3>
+
+          {/* 텀블러 사진 업로드 */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
+            <div
+              className={`p-4 border-b border-gray-100 flex justify-between items-center cursor-pointer ${image ? 'bg-green-50' : ''}`}
+              onClick={() => setShowImageBox(!showImageBox)}
+            >
+              <div className="flex items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${image ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  <span className="text-xl">📷</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">텀블러 사진</p>
+                  <p className="text-xs text-gray-500">{image ? '사진이 업로드되었습니다' : '필수 항목'}</p>
+                </div>
+              </div>
+              <FaChevronDown className={`text-gray-400 transition-transform duration-200 ${showImageBox ? 'rotate-180' : ''}`} />
+            </div>
+
+            {showImageBox && (
+              <div className="p-4 bg-gray-50">
+                {image ? (
+                  <div className="relative">
+                    <img src={image} alt="텀블러 인증 사진" className="w-full h-64 object-contain rounded-lg" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <button
+                        className="bg-white bg-opacity-80 text-gray-700 px-4 py-2 rounded-lg shadow-sm hover:bg-opacity-100"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        사진 변경
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="w-full h-64 bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-3xl">📷</span>
+                    </div>
+                    <p className="font-medium text-gray-700">사진 업로드</p>
+                    <p className="text-sm text-gray-500 mt-1">클릭하여 사진을 선택하세요</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 영수증 사진 업로드 */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div
+              className={`p-4 border-b border-gray-100 flex justify-between items-center cursor-pointer ${receiptImage ? 'bg-green-50' : ''}`}
+              onClick={() => setShowReceiptImageBox(!showReceiptImageBox)}
+            >
+              <div className="flex items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${receiptImage ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  <span className="text-xl">🧾</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">영수증 사진</p>
+                  <p className="text-xs text-gray-500">{receiptImage ? '사진이 업로드되었습니다' : '선택 항목'}</p>
+                </div>
+              </div>
+              <FaChevronDown className={`text-gray-400 transition-transform duration-200 ${showReceiptImageBox ? 'rotate-180' : ''}`} />
+            </div>
+
+            {showReceiptImageBox && (
+              <div className="p-4 bg-gray-50">
+                {receiptImage ? (
+                  <div className="relative">
+                    <img src={receiptImage} alt="영수증 인증 사진" className="w-full h-64 object-contain rounded-lg" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <button
+                        className="bg-white bg-opacity-80 text-gray-700 px-4 py-2 rounded-lg shadow-sm hover:bg-opacity-100"
+                        onClick={() => receiptFileInputRef.current?.click()}
+                      >
+                        사진 변경
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="w-full h-64 bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer"
+                    onClick={() => receiptFileInputRef.current?.click()}
+                  >
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-3xl">🧾</span>
+                    </div>
+                    <p className="font-medium text-gray-700">영수증 업로드</p>
+                    <p className="text-sm text-gray-500 mt-1">클릭하여 영수증 사진을 선택하세요</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 인증 업로드 버튼 - 토스 스타일 */}
+        <div className="sticky bottom-5 mt-4 pb-8">
           <button
-            className="w-full bg-primary text-white py-3 rounded-xl text-base font-semibold"
+            className={`w-full py-4 rounded-xl text-base font-bold shadow-md transition-all ${image ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400'}`}
             onClick={handleUploadCertification}
+            disabled={!image}
           >
-            인증 업로드
+            인증하기
           </button>
         </div>
 
@@ -230,4 +315,4 @@ export default function TumblerCertificationPage() {
       </div>
     </div>
   );
-} 
+}

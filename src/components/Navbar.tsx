@@ -151,10 +151,10 @@ const NavBar = memo(() => {
       isActive: pathname.startsWith("/community")
     },
     {
-      path: "/certification",
+      path: "/camera",
       label: "인증",
       icon: FaCamera,
-      isActive: pathname.startsWith("/certification")
+      isActive: pathname.startsWith("/camera") || pathname.startsWith("/certification")
     },
     {
       path: "/character",
