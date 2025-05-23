@@ -3,25 +3,172 @@ import { useRouter, usePathname } from "next/navigation";
 import { FaHome, FaComments, FaSeedling, FaUser, FaCamera } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
+import { memo, useState, useEffect, useMemo, Fragment } from "react";
+import styled from "styled-components";
+import { Tab } from "@headlessui/react";
 
-const NavBar = () => {
+// 스타일드 컴포넌트 정의
+const NavbarContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  z-index: 50;
+`;
+
+const NavbarInner = styled.div`
+  width: 100%;
+  max-width: 375px;
+  position: relative;
+`;
+
+const NavbarBackground = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+`;
+
+const NavButtonsContainer = styled.div`
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+`;
+
+// 아이콘 애니메이션 설정
+const iconVariants = {
+  active: {
+    scale: 1.2,
+    y: -4,
+    transition: { type: "spring", stiffness: 300 }
+  },
+  inactive: {
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+// 스타일드 컴포넌트 추가 정의
+const NavButton = styled(motion.button)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20%;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+`;
+
+const IconContainer = styled(motion.div)`
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+  position: relative;
+`;
+
+const IconBackground = styled.div<{ isActive: boolean }>`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: ${props => props.isActive ? 'rgba(52, 211, 153, 0.1)' : 'transparent'};
+  transition: all 0.2s ease;
+`;
+
+const Label = styled.p<{ isActive: boolean }>`
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: ${props => props.isActive ? 'var(--color-primary, #34D399)' : '#9CA3AF'};
+  transition: color 0.2s ease;
+`;
+
+const TabsContainer = styled(Tab.Group)`
+  width: 100%;
+`;
+
+const TabsList = styled(Tab.List)`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+`;
+
+const TabPanel = styled(Tab.Panel)`
+  display: none; // 탭 패널은 표시하지 않음 (네비게이션 용도로만 사용)
+`;
+
+// 성능 최적화를 위해 memo 사용
+const NavBar = memo(() => {
   const router = useRouter();
   const pathname = usePathname();
   const { isLoggedIn } = useAuth();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // 아이콘 애니메이션 설정
-  const iconVariants = {
-    active: {
-      scale: 1.2,
-      y: -4,
-      transition: { type: "spring", stiffness: 300 }
+  // 네비게이션 항목 정의 - 컴포넌트 최상위 레벨에서 정의
+  const navItems = useMemo(() => [
+    {
+      path: "/",
+      label: "홈",
+      icon: FaHome,
+      isActive: pathname === "/"
     },
-    inactive: {
-      scale: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 300 }
+    {
+      path: "/community",
+      label: "커뮤니티",
+      icon: FaComments,
+      isActive: pathname.startsWith("/community")
+    },
+    {
+      path: "/certification",
+      label: "인증",
+      icon: FaCamera,
+      isActive: pathname.startsWith("/certification")
+    },
+    {
+      path: "/character",
+      label: "캐릭터",
+      icon: FaSeedling,
+      isActive: pathname === "/character" || pathname.startsWith("/character")
+    },
+    {
+      path: "/dashboard",
+      label: "마이",
+      icon: FaUser,
+      isActive: pathname === "/dashboard" || pathname.startsWith("/dashboard")
     }
-  };
+  ], [pathname]);
+
+  // 현재 경로에 따라 선택된 탭 인덱스 계산
+  const currentTabIndex = useMemo(() => {
+    const index = navItems.findIndex(item => item.isActive);
+    return index !== -1 ? index : 0;
+  }, [navItems]);
+
+  // 선택된 탭 인덱스 업데이트
+  useEffect(() => {
+    if (isLoggedIn) {
+      setSelectedIndex(currentTabIndex);
+    }
+  }, [currentTabIndex, isLoggedIn]);
 
   // 로그인하지 않은 상태에서는 네비게이션 바를 표시하지 않음
   if (!isLoggedIn) {
@@ -29,96 +176,56 @@ const NavBar = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-center w-full z-50">
-      <div className="w-full max-w-[375px] relative">
+    <NavbarContainer>
+      <NavbarInner>
         {/* 네비게이션 배경 - iOS 스타일 유리 효과 */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-white bg-opacity-80 backdrop-filter backdrop-blur-xl border-t border-gray-200 shadow-sm"></div>
+        <NavbarBackground />
 
-        {/* 네비게이션 버튼 */}
-        <div className="relative w-full flex justify-evenly items-center px-2 py-3">
-          {/* 홈 버튼 */}
-          <motion.button
-            className={`flex flex-col items-center w-1/5 ${pathname === "/" ? "text-primary" : "text-gray-400"}`}
-            onClick={() => router.push("/")}
-            whileTap={{ scale: 0.9 }}
-          >
-            <motion.div
-              className="w-8 h-8 flex items-center justify-center mb-1"
-              variants={iconVariants}
-              animate={pathname === "/" ? "active" : "inactive"}
-            >
-              <FaHome className={`text-xl ${pathname === "/" ? "text-primary" : "text-gray-400"}`} />
-            </motion.div>
-            <p className={`text-[10px] font-medium ${pathname === "/" ? "text-primary" : "text-gray-400"}`}>홈</p>
-          </motion.button>
+        {/* 네비게이션 버튼 - Headless UI Tab 사용 */}
+        <NavButtonsContainer>
+          <TabsContainer selectedIndex={currentTabIndex} onChange={(index) => {
+            if (index !== currentTabIndex) {
+              router.push(navItems[index].path);
+            }
+          }}>
+            <TabsList>
+              {navItems.map((item, index) => (
+                <Tab key={item.path} as={Fragment}>
+                  {({ selected }) => (
+                    <NavButton
+                      whileTap={{ scale: 0.9 }}
+                      onTouchStart={() => {}} // iOS 호버 이슈 방지
+                    >
+                      <IconContainer
+                        variants={iconVariants}
+                        animate={selected ? "active" : "inactive"}
+                      >
+                        <IconBackground isActive={selected} />
+                        <item.icon
+                          style={{
+                            fontSize: '1.25rem',
+                            color: selected ? 'var(--color-primary, #34D399)' : '#9CA3AF',
+                            position: 'relative',
+                            zIndex: 1
+                          }}
+                        />
+                      </IconContainer>
+                      <Label isActive={selected}>{item.label}</Label>
+                    </NavButton>
+                  )}
+                </Tab>
+              ))}
+            </TabsList>
 
-          {/* 커뮤니티 버튼 */}
-          <motion.button
-            className={`flex flex-col items-center w-1/5 ${pathname.startsWith("/community") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => router.push("/community")}
-            whileTap={{ scale: 0.9 }}
-          >
-            <motion.div
-              className="w-8 h-8 flex items-center justify-center mb-1"
-              variants={iconVariants}
-              animate={pathname.startsWith("/community") ? "active" : "inactive"}
-            >
-              <FaComments className={`text-xl ${pathname.startsWith("/community") ? "text-primary" : "text-gray-400"}`} />
-            </motion.div>
-            <p className={`text-[10px] font-medium ${pathname.startsWith("/community") ? "text-primary" : "text-gray-400"}`}>커뮤니티</p>
-          </motion.button>
-
-          {/* 인증 버튼 */}
-          <motion.button
-            className={`flex flex-col items-center w-1/5 ${pathname.startsWith("/certification") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => router.push("/certification")}
-            whileTap={{ scale: 0.9 }}
-          >
-            <motion.div
-              className="w-8 h-8 flex items-center justify-center mb-1"
-              variants={iconVariants}
-              animate={pathname.startsWith("/certification") ? "active" : "inactive"}
-            >
-              <FaCamera className={`text-xl ${pathname.startsWith("/certification") ? "text-primary" : "text-gray-400"}`} />
-            </motion.div>
-            <p className={`text-[10px] font-medium ${pathname.startsWith("/certification") ? "text-primary" : "text-gray-400"}`}>인증</p>
-          </motion.button>
-
-          {/* 캐릭터 버튼 */}
-          <motion.button
-            className={`flex flex-col items-center w-1/5 ${pathname === "/character" || pathname.startsWith("/character") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => router.push("/character")}
-            whileTap={{ scale: 0.9 }}
-          >
-            <motion.div
-              className="w-8 h-8 flex items-center justify-center mb-1"
-              variants={iconVariants}
-              animate={pathname === "/character" || pathname.startsWith("/character") ? "active" : "inactive"}
-            >
-              <FaSeedling className={`text-xl ${pathname === "/character" || pathname.startsWith("/character") ? "text-primary" : "text-gray-400"}`} />
-            </motion.div>
-            <p className={`text-[10px] font-medium ${pathname === "/character" || pathname.startsWith("/character") ? "text-primary" : "text-gray-400"}`}>캐릭터</p>
-          </motion.button>
-
-          {/* 마이 버튼 */}
-          <motion.button
-            className={`flex flex-col items-center w-1/5 ${pathname === "/dashboard" || pathname.startsWith("/dashboard") ? "text-primary" : "text-gray-400"}`}
-            onClick={() => router.push("/dashboard")}
-            whileTap={{ scale: 0.9 }}
-          >
-            <motion.div
-              className="w-8 h-8 flex items-center justify-center mb-1"
-              variants={iconVariants}
-              animate={pathname === "/dashboard" || pathname.startsWith("/dashboard") ? "active" : "inactive"}
-            >
-              <FaUser className={`text-xl ${pathname === "/dashboard" || pathname.startsWith("/dashboard") ? "text-primary" : "text-gray-400"}`} />
-            </motion.div>
-            <p className={`text-[10px] font-medium ${pathname === "/dashboard" || pathname.startsWith("/dashboard") ? "text-primary" : "text-gray-400"}`}>마이</p>
-          </motion.button>
-        </div>
-      </div>
-    </div>
+            {/* 탭 패널 (화면에 표시되지 않음) */}
+            {navItems.map((item) => (
+              <TabPanel key={`panel-${item.path}`}></TabPanel>
+            ))}
+          </TabsContainer>
+        </NavButtonsContainer>
+      </NavbarInner>
+    </NavbarContainer>
   );
-};
+});
 
 export default NavBar;

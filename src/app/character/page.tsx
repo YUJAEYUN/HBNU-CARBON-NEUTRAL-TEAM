@@ -12,14 +12,14 @@ import CharacterHeader from "./components/CharacterHeader";
 import CharacterInfo from "./components/CharacterInfo";
 import CharacterDisplay from "./components/CharacterDisplay";
 import ActivityTabs from "./components/ActivityTabs";
-import UnifiedChatbot from "./components/UnifiedChatbot";
+import ChatInterface from "./components/ChatInterface";
+
 
 export default function CharacterPage() {
   const { isLoading } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [activeTab, setActiveTab] = useState<ActivityTabType>("daily");
-
   // 채팅 관련 상태
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -58,6 +58,8 @@ export default function CharacterPage() {
       speakMessage(lastMessage.content);
     }
   }, [chatMessages, voiceMode, speakMessage]);
+
+
 
   // 챗봇 메시지 전송 처리
   const handleSendMessage = useCallback(async (messageText: string) => {
@@ -206,7 +208,7 @@ export default function CharacterPage() {
       )}
 
       <div className="flex-1 flex flex-col items-center p-4">
-        {/* 캐릭터 이미지 및 레벨 표시 */}
+        {/* 캐릭터 레벨 표시 */}
         <CharacterDisplay
           currentStage={currentStage}
           currentPoints={currentPoints}
@@ -223,16 +225,15 @@ export default function CharacterPage() {
         />
       </div>
 
-      {/* 통합된 챗봇 대화창 */}
+      {/* 챗봇 대화창 */}
       {showChatbot && (
-        <UnifiedChatbot
+        <ChatInterface
           chatMessages={chatMessages}
           setChatMessages={setChatMessages}
           chatLoading={chatLoading}
           setChatLoading={setChatLoading}
           isListening={isListening}
           isSpeaking={isSpeaking}
-          voiceMode={voiceMode}
           recognizedText={recognizedText}
           handleVoiceToggle={handleVoiceToggle}
           handleStopSpeaking={handleStopSpeaking}

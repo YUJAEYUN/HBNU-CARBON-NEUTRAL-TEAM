@@ -22,6 +22,27 @@
   --ios-gray: #8E8E93;
   --ios-gray-light: #E5E5EA;
   --ios-background: #F2F2F7;
+
+  /* 탄소중립 테마 색상 */
+  --color-primary: #34D399; /* 메인 그린 */
+  --color-primary-light: #A7F3D0; /* 라이트 그린 */
+  --color-primary-dark: #059669; /* 다크 그린 */
+  --color-secondary: #60A5FA; /* 블루 */
+  --color-secondary-light: #BFDBFE; /* 라이트 블루 */
+  --color-accent: #F59E0B; /* 액센트 오렌지 */
+  --color-success: #10B981; /* 성공 그린 */
+  --color-warning: #FBBF24; /* 경고 옐로우 */
+  --color-error: #EF4444; /* 에러 레드 */
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
 }
 
 body {

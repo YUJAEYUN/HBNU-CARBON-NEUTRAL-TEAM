@@ -2,6 +2,8 @@
 import { motion } from "framer-motion";
 import { FaComment } from "react-icons/fa";
 import { CharacterStage } from "../constants";
+import { useState } from "react";
+import CharacterAnimation from "./CharacterAnimation";
 
 interface CharacterDisplayProps {
   currentStage: CharacterStage;
@@ -20,18 +22,23 @@ export default function CharacterDisplay({
   pointsToNextLevel,
   onChatbotToggle
 }: CharacterDisplayProps) {
+  const [hoverState, setHoverState] = useState<"idle" | "happy" | "confused">("idle");
+
   return (
     <>
       {/* 캐릭터 이미지 */}
       <motion.div
-        className="w-56 h-56 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-8 mb-3"
-        animate={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
-        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        className="w-56 h-56 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-8 mb-3 relative"
+        onMouseEnter={() => setHoverState("happy")}
+        onMouseLeave={() => setHoverState("idle")}
       >
         <div className="relative">
-          {/* 현재 레벨에 맞는 캐릭터 이미지 표시 */}
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-7xl">{currentStage.image}</span>
+          {/* 캐릭터 애니메이션 */}
+          <div className="flex flex-col items-center justify-center mt-2">
+            <CharacterAnimation
+              currentState={hoverState}
+              imagePath="/mainCharacter.png"
+            />
           </div>
 
           {/* 통합 챗봇 버튼 */}
