@@ -827,108 +827,6 @@ const CommunityPage = () => {
                     priority
                   />
 
-                  {/* 바닥에 꽃 이미지 추가 */}
-                  <div className="absolute bottom-[10%] left-0 w-full h-[25%] z-1">
-                    {/* 왼쪽 꽃 */}
-                    <div className="absolute bottom-[20%] left-[5%]">
-                      <Image
-                        src="/flower1.png"
-                        alt="꽃1"
-                        width={60}
-                        height={40}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 중앙 꽃 */}
-                    <div className="absolute bottom-[15%] left-[40%]">
-                      <Image
-                        src="/flower2.png"
-                        alt="꽃2"
-                        width={50}
-                        height={35}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 오른쪽 꽃 */}
-                    <div className="absolute bottom-[25%] right-[10%]">
-                      <Image
-                        src="/flower1.png"
-                        alt="꽃1"
-                        width={55}
-                        height={38}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 추가 꽃 */}
-                    <div className="absolute bottom-[10%] right-[30%]">
-                      <Image
-                        src="/flower2.png"
-                        alt="꽃2"
-                        width={45}
-                        height={30}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 추가 꽃 */}
-                    <div className="absolute bottom-[30%] left-[20%]">
-                      <Image
-                        src="/flower2.png"
-                        alt="꽃2"
-                        width={40}
-                        height={28}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 추가 꽃 */}
-                    <div className="absolute bottom-[5%] left-[70%]">
-                      <Image
-                        src="/flower1.png"
-                        alt="꽃1"
-                        width={50}
-                        height={35}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 추가 꽃 (새로 추가) */}
-                    <div className="absolute bottom-[35%] left-[55%]">
-                      <Image
-                        src="/flower1.png"
-                        alt="꽃1"
-                        width={45}
-                        height={30}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 추가 꽃 (새로 추가) */}
-                    <div className="absolute bottom-[40%] right-[45%]">
-                      <Image
-                        src="/flower2.png"
-                        alt="꽃2"
-                        width={55}
-                        height={38}
-                        className="object-contain"
-                      />
-                    </div>
-
-                    {/* 추가 꽃 (새로 추가) */}
-                    <div className="absolute bottom-[20%] right-[60%]">
-                      <Image
-                        src="/flower1.png"
-                        alt="꽃1"
-                        width={40}
-                        height={28}
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-
                   {/* 움직이는 구름 애니메이션 */}
                   <div className="absolute inset-0 overflow-hidden">
                     {clouds.map((cloud) => (
@@ -987,13 +885,13 @@ const CommunityPage = () => {
                     <span className="font-medium">현재:</span> {currentTime} <span className="mx-1 text-gray-300">|</span> <span className="font-medium">갱신:</span> {updateTime}
                   </div>
 
-                  {/* 큰 나무 이미지 - 학교 표현 - 더 크게 수정 */}
-                  <div className="w-[300px] h-[400px] mx-auto relative">
+                  {/* 큰 나무 이미지 - 학교 표현 - 500x500 비율에 맞게 수정, 아래로 내림 */}
+                  <div className="w-[375px] h-[500px] mx-auto relative pt-12">
                     <Image
                       src="/tree/tree_large.png"
                       alt="학교 나무"
-                      width={300}
-                      height={400}
+                      width={375}
+                      height={500}
                       className="object-contain"
                     />
 
@@ -1020,11 +918,11 @@ const CommunityPage = () => {
                           dept.score >= 350 ? "/yellow_apple.png" :
                           "/green_apple.png";
 
-                        // 위치 설정
+                        // 위치 설정 - 나무가 아래로 내려간 것에 맞춰 조정
                         const positions = [
-                          { top: "15%", left: "15%", rotate: -5 },  // 왼쪽 상단 (환경공학과 - 빨간 사과)
-                          { top: "12%", right: "20%", rotate: 8 },  // 오른쪽 상단 (에너지시스템공학과 - 노란 사과)
-                          { top: "35%", right: "25%", rotate: -10 }, // 오른쪽 중간 (지구환경과학과 - 녹색 사과)
+                          { top: "25%", left: "15%", rotate: -5 },  // 왼쪽 상단 (환경공학과 - 빨간 사과)
+                          { top: "22%", right: "20%", rotate: 8 },  // 오른쪽 상단 (에너지시스템공학과 - 노란 사과)
+                          { top: "45%", right: "25%", rotate: -10 }, // 오른쪽 중간 (지구환경과학과 - 녹색 사과)
                         ];
 
                         const position = positions[index % positions.length];
@@ -1108,17 +1006,17 @@ const CommunityPage = () => {
                           dept.score >= 350 ? "/yellow_apple.png" :
                           "/green_apple.png";
 
-                        // 위치 계산 - 원래 사과 위치와 일치하게 배치
+                        // 위치 계산 - 원래 사과 위치와 일치하게 배치 (조정됨)
                         const positions = [
-                          { top: "15%", left: "15%", rotate: -5 },  // 왼쪽 상단 (환경공학과 - 빨간 사과)
-                          { top: "12%", right: "20%", rotate: 8 },  // 오른쪽 상단 (에너지시스템공학과 - 노란 사과)
-                          { top: "35%", right: "25%", rotate: -10 }, // 오른쪽 중간 (지구환경과학과 - 녹색 사과)
+                          { top: "25%", left: "15%", rotate: -5 },  // 왼쪽 상단 (환경공학과 - 빨간 사과)
+                          { top: "22%", right: "20%", rotate: 8 },  // 오른쪽 상단 (에너지시스템공학과 - 노란 사과)
+                          { top: "45%", right: "25%", rotate: -10 }, // 오른쪽 중간 (지구환경과학과 - 녹색 사과)
                         ];
 
                         const position = positions[index % positions.length];
 
-                        // 바닥 위치 계산 (컨테이너 높이의 약 85%)
-                        const floorPosition = "85%";
+                        // 바닥 위치 계산 (컨테이너 높이의 약 90%)
+                        const floorPosition = "90%";
 
                         // 좌우 이동 방향 결정 (왼쪽에 있으면 오른쪽으로, 오른쪽에 있으면 왼쪽으로)
                         const horizontalDirection = position.left ? 1 : -1;
@@ -1463,7 +1361,7 @@ const CommunityPage = () => {
               {/* 멀쩡한 사과 이미지 */}
               {showWholeApple && (
                 <motion.div
-                  className="relative w-[350px] h-[350px] md:w-[500px] md:h-[500px]"
+                  className="relative w-[375px] h-[375px] md:w-[500px] md:h-[500px]"
                   initial={{ scale: 0.2, opacity: 0 }}
                   animate={{
                     scale: 1,
@@ -1494,8 +1392,8 @@ const CommunityPage = () => {
                         <Image
                           src={appleImage}
                           alt="사과"
-                          width={400}
-                          height={400}
+                          width={450}
+                          height={450}
                           className="object-contain"
                         />
                       );
@@ -1507,7 +1405,7 @@ const CommunityPage = () => {
               {/* 쪼개진 사과 이미지 */}
               {showCuttingApple && (
                 <motion.div
-                  className="relative w-[280px] h-[280px] md:w-[500px] md:h-[500px]"
+                  className="relative w-[375px] h-[375px] md:w-[500px] md:h-[500px]"
                   initial={{ scale: 0.2, opacity: 0 }}
                   animate={{
                     scale: 1,
@@ -1531,12 +1429,15 @@ const CommunityPage = () => {
                       "/cutting_green_apple.png";
 
                     return (
-                      <Image
-                        src={cuttingAppleImage}
-                        alt="쪼개진 사과"
-                        fill
-                        className="object-contain"
-                      />
+                      <div className="relative w-full h-full">
+                        <Image
+                          src={cuttingAppleImage}
+                          alt="쪼개진 사과"
+                          width={500}
+                          height={500}
+                          className="object-contain"
+                        />
+                      </div>
                     );
                   })()}
 
