@@ -403,7 +403,7 @@ export default function CertificationPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[76px]">
+    <div className="flex-1 flex flex-col h-full pb-[160px]">
       {/* 상단 헤더 - iOS 스타일 */}
       <div className="ios-header sticky top-0 z-10">
         <h1 className="text-xl font-semibold text-gray-800">환경을 위한 작은 실천</h1>

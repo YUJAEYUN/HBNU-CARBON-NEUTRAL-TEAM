@@ -11,6 +11,7 @@ interface VoiceState {
   isListening: boolean;
   isSpeaking: boolean;
   voiceMode: boolean;
+  voiceEnabled: boolean; // 음성 기능 활성화 여부 (사용자 설정)
   recognizedText: string;
   finalRecognizedText: string; // 최종 인식 결과 (누적)
   speechRecognition: any;
@@ -21,6 +22,7 @@ interface VoiceState {
   stopVoiceRecognition: () => string; // 음성 인식 중지 및 인식된 텍스트 반환
   stopSpeakingVoice: () => void;
   setVoiceMode: (active: boolean) => void;
+  setVoiceEnabled: (enabled: boolean) => void; // 음성 기능 활성화/비활성화
   setRecognizedText: (text: string) => void;
   appendFinalText: (text: string) => void; // 최종 인식 결과 추가
   resetRecognizedText: () => void; // 인식 텍스트 초기화
@@ -31,6 +33,7 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
   isListening: false,
   isSpeaking: false,
   voiceMode: false,
+  voiceEnabled: typeof window !== 'undefined' ? localStorage.getItem('voiceEnabled') !== 'false' : true, // 기본값은 true, 로컬 스토리지에서 가져옴
   recognizedText: '',
   finalRecognizedText: '', // 최종 인식 결과 (누적)
   speechRecognition: null,
@@ -43,6 +46,9 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
   },
 
   startVoiceRecognition: () => {
+    // 음성 기능이 비활성화되어 있으면 아무 작업도 하지 않음
+    if (!get().voiceEnabled) return;
+
     const { speechRecognition, isListening } = get();
     if (!speechRecognition) {
       console.warn('음성 인식 객체가 초기화되지 않았습니다. 다시 초기화합니다.');
@@ -157,6 +163,14 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
     set({ voiceMode: active });
   },
 
+  setVoiceEnabled: (enabled) => {
+    // 로컬 스토리지에 설정 저장
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('voiceEnabled', enabled.toString());
+    }
+    set({ voiceEnabled: enabled });
+  },
+
   setRecognizedText: (text) => {
     set({ recognizedText: text });
   },
@@ -173,6 +187,9 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
   },
 
   speakMessage: (content) => {
+    // 음성 기능이 비활성화되어 있으면 아무 작업도 하지 않음
+    if (!get().voiceEnabled) return;
+
     set({ isSpeaking: true });
     speakText(content, () => {
       set({ isSpeaking: false });

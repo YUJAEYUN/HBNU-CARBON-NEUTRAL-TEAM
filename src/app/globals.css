@@ -55,6 +55,7 @@ body {
 /* 스크롤바 스타일링 */
 ::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -63,6 +64,12 @@ body {
 
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300 rounded-full;
+}
+
+/* 모바일 스크롤 개선 */
+html, body {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* 버튼 효과 */

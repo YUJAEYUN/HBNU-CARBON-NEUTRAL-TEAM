@@ -2,6 +2,8 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ChatMessage, TextMessage, ImageMessage } from "@/types/chat";
+import { useVoiceStore } from "@/store/voiceStore";
+import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import ImageUpload from "./ImageUpload";
@@ -36,6 +38,7 @@ export default function ChatInterface({
   onClose
 }: ChatInterfaceProps) {
   const [showImageUpload, setShowImageUpload] = useState(false);
+  const { voiceEnabled, setVoiceEnabled } = useVoiceStore();
 
   // 이미지 메시지 전송
   const handleSendImage = useCallback((imageUrl: string, caption: string) => {
@@ -48,19 +51,37 @@ export default function ChatInterface({
 
   return (
     <motion.div
-      className="fixed bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 max-w-[375px] mx-auto"
+      className="absolute bottom-20 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 mx-auto"
       initial={{ y: 300 }}
       animate={{ y: 0 }}
       exit={{ y: 300 }}
+      style={{
+        maxHeight: 'calc(100% - 140px)',
+        display: 'flex',
+        flexDirection: 'column',
+        width: 'calc(100% - 32px)',
+        maxWidth: '343px'
+      }}
     >
       <div className="p-3 border-b border-gray-200 flex justify-between items-center">
         <p className="font-bold text-primary-dark">대나무와 대화하기</p>
-        <button
-          className="text-gray-500"
-          onClick={onClose}
-        >
-          닫기
-        </button>
+        <div className="flex items-center space-x-3">
+          {/* 음성 기능 온오프 토글 버튼 */}
+          <button
+            className={`p-2 rounded-full ${voiceEnabled ? 'text-primary' : 'text-gray-400'}`}
+            onClick={() => setVoiceEnabled(!voiceEnabled)}
+            title={voiceEnabled ? "음성 기능 끄기" : "음성 기능 켜기"}
+          >
+            {voiceEnabled ? <FaVolumeUp size={18} /> : <FaVolumeMute size={18} />}
+          </button>
+
+          <button
+            className="text-gray-500"
+            onClick={onClose}
+          >
+            닫기
+          </button>
+        </div>
       </div>
 
       {/* 이미지 업로드 UI */}
@@ -77,6 +98,7 @@ export default function ChatInterface({
             isLoading={chatLoading}
             isSpeaking={isSpeaking}
             speakMessage={speakMessage}
+            voiceEnabled={voiceEnabled}
           />
 
           {/* 채팅 입력 UI */}

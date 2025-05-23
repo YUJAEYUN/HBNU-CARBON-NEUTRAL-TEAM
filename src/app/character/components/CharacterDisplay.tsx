@@ -28,13 +28,13 @@ export default function CharacterDisplay({
     <>
       {/* 캐릭터 이미지 */}
       <motion.div
-        className="w-56 h-56 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-8 mb-3 relative"
+        className="w-56 h-56 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-4 mb-3 relative"
         onMouseEnter={() => setHoverState("happy")}
         onMouseLeave={() => setHoverState("idle")}
       >
-        <div className="relative">
+        <div className="relative -mt-8">
           {/* 캐릭터 애니메이션 */}
-          <div className="flex flex-col items-center justify-center mt-2">
+          <div className="flex flex-col items-center justify-center">
             <CharacterAnimation
               currentState={hoverState}
               imagePath="/mainCharacter.png"

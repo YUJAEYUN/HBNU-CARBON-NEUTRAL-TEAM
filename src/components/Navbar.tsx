@@ -9,7 +9,7 @@ import { Tab } from "@headlessui/react";
 
 // 스타일드 컴포넌트 정의
 const NavbarContainer = styled.div`
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;

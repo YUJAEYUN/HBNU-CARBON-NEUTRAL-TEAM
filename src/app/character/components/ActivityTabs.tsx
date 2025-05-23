@@ -36,7 +36,7 @@ export default function ActivityTabs({ activeTab, setActiveTab }: ActivityTabsPr
 
       {/* 활동 결과 - 선택된 탭에 따라 다른 내용 표시 */}
       <motion.div
-        className="w-full max-w-xs ios-card p-4"
+        className="w-full max-w-xs ios-card p-4 mb-28"
         key={activeTab}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

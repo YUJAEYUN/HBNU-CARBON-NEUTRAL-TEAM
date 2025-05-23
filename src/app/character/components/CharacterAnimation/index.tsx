@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useVoiceStore } from "@/store/voiceStore";
 import Image from "next/image";
 
@@ -167,7 +167,7 @@ export default function CharacterAnimation({
         animate="animate"
         variants={variants}
         onAnimationComplete={onAnimationComplete}
-        className="relative w-40 h-40 -mt-4"
+        className="relative w-40 h-40 -mt-8"
       >
         <Image
           src={imagePath}

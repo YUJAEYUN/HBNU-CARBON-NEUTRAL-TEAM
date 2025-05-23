@@ -9,13 +9,15 @@ interface ChatMessagesProps {
   isLoading: boolean;
   isSpeaking: boolean;
   speakMessage: (content: string) => void;
+  voiceEnabled: boolean;
 }
 
 export default function ChatMessages({
   messages,
   isLoading,
   isSpeaking,
-  speakMessage
+  speakMessage,
+  voiceEnabled
 }: ChatMessagesProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -29,10 +31,11 @@ export default function ChatMessages({
   return (
     <div
       ref={chatContainerRef}
-      className="h-64 p-3 overflow-y-auto"
+      className="flex-1 p-3 overflow-y-auto"
+      style={{ minHeight: '300px', maxHeight: 'calc(100% - 120px)' }}
     >
-      {/* 음성 출력 상태 표시 */}
-      {isSpeaking && (
+      {/* 음성 출력 상태 표시 (음성 기능이 활성화된 경우에만) */}
+      {isSpeaking && voiceEnabled && (
         <div className="mb-4 p-2 bg-green-100 text-green-800 rounded-lg text-center text-sm flex justify-between items-center">
           <span>🔊 대나무가 말하고 있어요...</span>
           <button
@@ -61,8 +64,8 @@ export default function ChatMessages({
             {/* 텍스트 메시지 */}
             {'type' in msg && msg.type === 'text' && (
               <>
-                {/* 음성으로 읽기 버튼 (어시스턴트 메시지에만 표시) */}
-                {msg.role === 'assistant' && !isSpeaking && (
+                {/* 음성으로 읽기 버튼 (어시스턴트 메시지에만 표시, 음성 기능이 활성화된 경우에만) */}
+                {msg.role === 'assistant' && !isSpeaking && voiceEnabled && (
                   <button
                     className="float-right ml-2 text-xs text-gray-500 hover:text-gray-700"
                     onClick={() => speakMessage(msg.content)}
@@ -98,7 +101,7 @@ export default function ChatMessages({
           </div>
         );
       })}
-      
+
       {/* 로딩 표시 */}
       {isLoading && (
         <div className="bg-primary-light p-2 rounded-lg mb-2 max-w-[80%] flex">

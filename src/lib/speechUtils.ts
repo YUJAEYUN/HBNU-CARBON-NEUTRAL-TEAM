@@ -66,8 +66,55 @@ export const initSpeechRecognition = (): SpeechRecognition | null => {
   return recognition;
 };
 
-// 텍스트를 음성으로 변환
-export const speakText = (text: string, onEnd?: () => void): void => {
+// 텍스트를 음성으로 변환 (OpenAI TTS API 사용)
+export const speakText = async (text: string, onEnd?: () => void): Promise<void> => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    // 현재 말하고 있는 것이 있다면 중지
+    stopSpeaking();
+
+    // OpenAI TTS API 호출을 위한 함수 가져오기
+    const { textToSpeech } = await import('./openai');
+
+    // OpenAI TTS API 호출
+    const audioBuffer = await textToSpeech(text);
+
+    // ArrayBuffer를 Blob으로 변환
+    const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+
+    // Blob URL 생성
+    const url = URL.createObjectURL(blob);
+
+    // 오디오 요소 생성 및 재생
+    const audio = new Audio(url);
+
+    // 재생 완료 이벤트 처리
+    if (onEnd) {
+      audio.onended = () => {
+        // Blob URL 해제
+        URL.revokeObjectURL(url);
+        onEnd();
+      };
+    } else {
+      audio.onended = () => {
+        // Blob URL 해제
+        URL.revokeObjectURL(url);
+      };
+    }
+
+    // 오디오 재생
+    await audio.play();
+  } catch (error) {
+    console.error('음성 합성 오류:', error);
+
+    // 오류 발생 시 브라우저 내장 TTS로 폴백
+    fallbackSpeakText(text, onEnd);
+  }
+};
+
+// 브라우저 내장 TTS로 폴백 (OpenAI TTS 실패 시)
+const fallbackSpeakText = (text: string, onEnd?: () => void): void => {
   if (typeof window === 'undefined') return;
 
   if (!('speechSynthesis' in window)) {

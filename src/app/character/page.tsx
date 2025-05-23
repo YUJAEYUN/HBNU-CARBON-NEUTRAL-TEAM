@@ -25,7 +25,7 @@ export default function CharacterPage() {
     {
       role: "assistant",
       type: "text",
-      content: "안녕하세요! 저는 탄소중립을 도와주는 대나무예요 🌱 오늘은 어떤 친환경 활동을 하셨나요? 작은 실천도 정말 소중해요!"
+      content: "안녕하세요! 무엇을 도와드릴까요?"
     }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
@@ -191,7 +191,7 @@ export default function CharacterPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[76px]">
+    <div className="flex-1 flex flex-col h-full pb-[160px] overflow-y-auto">
       {/* 상단 헤더 */}
       <CharacterHeader
         onInfoClick={() => setShowInfo(!showInfo)}
