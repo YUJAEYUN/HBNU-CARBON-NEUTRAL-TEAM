@@ -109,7 +109,7 @@ export default function CharacterPage() {
   // 음성 인식 토글 핸들러
   const handleVoiceToggle = useCallback(() => {
     if (isListening) {
-      // 음성 인식 중지 및 텍스트 전송
+      // 음성 인식 중지
       const text = stopVoiceRecognition();
       if (text && text.trim()) {
         // [en] 태그 제거하고 음성입력 태그 추가
@@ -120,8 +120,8 @@ export default function CharacterPage() {
         // 토큰 수를 줄이기 위해 접두사를 최소화
         const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
 
-        // 메시지 전송 (토큰 수를 줄이기 위해 접두사 최소화)
-        handleSendMessage(`${messagePrefix}${cleanText}`);
+        // 인식된 텍스트를 입력창에 넣기 위해 UnifiedChatbot 컴포넌트로 전달
+        return `${messagePrefix}${cleanText}`;
       }
     } else {
       // 음성 인식 시작 전 상태 표시
@@ -136,7 +136,8 @@ export default function CharacterPage() {
         setChatLoading(false);
       }, 100);
     }
-  }, [isListening, startVoiceRecognition, stopVoiceRecognition, handleSendMessage, setChatLoading, setRecognizedText]);
+    return ''; // 텍스트가 없는 경우 빈 문자열 반환
+  }, [isListening, startVoiceRecognition, stopVoiceRecognition, setChatLoading, setRecognizedText]);
 
   // 챗봇 창 열기 시 음성 모드 활성화
   useEffect(() => {
@@ -145,25 +146,14 @@ export default function CharacterPage() {
     }
   }, [showChatbot, setVoiceMode]);
 
-  // 챗봇 창 닫기 시 음성 인식 중지
+  // 챗봇 창 닫기 시 음성 인식 중지 (텍스트 전송하지 않음)
   useEffect(() => {
     // 챗봇 창이 닫힐 때만 실행
     if (!showChatbot && isListening) {
-      const text = stopVoiceRecognition();
-      if (text && text.trim()) {
-        // [en] 태그 제거하고 음성입력 태그 추가
-        const cleanText = text.replace('[en] ', '');
-
-        // 영어로 인식된 경우 표시 (짧은 접두사 사용)
-        const isEnglish = text.includes('[en]');
-        // 토큰 수를 줄이기 위해 접두사를 최소화
-        const messagePrefix = isEnglish ? '🇺🇸 ' : '🎤 ';
-
-        // 메시지 전송 (토큰 수를 줄이기 위해 접두사 최소화)
-        handleSendMessage(`${messagePrefix}${cleanText}`);
-      }
+      // 음성 인식 중지 (텍스트 전송하지 않음)
+      stopVoiceRecognition();
     }
-  }, [showChatbot, isListening, stopVoiceRecognition, handleSendMessage]);
+  }, [showChatbot, isListening, stopVoiceRecognition]);
 
   // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
   const currentPoints = 180;

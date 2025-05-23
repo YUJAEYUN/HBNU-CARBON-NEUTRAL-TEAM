@@ -16,7 +16,7 @@ interface ChatInterfaceProps {
   isListening: boolean;
   isSpeaking: boolean;
   recognizedText: string;
-  handleVoiceToggle: () => void;
+  handleVoiceToggle: () => string;
   handleStopSpeaking: () => void;
   speakMessage: (content: string) => void;
   handleSendMessage: (messageText: string) => void;

@@ -49,6 +49,22 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
     // 음성 기능이 비활성화되어 있으면 아무 작업도 하지 않음
     if (!get().voiceEnabled) return;
 
+    // 네트워크 연결 확인 (기본적인 확인)
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      console.error('네트워크 연결이 없습니다. 음성 인식을 시작할 수 없습니다.');
+      set({
+        recognizedText: '네트워크 연결이 없습니다. 연결 상태를 확인해주세요.',
+        isListening: false
+      });
+
+      // 3초 후 메시지 초기화
+      setTimeout(() => {
+        set({ recognizedText: '' });
+      }, 3000);
+
+      return;
+    }
+
     const { speechRecognition, isListening } = get();
     if (!speechRecognition) {
       console.warn('음성 인식 객체가 초기화되지 않았습니다. 다시 초기화합니다.');
@@ -56,6 +72,13 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
       const newRecognition = initSpeechRecognition();
       if (!newRecognition) {
         console.error('음성 인식 초기화 실패');
+        set({ recognizedText: '음성 인식 초기화에 실패했습니다. 브라우저 지원 여부를 확인해주세요.' });
+
+        // 3초 후 메시지 초기화
+        setTimeout(() => {
+          set({ recognizedText: '' });
+        }, 3000);
+
         return;
       }
       set({ speechRecognition: newRecognition });
@@ -100,11 +123,18 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
             // 상태는 유지 (영어로 재시도 중)
           } else if (error.error === 'network') {
             console.error('네트워크 오류로 음성 인식 실패');
-            set({ isListening: false });
-            // 잠시 후 재시도
+            // 네트워크 오류 발생 시 음성 인식 중지
+            set({
+              isListening: false,
+              recognizedText: '네트워크 오류가 발생했습니다. 연결을 확인해주세요.'
+            });
+
+            // 3초 후 메시지 초기화
             setTimeout(() => {
-              get().startVoiceRecognition();
-            }, 1000);
+              set({ recognizedText: '' });
+            }, 3000);
+
+            // 네트워크 오류 시 자동 재시도하지 않음 (무한 루프 방지)
           } else if (error.error === 'no-speech') {
             console.warn('음성이 감지되지 않았습니다.');
             // 상태 유지 (계속 듣는 중)

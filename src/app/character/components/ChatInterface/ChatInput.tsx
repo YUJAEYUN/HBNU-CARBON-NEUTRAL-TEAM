@@ -4,7 +4,7 @@ import { FaMicrophone, FaMicrophoneSlash, FaImage } from "react-icons/fa";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
-  onVoiceToggle: () => void;
+  onVoiceToggle: () => string; // 음성인식 결과를 반환하도록 변경
   onImageUpload: () => void;
   isListening: boolean;
   isLoading: boolean;
@@ -79,9 +79,15 @@ export default function ChatInput({
         {/* 음성 버튼 */}
         <button
           className={`p-2 ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-500 hover:text-gray-700'}`}
-          onClick={onVoiceToggle}
+          onClick={() => {
+            // 음성인식 토글 후 결과 텍스트가 있으면 입력창에 설정
+            const recognizedText = onVoiceToggle();
+            if (recognizedText && !isListening) {
+              setMessage(recognizedText);
+            }
+          }}
           disabled={isLoading}
-          title={isListening ? "음성 인식 중지 및 전송" : "음성으로 대화하기"}
+          title={isListening ? "음성 인식 중지" : "음성으로 대화하기"}
         >
           {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
         </button>

@@ -63,6 +63,9 @@ export const initSpeechRecognition = (): SpeechRecognition | null => {
   recognition.continuous = true;  // 연속 인식 모드 활성화
   recognition.interimResults = true;  // 중간 결과 활성화
 
+  // 네트워크 오류 발생 시 자동 재시도 횟수 제한
+  recognition.maxAlternatives = 1; // 대체 인식 결과 수 제한
+
   return recognition;
 };
 
@@ -198,6 +201,33 @@ export const startListening = (
   recognition.onerror = (event) => {
     console.error('음성 인식 오류:', event.error);
 
+    // 네트워크 오류 처리
+    if (event.error === 'network') {
+      console.warn('네트워크 연결 문제로 음성 인식이 중단되었습니다.');
+
+      // 현재 인식 세션 중지
+      try {
+        recognition.abort();
+      } catch (abortError) {
+        console.error('음성 인식 중단 실패:', abortError);
+      }
+
+      // 오류 콜백 호출
+      if (onError) {
+        onError({
+          ...event,
+          additionalInfo: '네트워크 연결을 확인해주세요. 음성 인식이 중단되었습니다.'
+        });
+      }
+
+      // 종료 콜백 호출
+      if (onEnd) {
+        onEnd();
+      }
+
+      return; // 여기서 함수 종료
+    }
+
     // language-not-supported 오류 처리
     if (event.error === 'language-not-supported') {
       console.warn('한국어 음성 인식이 지원되지 않습니다. 다른 언어로 시도합니다.');
@@ -229,6 +259,7 @@ export const startListening = (
       return; // 여기서 함수 종료
     }
 
+    // 기타 오류 처리
     if (onError) {
       onError(event);
     }
@@ -258,6 +289,21 @@ export const startListening = (
     // 약간의 지연 후 시작 (브라우저가 이전 세션을 완전히 정리할 시간을 줌)
     setTimeout(() => {
       try {
+        // 네트워크 연결 확인 (navigator.onLine은 완벽하지 않지만 기본적인 확인 가능)
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          console.error('네트워크 연결이 없습니다. 음성 인식을 시작할 수 없습니다.');
+          if (onError) {
+            onError({
+              error: 'network',
+              message: '네트워크 연결이 없습니다. 음성 인식을 시작할 수 없습니다.'
+            });
+          }
+          if (onEnd) {
+            onEnd();
+          }
+          return;
+        }
+
         recognition.start();
         console.log('음성 인식 시작됨');
       } catch (startError: any) {
@@ -300,9 +346,20 @@ export const stopListening = (recognition: SpeechRecognition | null): void => {
     const originalOnEnd = recognition.onend;
     recognition.onend = () => {}; // 빈 함수로 설정
 
-    // 음성 인식 중지
-    recognition.stop();
-    console.log('음성 인식 중지됨');
+    // 음성 인식 중지 전에 네트워크 상태 확인
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      console.warn('네트워크 연결이 없습니다. 음성 인식을 강제 종료합니다.');
+      try {
+        // 강제 종료 시도
+        recognition.abort();
+      } catch (abortError) {
+        console.error('음성 인식 강제 종료 실패:', abortError);
+      }
+    } else {
+      // 정상적인 중지 시도
+      recognition.stop();
+      console.log('음성 인식 중지됨');
+    }
 
     // 원래 onend 핸들러 복원 (필요한 경우)
     setTimeout(() => {
@@ -312,6 +369,14 @@ export const stopListening = (recognition: SpeechRecognition | null): void => {
     }, 100);
   } catch (error) {
     console.error('음성 인식 중지 오류:', error);
+
+    // 오류 발생 시 강제 종료 시도
+    try {
+      recognition.abort();
+      console.log('음성 인식 강제 종료됨');
+    } catch (abortError) {
+      console.error('음성 인식 강제 종료 실패:', abortError);
+    }
   }
 };
 
