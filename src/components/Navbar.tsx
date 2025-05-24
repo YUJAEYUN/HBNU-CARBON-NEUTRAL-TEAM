@@ -31,10 +31,9 @@ const NavbarBackground = styled.div`
   left: 0;
   right: 0;
   height: 4.5rem;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(229, 231, 235, 0.8);
-  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+  background-color: var(--toss-white);
+  border-top: 1px solid var(--toss-gray-100);
+  box-shadow: var(--toss-shadow-3);
   width: 100%;
 `;
 
@@ -97,16 +96,16 @@ const IconBackground = styled.div<{ isActive: boolean }>`
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  background-color: ${props => props.isActive ? 'rgba(52, 211, 153, 0.1)' : 'transparent'};
-  transition: all 0.2s ease;
+  border-radius: var(--toss-radius-12);
+  background-color: ${props => props.isActive ? 'var(--color-primary-light)' : 'transparent'};
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 `;
 
 const Label = styled.p<{ isActive: boolean }>`
   font-size: 0.625rem;
-  font-weight: 500;
-  color: ${props => props.isActive ? 'var(--color-primary, #34D399)' : '#9CA3AF'};
-  transition: color 0.2s ease;
+  font-weight: 600;
+  color: ${props => props.isActive ? 'var(--color-primary)' : 'var(--toss-gray-500)'};
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   white-space: nowrap;
 
   @media (max-width: 360px) {
@@ -217,7 +216,7 @@ const NavBar = memo(() => {
                         <item.icon
                           style={{
                             fontSize: '1.25rem',
-                            color: selected ? 'var(--color-primary, #34D399)' : '#9CA3AF',
+                            color: selected ? 'var(--color-primary)' : 'var(--toss-gray-500)',
                             position: 'relative',
                             zIndex: 1
                           }}

@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { FaBolt } from "react-icons/fa";
+import { FaBolt, FaLeaf, FaArrowUp } from "react-icons/fa";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -230,209 +230,255 @@ function LoggedInHome({
   }, [targetValue]);
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[60px]"> {/* 네비게이션 바 높이만큼 패딩 추가 */}
-      {/* 상단 타이틀 - iOS 스타일 헤더 */}
+    <div className="flex-1 flex flex-col h-full pb-[60px] bg-toss-gray-50">
+      {/* 토스 스타일 헤더 - 깔끔한 테마 */}
       <motion.div
-        className="ios-header sticky top-0 z-10"
+        className="bg-white border-b border-toss-gray-200 px-5 py-4 flex items-center justify-between"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
       >
-        <motion.h1
-          className="text-xl font-semibold text-gray-800"
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          C-nergy
-        </motion.h1>
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-toss-green rounded-full flex items-center justify-center">
+            <span className="text-white text-sm font-bold">🌱</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-toss-gray-900">C-nergy</h1>
+            <p className="text-xs text-toss-gray-600 font-medium">탄소중립 실천하기</p>
+          </div>
+        </div>
         <motion.button
-          className="ios-icon-button"
+          className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <FaBolt className="text-primary text-lg" />
+          <FaBolt className="text-toss-gray-600 text-lg" />
         </motion.button>
       </motion.div>
 
       {user ? (
-        <div className="flex-1 flex flex-col px-4 overflow-y-auto pt-4">
-          {/* 탄소 절감량 카드 - iOS 스타일 카드 */}
+        <div className="flex-1 flex flex-col px-5 overflow-y-auto pt-4">
+          {/* 토스 스타일 메인 성과 카드 */}
           <motion.div
-            className="ios-card w-full p-5 mb-5"
+            className="bg-white rounded-2xl p-6 mb-6 shadow-toss-2 border border-toss-gray-200"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           >
-            <p className="text-sm font-medium text-gray-500 mb-2">오늘의 탄소 절감량</p>
-            <div className="flex items-center justify-between">
+            {/* 상단: 제목과 레벨 */}
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <div className="relative">
-                  <motion.p
-                    className="text-3xl font-bold text-gray-800"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                <p className="text-toss-gray-600 text-sm font-medium">오늘 지구를 구한 양</p>
+                <div className="flex items-baseline space-x-1 mt-1">
+                  <motion.span
+                    className="text-4xl font-bold text-toss-green"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
                   >
-                    <span>{carbonValue.toFixed(2)}</span>
-                    <span className="text-lg font-medium">kg</span>
-                  </motion.p>
-                  {/* 애니메이션 완료 시 표시되는 효과 */}
+                    {carbonValue.toFixed(1)}
+                  </motion.span>
+                  <span className="text-lg font-medium text-toss-gray-700">kg CO₂</span>
                   {carbonValue >= targetValue * 0.99 && (
-                    <motion.div
-                      className="absolute -right-2 -top-2"
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
+                    <motion.span
+                      className="text-2xl ml-2"
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
                       transition={{ type: "spring", stiffness: 500, damping: 10 }}
                     >
-                      <span className="text-lg">✨</span>
-                    </motion.div>
+                      🎉
+                    </motion.span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  어제보다 {(mockData.carbonReduction - mockData.yesterdayReduction).toFixed(2)}kg 더 절감했어요!
-                </p>
               </div>
-              <div className="w-16 h-16 relative">
-                <CircularProgressbar
-                  value={mockData.levelProgress}
-                  text={`Lv.${mockData.level}`}
-                  styles={buildStyles({
-                    textSize: '28px',
-                    pathColor: '#34C759', // iOS 그린 색상
-                    textColor: '#248A3D',
-                    trailColor: '#E9F9EF',
-                    pathTransition: 'stroke-dashoffset 0.5s ease 0s',
-                  })}
-                />
+              <div className="text-right">
+                <div className="bg-toss-gray-100 rounded-full px-3 py-1 mb-2">
+                  <span className="text-sm font-bold text-toss-gray-700">Lv.{mockData.level}</span>
+                </div>
+                <motion.div
+                  className="w-12 h-12 bg-toss-green/10 rounded-full flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                >
+                  <span className="text-2xl">🌍</span>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* 하단: 성과 비교 */}
+            <div className="bg-toss-gray-50 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <FaArrowUp className="text-toss-green" />
+                  <span className="text-sm text-toss-gray-700">어제보다</span>
+                  <span className="font-bold text-toss-green">
+                    +{(mockData.carbonReduction - mockData.yesterdayReduction).toFixed(1)}kg
+                  </span>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-toss-gray-600">이번 달 목표</p>
+                  <p className="text-sm font-bold text-toss-gray-900">{mockData.levelProgress}% 달성</p>
+                </div>
               </div>
             </div>
           </motion.div>
 
-          {/* 핵심 버튼 - 4개로 축소 (iOS 스타일) */}
+          {/* 토스 스타일 편의 기능 */}
           <motion.div
-            className="grid grid-cols-2 gap-4 mb-6"
+            className="mb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
           >
-            {[
-              { icon: "🗓️", label: "시간표", path: "/timetable", id: "timetable" },
-              { icon: "🍽️", label: "학식", path: "/community/hansik", id: "hansik" },
-              { icon: "📦", label: "중고장터", path: "/marketplace", id: "marketplace" },
-              { icon: "🚗", label: "카풀", path: "/carpool", id: "carpool" }
-            ].map((item, index) => (
-              <motion.button
-                key={item.id}
-                className="ios-grid-item h-28 rounded-2xl"
-                onClick={() => router.push(item.path)}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index, duration: 0.3 }}
-              >
-                <span className="text-4xl mb-2">
-                  {item.icon}
-                </span>
-                <span className="text-sm font-medium text-gray-700">{item.label}</span>
-              </motion.button>
-            ))}
+            <h2 className="text-lg font-bold text-toss-gray-900 mb-4 px-1">편의 기능</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: "🗓️", label: "시간표", path: "/timetable", id: "timetable", color: "bg-blue-50" },
+                { icon: "🍽️", label: "학식", path: "/community/hansik", id: "hansik", color: "bg-orange-50" },
+                { icon: "📦", label: "중고장터", path: "/marketplace", id: "marketplace", color: "bg-purple-50" },
+                { icon: "🚗", label: "카풀", path: "/carpool", id: "carpool", color: "bg-green-50" }
+              ].map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  className="bg-white rounded-2xl p-4 shadow-toss-1 border border-toss-gray-200 h-20 flex items-center space-x-3 hover:shadow-toss-2 transition-shadow"
+                  onClick={() => router.push(item.path)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index + 0.3, duration: 0.3 }}
+                >
+                  <div className={`w-12 h-12 ${item.color} rounded-xl flex items-center justify-center`}>
+                    <span className="text-2xl">{item.icon}</span>
+                  </div>
+                  <span className="font-medium text-toss-gray-800">{item.label}</span>
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
 
-          {/* 오늘의 활동 - iOS 스타일 카드 */}
+          {/* 토스 스타일 오늘의 성과 */}
           <motion.div
             className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            transition={{ delay: 0.4, duration: 0.3 }}
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">오늘의 활동</h2>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h2 className="text-lg font-bold text-toss-gray-900">오늘의 환경 실천</h2>
+              <button className="text-sm text-toss-green font-medium">전체보기</button>
+            </div>
 
             {certifications.length > 0 ? (
-              certifications
-                .filter(cert => cert.date === new Date().toISOString().split('T')[0])
-                .slice(0, 3) // 최대 3개만 표시
-                .map((certification, index) => (
-                  <motion.div
-                    key={certification.id}
-                    className="ios-card p-4 mb-3"
-                    whileHover={{ scale: 1.02 }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
-                  >
-                    <p className="text-gray-800 font-medium">{certification.title}</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm text-gray-500">{certification.time} • {certification.timeAgo}</span>
-                      <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
+              <div className="space-y-3">
+                {certifications
+                  .filter(cert => cert.date === new Date().toISOString().split('T')[0])
+                  .slice(0, 3)
+                  .map((certification, index) => (
+                    <motion.div
+                      key={certification.id}
+                      className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-toss-green/10 rounded-full flex items-center justify-center">
+                          <span className="text-lg">✅</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-toss-gray-900">{certification.title}</p>
+                          <p className="text-sm text-toss-gray-600">{certification.time} • {certification.timeAgo}</p>
+                        </div>
+                      </div>
+                      <div className="bg-toss-green/10 text-toss-green px-3 py-1 rounded-full text-sm font-bold">
                         -{certification.carbonReduction}kg
-                      </span>
-                    </div>
-                  </motion.div>
-                ))
+                      </div>
+                    </motion.div>
+                  ))}
+              </div>
             ) : (
-              // 인증 데이터가 없을 때 목업 데이터 표시
-              mockData.activities.map((activity, index) => (
-                <motion.div
-                  key={activity.id}
-                  className="ios-card p-4 mb-3"
-                  whileHover={{ scale: 1.02 }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
+              <div className="bg-white rounded-2xl p-6 text-center border border-toss-gray-200 shadow-toss-1">
+                <div className="w-16 h-16 bg-toss-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🌱</span>
+                </div>
+                <h3 className="font-bold text-toss-gray-900 mb-2">첫 번째 환경 실천을 시작해보세요!</h3>
+                <p className="text-sm text-toss-gray-600 mb-4">텀블러 사용, 분리배출 등 작은 실천이 큰 변화를 만듭니다</p>
+                <button
+                  className="bg-toss-green text-white px-6 py-2 rounded-full font-medium text-sm hover:bg-toss-green/90 transition-colors"
+                  onClick={() => router.push('/certification/tumbler')}
                 >
-                  <p className="text-gray-800 font-medium">{activity.title}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-gray-500">{activity.time} • {activity.timeAgo}</span>
-                    <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
-                      -{activity.reduction}kg
-                    </span>
-                  </div>
-                </motion.div>
-              ))
+                  지금 시작하기
+                </button>
+              </div>
             )}
           </motion.div>
 
-          {/* 개인실적 - iOS 스타일 */}
+          {/* 토스 스타일 이번 달 목표 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
             className="mb-6"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">개인실적</h2>
-            <motion.div
-              className="ios-card p-4 mb-3"
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="flex justify-between items-center">
-                <p className="text-gray-800 font-medium">이번 달 탄소 절감량</p>
-                <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
-                  {monthlyReduction > 0 ? monthlyReduction.toFixed(2) : mockData.personalStats.monthlyReduction}kg
-                </span>
+            <h2 className="text-lg font-bold text-toss-gray-900 mb-4 px-1">이번 달 환경 목표</h2>
+            <div className="bg-white rounded-2xl p-6 shadow-toss-1 border border-toss-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-toss-gray-600">목표까지</p>
+                  <p className="text-2xl font-bold text-toss-gray-900">
+                    {(mockData.personalStats.monthlyGoal - (monthlyReduction > 0 ? monthlyReduction : mockData.personalStats.monthlyReduction)).toFixed(1)}kg
+                  </p>
+                  <p className="text-sm text-toss-gray-600">남았어요</p>
+                </div>
+                <div className="text-right">
+                  <div className="w-16 h-16 relative">
+                    <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#E5E7EB"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#22C55E"
+                        strokeWidth="2"
+                        strokeDasharray={`${monthlyReduction > 0
+                          ? Math.min((monthlyReduction / mockData.personalStats.monthlyGoal) * 100, 100)
+                          : mockData.personalStats.progress
+                        }, 100`}
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-sm font-bold text-toss-green">
+                        {monthlyReduction > 0
+                          ? Math.min(Math.round((monthlyReduction / mockData.personalStats.monthlyGoal) * 100), 100)
+                          : mockData.personalStats.progress
+                        }%
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="mt-4 bg-gray-100 h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-primary h-full transition-all duration-1000"
-                  style={{
-                    width: `${monthlyReduction > 0
-                      ? Math.min((monthlyReduction / mockData.personalStats.monthlyGoal) * 100, 100)
-                      : mockData.personalStats.progress
-                    }%`
-                  }}
-                ></div>
+
+              <div className="bg-toss-green/5 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-toss-gray-600 font-medium">현재 달성량</p>
+                    <p className="text-lg font-bold text-toss-green">
+                      {monthlyReduction > 0 ? monthlyReduction.toFixed(1) : mockData.personalStats.monthlyReduction}kg
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-toss-gray-600 font-medium">목표</p>
+                    <p className="text-lg font-bold text-toss-gray-900">{mockData.personalStats.monthlyGoal}kg</p>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between mt-2">
-                <span className="text-xs text-gray-500">목표: {mockData.personalStats.monthlyGoal}kg</span>
-                <span className="text-xs text-primary font-medium">
-                  {monthlyReduction > 0
-                    ? Math.min(Math.round((monthlyReduction / mockData.personalStats.monthlyGoal) * 100), 100)
-                    : mockData.personalStats.progress
-                  }%
-                </span>
-              </div>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* 탄소중립 활동 - iOS 스타일 */}

@@ -13,17 +13,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="theme-color" content="#ffffff" />
       </head>
-      <body className="bg-white text-gray-900 min-h-screen">
+      <body className="bg-toss-gray-50 text-toss-gray-900 min-h-screen">
         <AuthProvider>
-          {/* 반응형 레이아웃 - 모든 화면 크기에 맞게 조정 */}
+          {/* 토스 스타일 모바일 레이아웃 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="w-full max-w-md mx-auto h-full min-h-screen bg-white relative flex flex-col pb-[4.5rem]"
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-md mx-auto h-full min-h-screen bg-toss-white relative flex flex-col pb-[4.5rem] shadow-toss-1"
           >
             <div className="flex-grow overflow-y-auto overflow-x-hidden">{children}</div>
-            <NavBar /> {/* 네비게이션 바는 Navbar 컴포넌트 내에서 로그인 상태에 따라 표시 여부 결정 */}
+            <NavBar />
           </motion.div>
         </AuthProvider>
       </body>
