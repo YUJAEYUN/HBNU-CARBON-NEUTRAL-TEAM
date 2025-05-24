@@ -20,6 +20,8 @@ export default function TumblerCertificationPage() {
   const [showReceiptImageBox, setShowReceiptImageBox] = useState(false);
   const [showCertificationAnimation, setShowCertificationAnimation] = useState(false);
   const [certificationInProgress, setCertificationInProgress] = useState(false);
+  const [certificationResult, setCertificationResult] = useState<any>(null);
+  const [certificationError, setCertificationError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,13 +65,67 @@ export default function TumblerCertificationPage() {
     receiptFileInputRef.current?.click();
   };
 
-  const handleUploadCertification = () => {
+  const handleUploadCertification = async () => {
     if (!imageFile || certificationInProgress) {
       return;
     }
 
     setCertificationInProgress(true);
-    setShowCertificationAnimation(true);
+
+    try {
+      // 이미지를 Base64로 변환
+      const imageBase64 = await convertFileToBase64(imageFile);
+
+      // 텀블러 인증 API 호출
+      const response = await fetch('/api/certification/tumbler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageBase64,
+          receiptImage: receiptImageFile ? await convertFileToBase64(receiptImageFile) : null,
+        }),
+      });
+
+      const result = await response.json();
+
+      // API 호출 완료 후 결과 저장하고 애니메이션 시작
+      setCertificationResult(result);
+      setShowCertificationAnimation(true);
+
+    } catch (error) {
+      console.error('텀블러 인증 오류:', error);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+      setCertificationError(errorMessage);
+
+      // 에러 발생 시에도 애니메이션 표시 (실패 애니메이션)
+      setCertificationResult({
+        success: false,
+        verified: false,
+        carbonReduction: 0,
+        points: 0,
+        confidence: 0,
+        error: errorMessage,
+        reason: '네트워크 오류 또는 서버 오류가 발생했습니다.'
+      });
+      setShowCertificationAnimation(true);
+    }
+  };
+
+  // 파일을 Base64로 변환하는 함수
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // data:image/jpeg;base64, 부분을 제거하고 순수 base64만 반환
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   // 인증 애니메이션 완료 후 처리
@@ -77,34 +133,45 @@ export default function TumblerCertificationPage() {
     setShowCertificationAnimation(false);
     setCertificationInProgress(false);
 
-    // 인증 데이터 저장
-    const newCertification = {
-      id: Date.now(),
-      type: 'tumbler',
-      title: '텀블러 인증',
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toTimeString().split(' ')[0].substring(0, 5),
-      timeAgo: '방금 전',
-      location: '내 위치',
-      carbonReduction: 0.12,
-      verified: false,
-      status: '검토중',
-      points: 15,
-      image: image,
-      receiptImage: receiptImage,
-    };
+    // 인증 결과에 따른 처리
+    if (certificationError || (certificationResult && !certificationResult.success)) {
+      // 인증 실패 시 상태 초기화
+      setCertificationError(null);
+      setCertificationResult(null);
+      return;
+    }
 
-    // 로컬 스토리지에 저장
-    try {
-      const existing = localStorage.getItem('certifications');
-      const certs = existing ? JSON.parse(existing) : [];
-      localStorage.setItem('certifications', JSON.stringify([newCertification, ...certs]));
+    if (certificationResult) {
+      // 인증 성공 시 결과 저장
+      const newCertification = {
+        id: Date.now(),
+        type: 'tumbler',
+        title: '텀블러 인증',
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0].substring(0, 5),
+        timeAgo: '방금 전',
+        location: '내 위치',
+        carbonReduction: certificationResult.carbonReduction || 0.3,
+        verified: certificationResult.verified || true,
+        status: certificationResult.verified ? '인증완료' : '검토중',
+        points: certificationResult.points || 15,
+        image: image,
+        receiptImage: receiptImage,
+        analysisResult: certificationResult.analysisResult,
+      };
 
-      // 캐릭터 페이지로 이동
-      router.push('/character');
-    } catch (error) {
-      console.error('[Tumbler Upload] Error saving certification:', error);
-      router.push('/character');
+      // 로컬 스토리지에 저장
+      try {
+        const existing = localStorage.getItem('certifications');
+        const certs = existing ? JSON.parse(existing) : [];
+        localStorage.setItem('certifications', JSON.stringify([newCertification, ...certs]));
+
+        // 캐릭터 페이지로 이동
+        router.push('/character');
+      } catch (error) {
+        console.error('[Tumbler Upload] Error saving certification:', error);
+        router.push('/character');
+      }
     }
   };
 
@@ -333,6 +400,7 @@ export default function TumblerCertificationPage() {
         isVisible={showCertificationAnimation}
         certificationType="tumbler"
         onComplete={handleAnimationComplete}
+        certificationResult={certificationResult}
       />
     </div>
   );

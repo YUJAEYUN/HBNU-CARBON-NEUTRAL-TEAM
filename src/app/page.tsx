@@ -12,6 +12,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination } from 'swiper/modules';
+import { Certification } from '@/types/certification';
 
 export default function HomePage() {
   const router = useRouter();
@@ -134,7 +135,64 @@ function LoggedInHome({
 }>) {
   // 탄소 절감량 애니메이션을 위한 상태
   const [carbonValue, setCarbonValue] = useState(0);
-  const targetValue = mockData.carbonReduction; // 목업 데이터에서 값 가져오기
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [totalCarbonReduction, setTotalCarbonReduction] = useState(0);
+  const [monthlyReduction, setMonthlyReduction] = useState(0);
+
+  // 실제 인증 데이터 로드
+  useEffect(() => {
+    const loadCertifications = () => {
+      try {
+        const storedCertifications = localStorage.getItem('certifications');
+        if (storedCertifications) {
+          const parsedCertifications = JSON.parse(storedCertifications);
+          setCertifications(parsedCertifications);
+
+          // 오늘 날짜의 인증들만 필터링하여 탄소 절감량 계산
+          const today = new Date().toISOString().split('T')[0];
+          const todayCertifications = parsedCertifications.filter((cert: Certification) =>
+            cert.date === today
+          );
+
+          const todayReduction = todayCertifications.reduce((total: number, cert: Certification) =>
+            total + cert.carbonReduction, 0
+          );
+
+          // 이번 달 탄소 절감량 계산
+          const currentMonth = new Date().getMonth();
+          const currentYear = new Date().getFullYear();
+          const monthlyCertifications = parsedCertifications.filter((cert: Certification) => {
+            const certDate = new Date(cert.date);
+            return certDate.getMonth() === currentMonth && certDate.getFullYear() === currentYear;
+          });
+
+          const monthlyReductionTotal = monthlyCertifications.reduce((total: number, cert: Certification) =>
+            total + cert.carbonReduction, 0
+          );
+
+          setTotalCarbonReduction(todayReduction);
+          setMonthlyReduction(monthlyReductionTotal);
+        }
+      } catch (error) {
+        console.error('인증 데이터 로드 오류:', error);
+      }
+    };
+
+    loadCertifications();
+
+    // 인증 업데이트 이벤트 리스너
+    const handleCertificationUpdate = () => {
+      loadCertifications();
+    };
+
+    window.addEventListener('certificationUpdated', handleCertificationUpdate);
+
+    return () => {
+      window.removeEventListener('certificationUpdated', handleCertificationUpdate);
+    };
+  }, []);
+
+  const targetValue = totalCarbonReduction || mockData.carbonReduction; // 실제 데이터 우선, 없으면 목업 데이터
 
   // 컴포넌트가 마운트되면 애니메이션 시작
   useEffect(() => {
@@ -283,7 +341,7 @@ function LoggedInHome({
           </motion.div>
 
           {/* 오늘의 활동 - iOS 스타일 카드 */}
-          {/* <motion.div
+          <motion.div
             className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -291,25 +349,50 @@ function LoggedInHome({
           >
             <h2 className="text-lg font-semibold text-gray-800 mb-3 px-1">오늘의 활동</h2>
 
-            {mockData.activities.map((activity, index) => (
-              <motion.div
-                key={activity.id}
-                className="ios-card p-4 mb-3"
-                whileHover={{ scale: 1.02 }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
-              >
-                <p className="text-gray-800 font-medium">{activity.title}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm text-gray-500">{activity.time} • {activity.timeAgo}</span>
-                  <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
-                    -{activity.reduction}kg
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div> */}
+            {certifications.length > 0 ? (
+              certifications
+                .filter(cert => cert.date === new Date().toISOString().split('T')[0])
+                .slice(0, 3) // 최대 3개만 표시
+                .map((certification, index) => (
+                  <motion.div
+                    key={certification.id}
+                    className="ios-card p-4 mb-3"
+                    whileHover={{ scale: 1.02 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
+                  >
+                    <p className="text-gray-800 font-medium">{certification.title}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-sm text-gray-500">{certification.time} • {certification.timeAgo}</span>
+                      <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
+                        -{certification.carbonReduction}kg
+                      </span>
+                    </div>
+                  </motion.div>
+                ))
+            ) : (
+              // 인증 데이터가 없을 때 목업 데이터 표시
+              mockData.activities.map((activity, index) => (
+                <motion.div
+                  key={activity.id}
+                  className="ios-card p-4 mb-3"
+                  whileHover={{ scale: 1.02 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index + 0.5, duration: 0.3 }}
+                >
+                  <p className="text-gray-800 font-medium">{activity.title}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-500">{activity.time} • {activity.timeAgo}</span>
+                    <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
+                      -{activity.reduction}kg
+                    </span>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </motion.div>
 
           {/* 개인실적 - iOS 스타일 */}
           <motion.div
@@ -326,18 +409,28 @@ function LoggedInHome({
               <div className="flex justify-between items-center">
                 <p className="text-gray-800 font-medium">이번 달 탄소 절감량</p>
                 <span className="text-sm bg-gray-100 text-primary font-medium px-3 py-1 rounded-full">
-                  {mockData.personalStats.monthlyReduction}kg
+                  {monthlyReduction > 0 ? monthlyReduction.toFixed(2) : mockData.personalStats.monthlyReduction}kg
                 </span>
               </div>
               <div className="mt-4 bg-gray-100 h-2 rounded-full overflow-hidden">
                 <div
                   className="bg-primary h-full transition-all duration-1000"
-                  style={{ width: `${mockData.personalStats.progress}%` }}
+                  style={{
+                    width: `${monthlyReduction > 0
+                      ? Math.min((monthlyReduction / mockData.personalStats.monthlyGoal) * 100, 100)
+                      : mockData.personalStats.progress
+                    }%`
+                  }}
                 ></div>
               </div>
               <div className="flex justify-between mt-2">
                 <span className="text-xs text-gray-500">목표: {mockData.personalStats.monthlyGoal}kg</span>
-                <span className="text-xs text-primary font-medium">{mockData.personalStats.progress}%</span>
+                <span className="text-xs text-primary font-medium">
+                  {monthlyReduction > 0
+                    ? Math.min(Math.round((monthlyReduction / mockData.personalStats.monthlyGoal) * 100), 100)
+                    : mockData.personalStats.progress
+                  }%
+                </span>
               </div>
             </motion.div>
           </motion.div>

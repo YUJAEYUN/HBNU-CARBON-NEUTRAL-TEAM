@@ -162,8 +162,8 @@ export async function generateChatResponse(messages: ChatMessage[]): Promise<Cha
       (typeof msg.content === 'string' && msg.content.includes('[이미지:'))
     );
 
-    // 이미지 분석이 필요한 경우 GPT-4 Vision 모델 사용
-    const model = hasImageMessage ? 'gpt-4-vision-preview' : 'gpt-4';
+    // 이미지 분석이 필요한 경우 GPT-4o 모델 사용
+    const model = hasImageMessage ? 'gpt-4o' : 'gpt-4o';
 
     // OpenAI API 호출
     const response = await openai.chat.completions.create({
@@ -224,7 +224,7 @@ export async function analyzeImage(imageBase64: string): Promise<string> {
     const base64Data = imageBase64.split(',')[1];
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -278,12 +278,12 @@ export async function textToSpeech(text: string): Promise<ArrayBuffer> {
       timeout: 30000,
     });
 
-    // gpt-4o-mini-tts 모델 사용
-    console.log('gpt-4o-mini-tts 모델로 음성 생성 시도...');
+    // tts-1-hd 모델 사용 (고품질 TTS)
+    console.log('tts-1-hd 모델로 음성 생성 시도...');
 
-    // OpenAI SDK를 통한 호출 (이미지에 보이는 설정대로)
+    // OpenAI SDK를 통한 호출
     const response = await openai.audio.speech.create({
-      model: "gpt-4o-mini-tts", // GPT-4o 기반 TTS 모델
+      model: "tts-1-hd", // 고품질 TTS 모델
       voice: "echo", // Echo 음성
       input: text,
       speed: 1.0, // 기본 속도
@@ -292,10 +292,10 @@ export async function textToSpeech(text: string): Promise<ArrayBuffer> {
 
     // 응답을 ArrayBuffer로 변환
     const buffer = await response.arrayBuffer();
-    console.log('gpt-4o-mini-tts 모델 응답 성공, 버퍼 크기:', buffer.byteLength, 'bytes');
+    console.log('tts-1-hd 모델 응답 성공, 버퍼 크기:', buffer.byteLength, 'bytes');
     return buffer;
   } catch (error: any) {
-    console.error('gpt-4o-mini-tts 오류:', error);
+    console.error('tts-1-hd 오류:', error);
 
     // 오류 발생 시 다른 TTS 모델로 폴백
     try {
@@ -306,9 +306,9 @@ export async function textToSpeech(text: string): Promise<ArrayBuffer> {
         return new ArrayBuffer(0);
       }
 
-      console.log('다른 TTS 모델로 폴백합니다.');
+      console.log('tts-1 모델로 폴백합니다.');
       const fallbackResponse = await openai.audio.speech.create({
-        model: "tts-1-hd", // 고품질 오디오 모델로 폴백
+        model: "tts-1", // 기본 TTS 모델로 폴백
         voice: "echo", // Echo 음성으로 통일
         input: text,
         speed: 1.0, // 기본 속도
