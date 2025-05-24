@@ -152,8 +152,8 @@ export default function CharacterPage() {
     }
   }, [showChatbot, isListening, recording, toggleVoiceRecognition]);
 
-  // 현재 사용자 포인트 (실제로는 API에서 가져올 값)
-  const currentPoints = 180;
+  // 현재 사용자 포인트 (인증 데이터에서 계산)
+  const currentPoints = certifications.reduce((total, cert) => total + (cert.points || 0), 0);
 
   // 현재 캐릭터 단계 계산
   const currentStage = CHARACTER_STAGES.reduce((prev, curr) => {
@@ -174,17 +174,57 @@ export default function CharacterPage() {
 
   // 인증 내역 데이터 로드
   useEffect(() => {
-    // 인증 페이지에서 가져온 SAMPLE_CERTIFICATIONS 데이터 직접 사용
-    setIsLoading(true);
-    try {
-      console.log('[Character Page] Using SAMPLE_CERTIFICATIONS data');
-      setCertifications(SAMPLE_CERTIFICATIONS);
-    } catch (err) {
-      console.error('인증 목록 가져오기 오류:', err);
-      setCertifications([]);
-    } finally {
-      setIsLoading(false);
-    }
+    const loadCertifications = () => {
+      setIsLoading(true);
+      try {
+        // 로컬 스토리지에서 실제 인증 데이터 가져오기
+        const storedCertifications = localStorage.getItem('certifications');
+        if (storedCertifications) {
+          const parsedCertifications = JSON.parse(storedCertifications);
+          console.log('[Character Page] Loaded certifications from localStorage:', parsedCertifications);
+          setCertifications(parsedCertifications);
+        } else {
+          // 로컬 스토리지에 데이터가 없으면 샘플 데이터 사용
+          console.log('[Character Page] No certifications in localStorage, using sample data');
+          setCertifications(SAMPLE_CERTIFICATIONS);
+        }
+      } catch (err) {
+        console.error('인증 목록 가져오기 오류:', err);
+        // 오류 발생 시 샘플 데이터 사용
+        setCertifications(SAMPLE_CERTIFICATIONS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCertifications();
+
+    // 페이지가 포커스될 때마다 데이터 새로고침 (다른 페이지에서 인증 후 돌아왔을 때)
+    const handleFocus = () => {
+      loadCertifications();
+    };
+
+    // storage 이벤트 리스너 추가 (같은 탭에서 localStorage 변경 감지)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'certifications') {
+        loadCertifications();
+      }
+    };
+
+    // 커스텀 이벤트 리스너 추가 (같은 페이지에서 localStorage 변경 감지)
+    const handleCertificationUpdate = () => {
+      loadCertifications();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('certificationUpdated', handleCertificationUpdate);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('certificationUpdated', handleCertificationUpdate);
+    };
   }, []);
 
   // 로딩 중일 때 로딩 화면 표시

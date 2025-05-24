@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaChevronDown } from 'react-icons/fa';
+import CertificationAnimation from '@/components/CertificationAnimation';
 
 export default function ReceiptCertificationPage() {
   const router = useRouter();
@@ -10,6 +11,8 @@ export default function ReceiptCertificationPage() {
   const [image, setImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [showImageBox, setShowImageBox] = useState(true);
+  const [showCertificationAnimation, setShowCertificationAnimation] = useState(false);
+  const [certificationInProgress, setCertificationInProgress] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,25 +38,32 @@ export default function ReceiptCertificationPage() {
   };
 
   const handleUploadCertification = () => {
-    if (!imageFile) {
-      // 토스 스타일은 버튼 비활성화로 처리하므로 alert 대신 조용히 리턴
+    if (!imageFile || certificationInProgress) {
       return;
     }
 
-    // 인증 진행 중 UI 표시 로직 추가 가능
+    setCertificationInProgress(true);
+    setShowCertificationAnimation(true);
+  };
 
+  // 인증 애니메이션 완료 후 처리
+  const handleAnimationComplete = () => {
+    setShowCertificationAnimation(false);
+    setCertificationInProgress(false);
+
+    // 인증 데이터 저장
     const newCertification = {
       id: Date.now(),
       type: 'receipt',
-      title: '전자영수증 인증', // 고정 타이틀 사용 (토스 스타일은 단순함 추구)
+      title: '전자영수증 인증',
       date: new Date().toISOString().split('T')[0],
       time: new Date().toTimeString().split(' ')[0].substring(0, 5),
       timeAgo: '방금 전',
-      location: '내 위치', // 간단한 위치 표시
-      carbonReduction: 0.05, // 고정된 탄소 절감량 (전자영수증 사용 시)
+      location: '내 위치',
+      carbonReduction: 0.05,
       verified: false,
       status: '검토중',
-      points: 10, // 고정된 포인트 (전자영수증 사용 시)
+      points: 10,
       image: image,
     };
 
@@ -63,11 +73,11 @@ export default function ReceiptCertificationPage() {
       const certs = existing ? JSON.parse(existing) : [];
       localStorage.setItem('certifications', JSON.stringify([newCertification, ...certs]));
 
-      // 성공 시 홈으로 이동 (토스는 작업 완료 후 홈으로 이동하는 패턴 사용)
-      router.push('/');
+      // 캐릭터 페이지로 이동
+      router.push('/character');
     } catch (error) {
       console.error('[Receipt Upload] Error saving certification:', error);
-      // 오류 처리 로직 추가 가능
+      router.push('/character');
     }
   };
 
@@ -192,11 +202,15 @@ export default function ReceiptCertificationPage() {
         {/* 인증 업로드 버튼 - 토스 스타일 */}
         <div className="sticky bottom-5 mt-4 pb-8">
           <button
-            className={`w-full py-4 rounded-xl text-base font-bold shadow-md transition-all ${image ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400'}`}
+            className={`w-full py-4 rounded-xl text-base font-bold shadow-md transition-all ${
+              image && !certificationInProgress
+                ? 'bg-primary text-white'
+                : 'bg-gray-200 text-gray-400'
+            } ${certificationInProgress ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={handleUploadCertification}
-            disabled={!image}
+            disabled={!image || certificationInProgress}
           >
-            인증하기
+            {certificationInProgress ? '인증 중...' : '인증하기'}
           </button>
         </div>
 
@@ -217,6 +231,13 @@ export default function ReceiptCertificationPage() {
           className="hidden"
         />
       </div>
+
+      {/* 인증 애니메이션 */}
+      <CertificationAnimation
+        isVisible={showCertificationAnimation}
+        certificationType="receipt"
+        onComplete={handleAnimationComplete}
+      />
     </div>
   );
 }

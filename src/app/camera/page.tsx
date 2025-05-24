@@ -6,44 +6,11 @@ import { FaArrowLeft, FaSpinner, FaCheck, FaTimes, FaRedo, FaCamera, FaMapMarker
 import { CertificationType, CERTIFICATION_TYPE_INFO } from '@/types/certification';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface CertificationAnalysisResult {
-  success: boolean;
-  message?: string;
-  confidence?: number;
-}
-
 export default function CameraPage() {
-  const [image, setImage] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [analysisResult, setAnalysisResult] = useState<CertificationAnalysisResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<CertificationType>('other');
-  const [showTypeList, setShowTypeList] = useState(false);
-  const [title, setTitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [showMethodModal, setShowMethodModal] = useState(false);
-  const [selectedTypeForModal, setSelectedTypeForModal] = useState<CertificationType | null>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const [isCapturing, setIsCapturing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-
-  const selectedTypeInfo = CERTIFICATION_TYPE_INFO[selectedType];
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
-      setImageFile(file);
-      setAnalysisResult(null);
-      setError(null);
-    }
-  };
 
   const handleCameraClick = () => {
     setShowGuideModal(true);
@@ -53,238 +20,12 @@ export default function CameraPage() {
     setShowLocationModal(true);
   };
 
-  const handleStartCapture = () => {
-    setShowGuideModal(false);
-    setIsCapturing(true);
+  // 인증 페이지로 이동하는 함수
+  const handleCertificationSubmit = (type: CertificationType) => {
+    router.push(`/certification/${type}`);
   };
 
-  const toggleTypeList = () => setShowTypeList(!showTypeList);
-  const handleSelectType = (type: CertificationType) => {
-    setSelectedType(type);
-    setShowTypeList(false);
-  };
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value);
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value);
-
-  // 카테고리 버튼 UI로 변경하여 관련 함수 제거
-
-  const uploadImage = async () => {
-    if (!imageFile) return;
-
-    const certTitle = title.trim() || `${selectedTypeInfo.label} 인증`;
-    const certLocation = location.trim() || '위치 정보 없음';
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result: CertificationAnalysisResult = {
-        success: true,
-        message: '이미지가 성공적으로 분석되었습니다.',
-        confidence: 0.95,
-      };
-      setAnalysisResult(result);
-
-      if (result.success) {
-        const newCertification = {
-          id: Date.now(),
-          type: selectedType,
-          title: certTitle,
-          date: new Date().toISOString().split('T')[0],
-          time: new Date().toTimeString().split(' ')[0].substring(0, 5),
-          timeAgo: '방금 전',
-          location: certLocation,
-          carbonReduction: selectedTypeInfo.carbonReduction || Math.round(Math.random() * 30) / 100,
-          verified: false,
-          status: '검토중',
-          points: selectedTypeInfo.points || Math.round(Math.random() * 20) + 5,
-          image: image || '/certification/tumbler.jpg',
-        };
-
-        const existing = localStorage.getItem('certifications');
-        const certs = existing ? JSON.parse(existing) : [];
-        localStorage.setItem('certifications', JSON.stringify([newCertification, ...certs]));
-
-        setTimeout(() => router.push('/certification'), 3000);
-      }
-    } catch (err) {
-      console.error('이미지 업로드 오류:', err);
-      setError(err instanceof Error ? err.message : '이미지 업로드 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRetry = () => {
-    setImage(null);
-    setImageFile(null);
-    setAnalysisResult(null);
-    setError(null);
-  };
-
-  const handleCapture = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-
-      if (context) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      }
-    }
-  };
-
-  const handleRetake = () => {
-    setIsCapturing(false);
-  };
-
-  const handleSubmit = () => {
-    // TODO: 이미지 저장 및 서버 전송 로직 구현
-    router.push('/certification');
-  };
-
-  // 인증 방법 모달 내용 생성 함수
-  const renderMethodModalContent = () => {
-    if (!selectedTypeForModal) return null;
-
-    const typeInfo = CERTIFICATION_TYPE_INFO[selectedTypeForModal];
-
-    // 각 인증 유형별 인증 방법 설명
-    const methodDescriptions: Record<CertificationType, { steps: string[], tips: string[] }> = {
-      'tumbler': {
-        steps: [
-          '텀블러를 사용한 음료 구매 후 영수증과 함께 촬영해주세요.',
-          '텀블러와 음료가 함께 보이도록 촬영해주세요.',
-          '가게 이름이나 위치가 보이면 더 좋습니다.'
-        ],
-        tips: [
-          '일회용컵 대신 텀블러를 사용하면 약 12g의 탄소 배출량을 줄일 수 있어요!',
-          '텀블러 사용 시 많은 카페에서 할인 혜택을 제공합니다.'
-        ]
-      },
-      'container': {
-        steps: [
-          '다회용기에 음식을 포장한 모습을 촬영해주세요.',
-          '가게 이름이나 위치가 보이도록 함께 촬영하면 좋습니다.',
-          '영수증이 있다면 함께 촬영해주세요.'
-        ],
-        tips: [
-          '일회용 용기 대신 다회용기를 사용하면 약 25g의 탄소 배출량을 줄일 수 있어요!',
-          '다회용기 사용 시 일부 가게에서는 할인 혜택을 제공합니다.'
-        ]
-      },
-      'receipt': {
-        steps: [
-          '전자영수증 사용 화면을 캡처하거나 촬영해주세요.',
-          '영수증 정보(가게명, 날짜, 금액)가 잘 보이도록 해주세요.'
-        ],
-        tips: [
-          '종이영수증 1장 대신 전자영수증을 사용하면 약 5g의 탄소 배출량을 줄일 수 있어요!',
-          '전자영수증은 분실 걱정 없이 관리할 수 있어 편리합니다.'
-        ]
-      },
-      'email': {
-        steps: [
-          '삭제한 이메일 목록 또는 휴지통 화면을 캡처해주세요.',
-          '삭제한 이메일 개수가 보이도록 해주세요.'
-        ],
-        tips: [
-          '불필요한 이메일 50개를 삭제하면 약 3g의 탄소 배출량을 줄일 수 있어요!',
-          '정기적인 이메일 정리는 디지털 탄소발자국을 줄이는 좋은 방법입니다.'
-        ]
-      },
-      'refill': {
-        steps: [
-          '리필스테이션 사용 모습을 촬영해주세요.',
-          '리필한 제품과 용기가 함께 보이도록 해주세요.',
-          '가게 이름이나 위치가 보이면 더 좋습니다.'
-        ],
-        tips: [
-          '리필스테이션을 이용하면 약 18g의 탄소 배출량을 줄일 수 있어요!',
-          '리필 제품은 일반 제품보다 가격이 저렴한 경우가 많습니다.'
-        ]
-      },
-      'recycle': {
-        steps: [
-          '전자제품 분리배출 모습을 촬영해주세요.',
-          '배출한 제품의 종류가 식별 가능하도록 촬영해주세요.',
-          '분리수거함이나 수거 장소가 함께 보이면 좋습니다.'
-        ],
-        tips: [
-          '전자제품을 올바르게 분리배출하면 약 30g의 탄소 배출량을 줄일 수 있어요!',
-          '배터리는 반드시 분리하여 배출해야 합니다.'
-        ]
-      },
-      'other': {
-        steps: [
-          '탄소중립에 기여하는 활동 모습을 촬영해주세요.',
-          '활동 내용을 잘 알 수 있도록 상세히 촬영해주세요.'
-        ],
-        tips: [
-          '일상 속 작은 실천이 모여 큰 변화를 만듭니다!',
-          '새로운 탄소중립 활동을 발굴하면 추가 포인트를 받을 수 있어요.'
-        ]
-      }
-    };
-
-    const methodInfo = methodDescriptions[selectedTypeForModal];
-
-    return (
-      <div className="p-5">
-        <div className="flex items-center mb-4">
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center mr-3"
-            style={{ backgroundColor: `${typeInfo.color}30` }}
-          >
-            <span className="text-2xl">{typeInfo.icon}</span>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-gray-800">{typeInfo.label} 인증</h3>
-            <p className="text-sm text-gray-500">인증 방법을 확인해보세요</p>
-          </div>
-        </div>
-
-        <div className="mb-5">
-          <h4 className="font-semibold text-gray-700 mb-2">인증 방법</h4>
-          <ol className="list-decimal pl-5 space-y-2">
-            {methodInfo.steps.map((step, index) => (
-              <li key={index} className="text-gray-600">{step}</li>
-            ))}
-          </ol>
-        </div>
-
-        <div className="mb-5 bg-green-50 p-3 rounded-lg">
-          <h4 className="font-semibold text-green-700 mb-2">알아두세요!</h4>
-          <ul className="list-disc pl-5 space-y-2">
-            {methodInfo.tips.map((tip, index) => (
-              <li key={index} className="text-green-600">{tip}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex space-x-3">
-          <button
-            className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium"
-            onClick={() => setShowMethodModal(false)}
-          >
-            취소
-          </button>
-          <button
-            className="flex-1 py-3 bg-primary text-white rounded-xl font-medium"
-            onClick={() => {
-              setShowMethodModal(false);
-              router.push(`/certification/${selectedTypeForModal}`);
-            }}
-          >
-            인증하러 가기
-          </button>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -322,16 +63,7 @@ export default function CameraPage() {
         </div>
       )}
 
-      {/* 인증 방법 모달 */}
-      {showMethodModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 max-w-md mx-auto"
-             style={{ width: "100%", left: 0, right: 0, margin: "0 auto" }}
-             onClick={() => setShowMethodModal(false)}>
-          <div className="bg-white rounded-2xl w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
-            {renderMethodModalContent()}
-          </div>
-        </div>
-      )}
+
 
       {/* 촬영 가이드 모달 */}
       {showGuideModal && (
@@ -376,10 +108,6 @@ export default function CameraPage() {
           autoPlay
           playsInline
         />
-        <canvas
-          ref={canvasRef}
-          className={`absolute inset-0 w-full h-full ${isCapturing ? 'block' : 'hidden'}`}
-        />
       </div>
 
       {/* 인증 카테고리 버튼 그리드 - 토스 스타일 */}
@@ -391,11 +119,7 @@ export default function CameraPage() {
               <button
                 key={typeInfo.id}
                 className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
-                onClick={() => {
-                  setSelectedType(typeInfo.id);
-                  setSelectedTypeForModal(typeInfo.id);
-                  setShowMethodModal(true);
-                }}
+                onClick={() => handleCertificationSubmit(typeInfo.id)}
               >
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center mb-2"
