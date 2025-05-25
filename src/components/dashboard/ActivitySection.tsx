@@ -65,7 +65,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ user }) => {
   }, []);
 
   return (
-    <div className="p-4 pb-16 overflow-y-auto h-full">
+    <div className="px-5 py-4 pb-16 overflow-y-auto h-full">
       {/* 통계 카드 */}
       <StatsCard
         totalReduction={22.8}

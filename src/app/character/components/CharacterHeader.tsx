@@ -8,22 +8,22 @@ interface CharacterHeaderProps {
 
 export default function CharacterHeader({ onInfoClick, onStatsClick }: CharacterHeaderProps) {
   return (
-    <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md">
-      <h1 className="text-xl font-bold text-white">나의 캐릭터</h1>
+    <div className="w-full bg-white py-4 px-5 flex justify-between items-center border-b border-toss-gray-200">
+      <h1 className="text-xl font-bold text-toss-gray-900">나의 캐릭터</h1>
       <div className="flex space-x-2">
         <button
-          className="text-white p-2 rounded-full"
+          className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center hover:bg-toss-gray-200 transition-colors"
           onClick={onStatsClick}
           aria-label="활동 실적 보기"
         >
-          <FaFileAlt className="text-xl" />
+          <FaFileAlt className="text-toss-gray-600 text-lg" />
         </button>
         <button
-          className="text-white p-2 rounded-full"
+          className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center hover:bg-toss-gray-200 transition-colors"
           onClick={onInfoClick}
           aria-label="캐릭터 정보 보기"
         >
-          <FaInfoCircle className="text-xl" />
+          <FaInfoCircle className="text-toss-gray-600 text-lg" />
         </button>
       </div>
     </div>

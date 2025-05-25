@@ -233,7 +233,7 @@ export default function CharacterPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full pb-[80px] overflow-y-auto">
+    <div className="flex-1 flex flex-col h-screen pb-[80px] overflow-hidden bg-toss-gray-50">
       {/* 상단 헤더 */}
       <CharacterHeader
         onInfoClick={() => setShowInfo(!showInfo)}
@@ -249,22 +249,28 @@ export default function CharacterPage() {
         />
       )}
 
-      <div className="flex-1 flex flex-col items-center p-4">
-        {/* 캐릭터 레벨 표시 */}
-        <CharacterDisplay
-          currentStage={currentStage}
-          currentPoints={currentPoints}
-          nextStage={nextStage}
-          progressPercentage={progressPercentage}
-          pointsToNextLevel={pointsToNextLevel}
-          onChatbotToggle={() => setShowChatbot(!showChatbot)}
-        />
+      <div className="flex-1 flex flex-col items-center px-5 py-4 overflow-y-auto">
+        {/* 캐릭터 레벨 표시 카드 */}
+        <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-toss-2 border border-toss-gray-200 mb-6">
+          <div className="flex flex-col items-center">
+            <CharacterDisplay
+              currentStage={currentStage}
+              currentPoints={currentPoints}
+              nextStage={nextStage}
+              progressPercentage={progressPercentage}
+              pointsToNextLevel={pointsToNextLevel}
+              onChatbotToggle={() => setShowChatbot(!showChatbot)}
+            />
+          </div>
+        </div>
 
         {/* 활동량 표시 탭 */}
-        <ActivityTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+        <div className="w-full max-w-sm flex flex-col items-center">
+          <ActivityTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
       </div>
 
       {/* 챗봇 대화창 */}

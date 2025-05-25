@@ -57,32 +57,36 @@ export default function ChatInterface({
 
   return (
     <motion.div
-      className="absolute bottom-24 left-4 right-4 bg-white rounded-t-xl shadow-lg z-20 mx-auto"
+      className="absolute bottom-[76px] left-4 right-4 bg-white rounded-t-2xl shadow-toss-3 border border-toss-gray-200 z-20 mx-auto"
       initial={{ y: 300 }}
       animate={{ y: 0 }}
       exit={{ y: 300 }}
       style={{
-        maxHeight: 'calc(100% - 180px)',
+        maxHeight: 'calc(100% - 156px)',
         display: 'flex',
         flexDirection: 'column',
         width: 'calc(100% - 32px)',
         maxWidth: '343px'
       }}
     >
-      <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-        <p className="font-bold text-primary-dark">대나무와 대화하기</p>
-        <div className="flex items-center space-x-3">
+      <div className="p-4 border-b border-toss-gray-200 flex justify-between items-center">
+        <p className="font-bold text-toss-gray-900">대나무와 대화하기</p>
+        <div className="flex items-center space-x-2">
           {/* 음성 기능 온오프 토글 버튼 */}
           <button
-            className={`p-2 rounded-full ${voiceEnabled ? 'text-primary' : 'text-gray-400'}`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+              voiceEnabled
+                ? 'bg-toss-green/10 text-toss-green'
+                : 'bg-toss-gray-100 text-toss-gray-400'
+            }`}
             onClick={() => setVoiceEnabled(!voiceEnabled)}
             title={voiceEnabled ? "음성 기능 끄기" : "음성 기능 켜기"}
           >
-            {voiceEnabled ? <FaVolumeUp size={18} /> : <FaVolumeMute size={18} />}
+            {voiceEnabled ? <FaVolumeUp size={16} /> : <FaVolumeMute size={16} />}
           </button>
 
           <button
-            className="text-gray-500"
+            className="text-toss-gray-500 text-sm font-medium"
             onClick={onClose}
           >
             닫기

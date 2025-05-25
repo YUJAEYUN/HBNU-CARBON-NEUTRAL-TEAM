@@ -580,16 +580,16 @@ const CommunityPage = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full">
-      {/* 상단 헤더 - 고정 */}
-      <div className="w-full bg-primary py-4 px-4 flex justify-between items-center shadow-md sticky top-0 z-50">
-        <h1 className="text-2xl font-bold text-white">커뮤니티</h1>
+    <div className="flex-1 flex flex-col h-full bg-toss-gray-50">
+      {/* 상단 헤더 - 토스 스타일 */}
+      <div className="w-full bg-white py-4 px-5 flex justify-between items-center border-b border-toss-gray-200 sticky top-0 z-50">
+        <h1 className="text-xl font-bold text-toss-gray-900">커뮤니티</h1>
         <button
-          className="text-white p-2 rounded-full hover:bg-primary-dark transition-colors"
+          className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center hover:bg-toss-gray-200 transition-colors"
           onClick={() => router.push("/messages")}
           aria-label="쪽지함"
         >
-          <FaEnvelope className="text-xl" />
+          <FaEnvelope className="text-toss-gray-600 text-lg" />
         </button>
       </div>
 
@@ -617,28 +617,30 @@ const CommunityPage = () => {
         </motion.div>
       )}
 
-      {/* 탭 메뉴 - 고정 */}
-      <div className="flex bg-gray-100 p-2 space-x-2 sticky top-[60px] z-40 shadow-sm">
-        {["전체", "자유", "비밀", "랭킹"].map((tab) => (
-          <button
-            key={tab}
-            className={`flex-1 py-2 px-4 text-center rounded-full font-medium ${
-              activeTab === tab
-                ? "bg-primary text-white"
-                : "bg-white text-gray-600"
-            }`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === "랭킹" ? (
-              <div className="flex items-center justify-center">
-                <FaTrophy className="mr-1 text-xs" />
-                <span>{tab}</span>
-              </div>
-            ) : (
-              tab
-            )}
-          </button>
-        ))}
+      {/* 탭 메뉴 - 토스 스타일 */}
+      <div className="bg-white px-5 py-3 border-b border-toss-gray-200 sticky top-[68px] z-40">
+        <div className="flex bg-toss-gray-100 p-1 rounded-xl">
+          {["전체", "자유", "비밀", "랭킹"].map((tab) => (
+            <button
+              key={tab}
+              className={`flex-1 py-2 px-3 text-center rounded-lg font-medium text-sm transition-all ${
+                activeTab === tab
+                  ? "bg-white text-toss-gray-900 shadow-toss-1"
+                  : "text-toss-gray-600 hover:text-toss-gray-800"
+              }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab === "랭킹" ? (
+                <div className="flex items-center justify-center">
+                  <FaTrophy className="mr-1 text-xs" />
+                  <span>{tab}</span>
+                </div>
+              ) : (
+                tab
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 검색 바 추가 - 고정 */}
@@ -663,11 +665,11 @@ const CommunityPage = () => {
         </div>
       </div>
 
-      {/* 글쓰기 버튼 (랭킹 탭이 아닐 때만 표시) - 고정 */}
+      {/* 글쓰기 버튼 (랭킹 탭이 아닐 때만 표시) - 토스 스타일 */}
       {activeTab !== "랭킹" && !isWritingPost && (
-        <div className="bg-white p-3 border-b sticky top-[164px] z-20 shadow-sm">
+        <div className="bg-white px-5 py-3 border-b border-toss-gray-200 sticky top-[164px] z-20">
           <button
-            className="w-full py-2 bg-primary text-white rounded-lg font-medium flex items-center justify-center"
+            className="w-full py-3 bg-toss-green text-white rounded-xl font-medium flex items-center justify-center hover:bg-toss-green/90 transition-colors shadow-toss-1"
             onClick={() => setIsWritingPost(true)}
           >
             <FaPlus className="mr-2" />
@@ -677,22 +679,22 @@ const CommunityPage = () => {
       )}
 
       {/* 랭킹 또는 게시글 목록 또는 글쓰기 화면 */}
-      <div className="flex-1 overflow-y-auto bg-gray-100 p-2 pb-20">
+      <div className="flex-1 overflow-y-auto px-5 py-4 pb-20">
         {isWritingPost ? (
-          // 게시글 작성 화면
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-primary-dark">
+          // 게시글 작성 화면 - 토스 스타일
+          <div className="bg-white rounded-2xl p-6 shadow-toss-2 border border-toss-gray-200">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-toss-gray-900">
                 {activeTab === "비밀" ? "비밀 게시글 작성" : "자유 게시글 작성"}
               </h2>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+                <label className="block text-sm font-medium text-toss-gray-700 mb-2">제목</label>
                 <input
                   type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full p-4 border border-toss-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-toss-green focus:border-toss-green transition-colors"
                   placeholder="제목을 입력하세요"
                   value={postTitle}
                   onChange={(e) => setPostTitle(e.target.value)}
@@ -702,18 +704,26 @@ const CommunityPage = () => {
               {/* 게시글 타입 선택 - 비밀 게시판이 아닐 때만 표시 */}
               {activeTab !== "비밀" && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">게시글 타입</label>
-                  <div className="flex space-x-2">
+                  <label className="block text-sm font-medium text-toss-gray-700 mb-2">게시글 타입</label>
+                  <div className="flex bg-toss-gray-100 p-1 rounded-xl">
                     <button
                       type="button"
-                      className={`flex-1 py-2 px-4 rounded-md ${postType === "일반" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"}`}
+                      className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                        postType === "일반"
+                          ? "bg-white text-toss-gray-900 shadow-toss-1"
+                          : "text-toss-gray-600 hover:text-toss-gray-800"
+                      }`}
                       onClick={() => setPostType("일반")}
                     >
                       일반 게시글
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 py-2 px-4 rounded-md ${postType === "환경활동" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"}`}
+                      className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+                        postType === "환경활동"
+                          ? "bg-white text-toss-gray-900 shadow-toss-1"
+                          : "text-toss-gray-600 hover:text-toss-gray-800"
+                      }`}
                       onClick={() => setPostType("환경활동")}
                     >
                       환경활동 게시글
@@ -723,9 +733,9 @@ const CommunityPage = () => {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
+                <label className="block text-sm font-medium text-toss-gray-700 mb-2">내용</label>
                 <textarea
-                  className="w-full p-2 border border-gray-300 rounded-lg h-64 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full p-4 border border-toss-gray-300 rounded-xl h-64 resize-none focus:outline-none focus:ring-2 focus:ring-toss-green focus:border-toss-green transition-colors"
                   placeholder="내용을 입력하세요"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
@@ -734,11 +744,11 @@ const CommunityPage = () => {
 
               {/* 이미지 첨부 영역 */}
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-gray-700">이미지 첨부</label>
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-toss-gray-700">이미지 첨부</label>
                   <button
                     type="button"
-                    className="text-sm text-primary font-medium flex items-center"
+                    className="text-sm text-toss-green font-medium flex items-center bg-toss-green/10 px-3 py-1 rounded-full hover:bg-toss-green/20 transition-colors"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <FaPlus className="mr-1" size={12} />
@@ -780,27 +790,27 @@ const CommunityPage = () => {
               </div>
 
               {activeTab === "비밀" && (
-                <div className="flex items-center">
+                <div className="flex items-center bg-toss-gray-50 p-4 rounded-xl">
                   <input
                     type="checkbox"
                     id="anonymous"
-                    className="mr-2"
+                    className="mr-3 w-4 h-4 text-toss-green bg-gray-100 border-gray-300 rounded focus:ring-toss-green focus:ring-2"
                     checked={isAnonymous}
                     onChange={(e) => setIsAnonymous(e.target.checked)}
                   />
-                  <label htmlFor="anonymous" className="text-sm text-gray-700">익명으로 게시하기</label>
+                  <label htmlFor="anonymous" className="text-sm text-toss-gray-700 font-medium">익명으로 게시하기</label>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-3 pt-4">
                 <button
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="px-6 py-3 bg-toss-gray-200 text-toss-gray-700 rounded-xl font-medium hover:bg-toss-gray-300 transition-colors"
                   onClick={handleCancelPost}
                 >
                   취소
                 </button>
                 <button
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
+                  className="px-6 py-3 bg-toss-green text-white rounded-xl font-medium hover:bg-toss-green/90 transition-colors shadow-toss-1"
                   onClick={handlePostSubmit}
                 >
                   게시하기
@@ -809,10 +819,10 @@ const CommunityPage = () => {
             </div>
           </div>
         ) : activeTab === "랭킹" ? (
-          // 랭킹 화면 - 통합 디자인
-          <div className="p-2">
-            <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-              <h2 className="text-lg font-bold text-primary-dark mb-3">에코 포인트 랭킹</h2>
+          // 랭킹 화면 - 토스 스타일
+          <div>
+            <div className="bg-white rounded-2xl p-6 shadow-toss-2 border border-toss-gray-200 mb-6">
+              <h2 className="text-xl font-bold text-toss-gray-900 mb-4">에코 포인트 랭킹</h2>
 
               {/* 학과별 나무 UI (먼저 표시) */}
               <div className="mb-6 relative overflow-hidden rounded-lg">
@@ -1204,71 +1214,72 @@ const CommunityPage = () => {
             </div>
           </div>
         ) : (
-          // 기존 게시글 목록 코드는 그대로 유지
-          filteredPosts.map((post) => (
-            <motion.div
-              key={post.id}
-              className={`mb-3 p-4 rounded-lg ${
-                post.postType === "환경활동"
-                  ? "bg-primary-light"
-                  : "bg-white"
-              } border ${post.postType === "환경활동" ? "border-primary-medium" : "border-gray-100"}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              whileHover={{ scale: 1.01 }}
-              onClick={() => router.push(`/community/post/${post.id}`)}
-              style={{ cursor: 'pointer' }}
-            >
-              {/* 게시글 타입 표시 */}
-              <div className="flex justify-between items-center mb-1">
-                <span className={`text-xs px-2 py-1 rounded-full ${
+          // 게시글 목록 - 토스 스타일
+          <div className="space-y-4">
+            {filteredPosts.map((post) => (
+              <motion.div
+                key={post.id}
+                className={`p-5 rounded-2xl shadow-toss-1 border cursor-pointer transition-all hover:shadow-toss-2 ${
                   post.postType === "환경활동"
-                    ? "bg-primary-dark text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}>
-                  {post.postType}
-                </span>
-                <span className="text-xs text-gray-500">{post.time}</span>
-              </div>
+                    ? "bg-toss-green/5 border-toss-green/20"
+                    : "bg-white border-toss-gray-200"
+                }`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ scale: 1.01 }}
+                onClick={() => router.push(`/community/post/${post.id}`)}
+              >
+                {/* 게시글 타입 표시 */}
+                <div className="flex justify-between items-center mb-3">
+                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                    post.postType === "환경활동"
+                      ? "bg-toss-green text-white"
+                      : "bg-toss-gray-100 text-toss-gray-700"
+                  }`}>
+                    {post.postType}
+                  </span>
+                  <span className="text-xs text-toss-gray-500">{post.time}</span>
+                </div>
 
-              <h2 className="text-lg font-bold text-gray-800 mb-1">{post.title}</h2>
-              <p className="text-gray-600 mb-2">{post.content}</p>
+                <h2 className="text-lg font-bold text-toss-gray-900 mb-2">{post.title}</h2>
+                <p className="text-toss-gray-600 mb-3 line-clamp-2">{post.content}</p>
 
-              {/* 첨부 이미지가 있는 경우 표시 */}
-              {post.images && post.images.length > 0 && (
-                <div className="mb-3">
-                  <div className="grid grid-cols-3 gap-2">
-                    {post.images.map((image, index) => (
-                      <div key={index} className="w-full h-24 bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          src={image}
-                          alt={`${post.title} 이미지 ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
+                {/* 첨부 이미지가 있는 경우 표시 */}
+                {post.images && post.images.length > 0 && (
+                  <div className="mb-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      {post.images.map((image, index) => (
+                        <div key={index} className="w-full h-24 bg-toss-gray-100 rounded-xl overflow-hidden">
+                          <img
+                            src={image}
+                            alt={`${post.title} 이미지 ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <div className="text-toss-gray-500 text-sm">
+                    {post.author} • {post.time}
+                  </div>
+                  <div className="flex items-center text-toss-green">
+                    {post.isEvent ? (
+                      <span className="text-toss-green font-medium">👍 {post.author}</span>
+                    ) : (
+                      <>
+                        <FaThumbsUp className="mr-1" />
+                        <span>{post.likes}</span>
+                      </>
+                    )}
                   </div>
                 </div>
-              )}
-
-              <div className="flex justify-between items-center">
-                <div className="text-gray-500 text-sm">
-                  {post.author} • {post.time}
-                </div>
-                <div className="flex items-center text-primary">
-                  {post.isEvent ? (
-                    <span className="text-primary font-medium">👍 {post.author}</span>
-                  ) : (
-                    <>
-                      <FaThumbsUp className="mr-1" />
-                      <span>{post.likes}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))
+              </motion.div>
+            ))}
+          </div>
         )}
       </div>
 

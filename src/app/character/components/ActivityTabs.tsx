@@ -10,23 +10,35 @@ interface ActivityTabsProps {
 export default function ActivityTabs({ activeTab, setActiveTab }: ActivityTabsProps) {
   return (
     <>
-      {/* 활동량 표시 - 탭 버튼 */}
-      <div className="w-full max-w-xs">
-        <div className="flex justify-between mb-4">
+      {/* 활동량 표시 - 토스 스타일 탭 버튼 */}
+      <div className="w-full max-w-xs mb-6">
+        <div className="flex bg-toss-gray-100 p-1 rounded-xl">
           <button
-            className={`flex-1 py-2 px-4 text-center rounded-l-lg font-medium ${activeTab === "daily" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}`}
+            className={`flex-1 py-2 px-3 text-center rounded-lg font-medium text-sm transition-all ${
+              activeTab === "daily"
+                ? "bg-white text-toss-gray-900 shadow-toss-1"
+                : "text-toss-gray-600 hover:text-toss-gray-800"
+            }`}
             onClick={() => setActiveTab("daily")}
           >
             오늘
           </button>
           <button
-            className={`flex-1 py-2 px-4 text-center font-medium ${activeTab === "weekly" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}`}
+            className={`flex-1 py-2 px-3 text-center rounded-lg font-medium text-sm transition-all ${
+              activeTab === "weekly"
+                ? "bg-white text-toss-gray-900 shadow-toss-1"
+                : "text-toss-gray-600 hover:text-toss-gray-800"
+            }`}
             onClick={() => setActiveTab("weekly")}
           >
             이번주
           </button>
           <button
-            className={`flex-1 py-2 px-4 text-center rounded-r-lg font-medium ${activeTab === "monthly" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}`}
+            className={`flex-1 py-2 px-3 text-center rounded-lg font-medium text-sm transition-all ${
+              activeTab === "monthly"
+                ? "bg-white text-toss-gray-900 shadow-toss-1"
+                : "text-toss-gray-600 hover:text-toss-gray-800"
+            }`}
             onClick={() => setActiveTab("monthly")}
           >
             이번달
@@ -34,25 +46,25 @@ export default function ActivityTabs({ activeTab, setActiveTab }: ActivityTabsPr
         </div>
       </div>
 
-      {/* 활동 결과 - 선택된 탭에 따라 다른 내용 표시 */}
+      {/* 활동 결과 - 토스 스타일 카드 */}
       <motion.div
-        className="w-full max-w-xs ios-card p-4 mb-28"
+        className="w-full max-w-xs bg-white rounded-2xl p-5 shadow-toss-2 border border-toss-gray-200 mb-4"
         key={activeTab}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h2 className="text-gray-800 font-bold mb-3">{ACTIVITY_DATA[activeTab].title}</h2>
-        <div className="space-y-2">
+        <h2 className="text-toss-gray-900 font-bold mb-4 text-lg">{ACTIVITY_DATA[activeTab].title}</h2>
+        <div className="space-y-3">
           {ACTIVITY_DATA[activeTab].items.map((item) => (
-            <div key={`${activeTab}-${item.label}`} className="flex justify-between">
-              <span className="text-gray-700">{item.label}:</span>
-              <span className="text-primary-dark font-medium">{item.value}</span>
+            <div key={`${activeTab}-${item.label}`} className="flex justify-between items-center">
+              <span className="text-toss-gray-700">{item.label}:</span>
+              <span className="text-toss-green font-medium">{item.value}</span>
             </div>
           ))}
-          <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
-            <span className="text-primary-dark font-bold">총 절감량:</span>
-            <span className="text-primary-dark font-bold">{ACTIVITY_DATA[activeTab].total}</span>
+          <div className="flex justify-between items-center border-t border-toss-gray-200 pt-3 mt-3">
+            <span className="text-toss-gray-900 font-bold">총 절감량:</span>
+            <span className="text-toss-green font-bold text-lg">{ACTIVITY_DATA[activeTab].total}</span>
           </div>
         </div>
       </motion.div>

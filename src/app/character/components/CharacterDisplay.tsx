@@ -100,7 +100,7 @@ export default function CharacterDisplay({
 
       {/* 캐릭터 이미지 */}
       <motion.div
-        className="w-56 h-56 bg-primary-light bg-opacity-30 rounded-full flex items-center justify-center mt-4 mb-3 relative"
+        className="w-56 h-56 bg-toss-green/10 rounded-full flex items-center justify-center mt-4 mb-6 relative"
         onMouseEnter={() => setHoverState("happy")}
         onMouseLeave={() => setHoverState("idle")}
         animate={showPointsAnimation ? { scale: [1, 1.05, 1] } : {}}
@@ -117,12 +117,12 @@ export default function CharacterDisplay({
 
           {/* 통합 챗봇 버튼 */}
           <motion.button
-            className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 bg-white p-3 rounded-full shadow-lg"
+            className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 bg-toss-green text-white p-3 rounded-full shadow-toss-2"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onChatbotToggle}
           >
-            <FaComment className="text-primary text-xl" />
+            <FaComment className="text-xl" />
           </motion.button>
         </div>
       </motion.div>
@@ -130,21 +130,21 @@ export default function CharacterDisplay({
       {/* 레벨과 진행 바를 하나의 컴팩트한 컨테이너로 */}
       <div className="w-full max-w-xs">
         {/* 레벨 표시 */}
-        <p className="text-primary font-bold text-center mb-1">
+        <p className="text-toss-green font-bold text-center mb-3 text-lg">
           Lv.{currentStage.level} {currentStage.name}
         </p>
 
         {/* 진행 바 */}
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-1 relative overflow-hidden">
+        <div className="w-full bg-toss-gray-200 rounded-full h-3 mb-3 relative overflow-hidden">
           <motion.div
-            className="bg-primary h-3 rounded-full"
+            className="bg-toss-green h-3 rounded-full"
             initial={{ width: `${animatedProgress}%` }}
             animate={{ width: `${animatedProgress}%` }}
             transition={{ duration: 1.5, ease: "easeOut" }}
           />
           {showPointsAnimation && (
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 h-3 rounded-full opacity-50"
+              className="absolute inset-0 bg-gradient-to-r from-toss-green to-toss-green/80 h-3 rounded-full opacity-50"
               initial={{ width: "0%" }}
               animate={{ width: `${animatedProgress}%` }}
               transition={{ duration: 1.5, ease: "easeOut" }}
@@ -155,24 +155,24 @@ export default function CharacterDisplay({
         {/* 포인트 정보 */}
         <div className="flex justify-between items-center mb-6">
           <motion.p
-            className="text-xs text-gray-500"
-            animate={showPointsAnimation ? { scale: [1, 1.2, 1], color: ["#6b7280", "#3b82f6", "#6b7280"] } : {}}
+            className="text-sm text-toss-gray-600 font-medium"
+            animate={showPointsAnimation ? { scale: [1, 1.2, 1], color: ["#6B7684", "#22C55E", "#6B7684"] } : {}}
             transition={{ duration: 0.8 }}
           >
             {animatedPoints}P
           </motion.p>
           {nextStage && (
-            <p className="text-xs text-gray-500">다음: {nextStage.requiredPoints}P</p>
+            <p className="text-sm text-toss-gray-600">다음: {nextStage.requiredPoints}P</p>
           )}
         </div>
       </div>
 
       {nextStage ? (
-        <p className="text-gray-600 text-sm mb-8">
+        <p className="text-toss-gray-600 text-sm text-center">
           다음 레벨까지 {pointsToNextLevel}포인트 더 모으면 됩니다
         </p>
       ) : (
-        <p className="text-primary-dark font-medium text-sm mb-8">
+        <p className="text-toss-green font-medium text-sm text-center">
           최고 레벨에 도달했습니다!
         </p>
       )}
