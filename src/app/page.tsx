@@ -37,13 +37,13 @@ export default function HomePage() {
       { id: 3, title: "전자영수증 사용", time: "어제", timeAgo: "1일 전", reduction: 0.08 },
     ],
     personalStats: {
-      monthlyGoal: 20,
-      monthlyReduction: 12.5,
-      progress: 65
+      monthlyGoal: 15,
+      monthlyReduction: 3.7,
+      progress: 25
     },
     events: [
-      { id: 1, title: "탄소중립 봉사활동하러가기", date: "5월 15일", time: "14:00", duration: "" },
-      { id: 2, title: "탄소중립 대외활동하러가기", date: "5월 20일", time: "10:00", duration: "" }
+      { id: 1, title: "탄소중립 봉사활동 하러 가기", date: "5월 15일", time: "14:00", duration: "" },
+      { id: 2, title: "탄소중립 대외활동 하러 가기", date: "5월 20일", time: "10:00", duration: "" }
     ],
     news: [
       {
@@ -378,7 +378,7 @@ function LoggedInHome({
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-toss-gray-600">이번 달 목표</p>
-                  <p className="text-sm font-bold text-toss-gray-900">{mockData.levelProgress}% 달성</p>
+                  <p className="text-sm font-bold text-toss-gray-900">25% 달성</p>
                 </div>
               </div>
             </div>
@@ -580,7 +580,7 @@ function LoggedInHome({
             {mockData.events.map((event, index) => (
               <motion.div
                 key={event.id}
-                className={`ios-card p-4 mb-3 border-l-4 ${index === 0 ? 'border-green-500' : 'border-blue-500'}`}
+                className={`ios-card p-3 mb-3 border-l-4 ${index === 0 ? 'border-green-500' : 'border-blue-500'}`}
                 whileHover={{ scale: 1.02 }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -588,16 +588,13 @@ function LoggedInHome({
                 onClick={() => router.push(index === 0 ? "/activities/volunteer" : "/activities/external")}
               >
                 <div className="flex items-center">
-                  <div className={`${index === 0 ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} p-3 rounded-full mr-3 flex items-center justify-center`} style={{ width: '48px', height: '48px' }}>
+                  <div className={`${index === 0 ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} p-2 rounded-full mr-3 flex items-center justify-center`} style={{ width: '40px', height: '40px' }}>
                     <span className="text-xl">{index === 0 ? '🌱' : '🌍'}</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 flex items-center">
                     <p className={`${index === 0 ? 'text-green-700' : 'text-blue-700'} font-bold text-lg`}>{event.title}</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm text-gray-500">{event.date} • {event.time}</span>
-                      <div className="flex items-center">
-                        <span className={`${index === 0 ? 'text-green-500' : 'text-blue-500'} text-lg`}>›</span>
-                      </div>
+                    <div className="flex items-center ml-auto">
+                      <span className={`${index === 0 ? 'text-green-500' : 'text-blue-500'} text-4xl -mt-1`}>›</span>
                     </div>
                   </div>
                 </div>

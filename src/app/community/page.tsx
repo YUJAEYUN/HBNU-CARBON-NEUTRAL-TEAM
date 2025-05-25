@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -12,6 +10,7 @@ const CommunityPage = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("자유");
   const [showEventBanner, setShowEventBanner] = useState(true);
+  const [isEventBannerCollapsed, setIsEventBannerCollapsed] = useState(false);
   const [rankingTab, setRankingTab] = useState("단과대");
   const [fallenApples, setFallenApples] = useState<number[]>([]);
   const [shakingApples, setShakingApples] = useState<number[]>([]);
@@ -31,10 +30,10 @@ const CommunityPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 사용자 단과대 (실제로는 API에서 가져올 수 있음)
-  const userCollege = "환경공학대학";
+  const userCollege = "정보기술대학";
 
   // 사용자 소속 학과 (실제로는 API에서 가져올 수 있음)
-  const userDepartment = "에너지시스템공학과";
+  const userDepartment = "정보통신공학과";
 
   // 현재 시간 상태 추가
   const [currentTime, setCurrentTime] = useState<string>("");
@@ -242,19 +241,19 @@ const CommunityPage = () => {
 
   // 단과대 랭킹 데이터
   const collegeRankings = [
-    { id: 1, name: "환경공학대학", score: 1250, change: "up", treeImage: "/tree/tree_large.png" },
-    { id: 2, name: "인문대학", score: 980, change: "down", treeImage: "/tree/tree_medium.png" },
-    { id: 3, name: "자연과학대학", score: 920, change: "up", treeImage: "/tree/tree_small.png" },
+    { id: 1, name: "정보기술대학", score: 1250, change: "up", treeImage: "/tree/tree_large.png" },
+    { id: 2, name: "인문사회대학", score: 980, change: "down", treeImage: "/tree/tree_medium.png" },
+    { id: 3, name: "공과대학", score: 920, change: "up", treeImage: "/tree/tree_small.png" },
   ];
 
-  // 학과 랭킹 데이터 - 환경공학대학 소속 학과만 필터링
+  // 학과 랭킹 데이터 - 정보기술대학 소속 학과만 필터링
   const departmentRankings = [
-    { id: 1, name: "환경공학과", score: 450, apples: 5, college: "환경공학대학" },
-    { id: 2, name: "에너지시스템공학과", score: 380, apples: 4, college: "환경공학대학" },
-    { id: 3, name: "지구환경과학과", score: 320, apples: 3, college: "환경공학대학" },
-    { id: 4, name: "인문학과", score: 280, apples: 2, college: "인문대학" },
-    { id: 5, name: "경영학과", score: 250, apples: 2, college: "경영대학" },
-    { id: 6, name: "컴퓨터공학과", score: 220, apples: 1, college: "공과대학" },
+    { id: 1, name: "컴퓨터공학과", score: 450, apples: 5, college: "정보기술대학" },
+    { id: 2, name: "정보통신공학과", score: 380, apples: 4, college: "정보기술대학" },
+    { id: 3, name: "모바일융합공학과", score: 320, apples: 3, college: "정보기술대학" },
+    { id: 4, name: "공공행정학과", score: 280, apples: 2, college: "인문사회대학" },
+    { id: 5, name: "경제학과", score: 250, apples: 2, college: "경상대학" },
+    { id: 6, name: "신소재공학과", score: 220, apples: 1, college: "공과대학" },
   ];
 
   // 사용자 단과대에 속한 학과만 필터링
@@ -264,20 +263,20 @@ const CommunityPage = () => {
 
   // 개인 랭킹 데이터
   const userRankings = [
-    // 환경공학과 사용자
-    { id: 1, name: "에코마스터", dept: "환경공학과", score: 120, avatar: "👨‍🌾" },
-    { id: 6, name: "그린리더", dept: "환경공학과", score: 110, avatar: "👩‍🔬" },
-    { id: 7, name: "환경수호자", dept: "환경공학과", score: 105, avatar: "🧑‍🔧" },
+    // 컴퓨터공학과 사용자
+    { id: 1, name: "에코마스터", dept: "컴퓨터공학과", score: 120, avatar: "👨‍🌾" },
+    { id: 6, name: "그린리더", dept: "컴퓨터공학과", score: 110, avatar: "👩‍🔬" },
+    { id: 7, name: "환경수호자", dept: "컴퓨터공학과", score: 105, avatar: "🧑‍🔧" },
 
-    // 에너지시스템공학과 사용자
-    { id: 2, name: "그린워커", dept: "에너지시스템공학과", score: 115, avatar: "👩‍🌾" },
-    { id: 4, name: "에너지세이버", dept: "에너지시스템공학과", score: 95, avatar: "👨‍🔬" },
-    { id: 5, name: "탄소중립맨", dept: "에너지시스템공학과", score: 85, avatar: "👩‍🔬" },
+    // 정보통신공학과 사용자
+    { id: 2, name: "그린워커", dept: "정보통신공학과", score: 115, avatar: "👩‍🌾" },
+    { id: 4, name: "에너지세이버", dept: "정보통신공학과", score: 95, avatar: "👨‍🔬" },
+    { id: 5, name: "탄소중립맨", dept: "정보통신공학과", score: 85, avatar: "👩‍🔬" },
 
-    // 지구환경과학과 사용자
-    { id: 3, name: "지구지킴이", dept: "지구환경과학과", score: 105, avatar: "🧑‍🌾" },
-    { id: 8, name: "지구사랑", dept: "지구환경과학과", score: 100, avatar: "👨‍🚀" },
-    { id: 9, name: "에코사이언티스트", dept: "지구환경과학과", score: 90, avatar: "👩‍🚀" },
+    // 모바일융합공학과 사용자
+    { id: 3, name: "지구지킴이", dept: "모바일융합공학과", score: 105, avatar: "🧑‍🌾" },
+    { id: 8, name: "지구사랑", dept: "모바일융합공학과", score: 100, avatar: "👨‍🚀" },
+    { id: 9, name: "에코사이언티스트", dept: "모바일융합공학과", score: 90, avatar: "👩‍🚀" },
   ];
 
   // 학과별 개인 랭킹 데이터를 가져오는 함수 추가
@@ -594,12 +593,13 @@ const CommunityPage = () => {
       </div>
 
       {/* 이벤트 배너 */}
-      {showEventBanner && (
+      {!isEventBannerCollapsed && (
         <motion.div
           className="bg-primary-light p-3 flex justify-between items-center cursor-pointer"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
           onClick={handleEventBannerClick}
         >
           <p className="text-sm text-primary-dark">
@@ -608,13 +608,27 @@ const CommunityPage = () => {
           <button
             className="text-xs text-gray-500"
             onClick={(e) => {
-              e.stopPropagation(); // 이벤트 버블링 방지
-              setShowEventBanner(false);
+              e.stopPropagation();
+              setIsEventBannerCollapsed(true);
             }}
           >
             닫기
           </button>
         </motion.div>
+      )}
+
+      {/* 오른쪽 상단 화살표 버튼 (배너 닫힘 시만) */}
+      {isEventBannerCollapsed && (
+        <button
+          className="absolute top-5 right-20 z-50 bg-white rounded-full shadow p-1 border border-gray-200 hover:bg-gray-50 transition"
+          onClick={() => setIsEventBannerCollapsed(false)}
+          aria-label="이벤트 배너 열기"
+          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        >
+          <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
       )}
 
       {/* 탭 메뉴 - 토스 스타일 */}
@@ -824,7 +838,7 @@ const CommunityPage = () => {
             <div className="bg-white rounded-2xl p-6 shadow-toss-2 border border-toss-gray-200 mb-6">
               <h2 className="text-xl font-bold text-toss-gray-900 mb-4">에코 포인트 랭킹</h2>
 
-              {/* 학과별 나무 UI (먼저 표시) */}
+              {/* 학과별 나무 UI */}
               <div className="mb-6 relative overflow-hidden rounded-lg">
                 {/* 배경 이미지 추가 - 전체 섹션 커버 */}
                 <div className="absolute inset-0 z-0">
@@ -1128,8 +1142,8 @@ const CommunityPage = () => {
                 <h4 className="text-sm font-bold text-primary-dark mb-2">학과별 에코 포인트</h4>
                 <div className="space-y-2">
                   {userCollegeDepartments.map((dept) => (
-                    <div key={`legend-${dept.id}`} className="flex items-center">
-                      <div className="w-4 h-4 mr-2">
+                    <div key={`legend-${dept.id}`} className="flex items-center py-2">
+                      <div className="w-6 h-6 mr-3">
                         <Image
                           src={
                             dept.score >= 400 ? "/apple/apple.png" :
@@ -1137,23 +1151,25 @@ const CommunityPage = () => {
                             "/green_apple.png"
                           }
                           alt={dept.name}
-                          width={16}
-                          height={16}
+                          width={24}
+                          height={24}
                           className="object-contain"
                         />
                       </div>
-                      <span className="text-xs font-medium">{dept.name}</span>
-                      <span className="text-xs text-primary-dark ml-auto font-bold">{dept.score}점</span>
+                      <div className="flex flex-col justify-center">
+                        <span className="text-sm font-medium leading-none">{dept.name}</span>
+                      </div>
+                      <span className="text-sm text-primary-dark ml-auto font-bold">{dept.score}점</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* 여백 추가하여 구분 */}
-              <div className="h-10"></div>
+              {/* 여백 줄임 */}
+              <div className="h-4"></div>
 
-              {/* 단과대 랭킹 섹션 (스크롤해서 볼 수 있음) */}
-              <div className="mt-6">
+              {/* 단과대 랭킹 섹션 */}
+              <div className="mt-2">
                 <h3 className="text-base font-bold text-primary-dark mb-3">단과대 랭킹</h3>
 
                 <div className="space-y-3">
@@ -1205,7 +1221,6 @@ const CommunityPage = () => {
                   ))}
                 </div>
 
-                {/* 랭킹 설명 */}
                 <div className="mt-4 text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
                   <p>• 단과대 랭킹은 소속 학과들의 에코 포인트 합산으로 결정됩니다.</p>
                   <p>• 매주 월요일 자정에 랭킹이 갱신됩니다.</p>
