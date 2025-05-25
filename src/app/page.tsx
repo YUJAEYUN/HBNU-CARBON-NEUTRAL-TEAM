@@ -7,6 +7,7 @@ import { FaBolt, FaLeaf, FaArrowUp } from "react-icons/fa";
 
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import PWAInstallButton from "@/components/PWAInstallButton";
 import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -321,6 +322,16 @@ function LoggedInHome({
                 </div>
               </div>
             </div>
+          </motion.div>
+
+          {/* PWA 설치 버튼 */}
+          <motion.div
+            className="mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.25, duration: 0.3 }}
+          >
+            <PWAInstallButton />
           </motion.div>
 
           {/* 토스 스타일 편의 기능 */}
@@ -683,6 +694,9 @@ function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRoute
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.9, duration: 0.5 }}
         >
+          {/* PWA 설치 버튼 */}
+          <PWAInstallButton />
+
           <motion.button
             className="ios-button w-full py-4 text-white font-semibold text-lg"
             onClick={() => router.push("/auth/login")}
