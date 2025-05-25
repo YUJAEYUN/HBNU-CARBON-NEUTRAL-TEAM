@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { FaBolt, FaLeaf, FaArrowUp } from "react-icons/fa";
-import Image from "next/image";
+
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useState, useEffect } from "react";
@@ -622,16 +622,40 @@ function LoggedOutHome({ router }: Readonly<{ router: ReturnType<typeof useRoute
           {/* 그림자 효과 - iOS 스타일 */}
           <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black opacity-5 rounded-full blur-lg"></div>
 
-          {/* 이미지 */}
-          <div className="relative z-10 animate-bounce-sm">
-            <Image
-              src="/village.png"
-              alt="탄소중립 챌린지"
-              width={180}
-              height={180}
-              className="drop-shadow-md"
-            />
+          {/* 탄소중립 아이콘 애니메이션 */}
+          <div className="relative z-10">
+            <div className="w-32 h-32 bg-toss-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div
+                className="text-6xl"
+                style={{
+                  animation: 'gentleBounce 2s ease-in-out infinite'
+                }}
+              >
+                🌱
+              </div>
+            </div>
+            {/* 주변 떠다니는 아이콘들 */}
+            <div className="absolute top-0 left-8 animate-ping">
+              <span className="text-2xl opacity-60">🍃</span>
+            </div>
+            <div className="absolute top-4 right-8 animate-pulse">
+              <span className="text-2xl opacity-40">♻️</span>
+            </div>
+            <div className="absolute bottom-8 left-4 animate-bounce">
+              <span className="text-xl opacity-50">🌍</span>
+            </div>
+            <div className="absolute bottom-4 right-12 animate-ping">
+              <span className="text-xl opacity-30">💚</span>
+            </div>
           </div>
+
+          {/* 애니메이션 스타일 */}
+          <style jsx>{`
+            @keyframes gentleBounce {
+              0%, 100% { transform: translateY(0px) scale(1); }
+              50% { transform: translateY(-8px) scale(1.05); }
+            }
+          `}</style>
         </motion.div>
 
         <motion.h1

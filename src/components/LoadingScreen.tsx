@@ -13,7 +13,7 @@ export default function LoadingScreen() {
       >
         <div className="absolute inset-0 bg-primary-light rounded-full opacity-50 blur-xl"></div>
         <Image
-          src="/village.png"
+          src="/mainCharacter.png"
           alt="로딩 중"
           width={128}
           height={128}
