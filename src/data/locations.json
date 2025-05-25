@@ -1,0 +1,44 @@
+{
+  "locations": [
+    {
+      "id": 1,
+      "name": "에코 리필스테이션",
+      "type": "refill",
+      "address": "충북 청주시 서원구 충대로 1",
+      "description": "샴푸, 세제 등 생활용품 리필 가능",
+      "coordinates": [36.629359, 127.456309],
+      "operatingHours": "09:00-18:00",
+      "contact": "043-123-4567"
+    },
+    {
+      "id": 2,
+      "name": "그린 리필샵",
+      "type": "refill",
+      "address": "충북 청주시 서원구 성봉로 123",
+      "description": "화장품, 세제류 리필 전문",
+      "coordinates": [36.632521, 127.459831],
+      "operatingHours": "10:00-20:00",
+      "contact": "043-234-5678"
+    },
+    {
+      "id": 3,
+      "name": "청주대학교 전자폐기물 수거함",
+      "type": "recycle",
+      "address": "충북 청주시 청원구 대성로 298",
+      "description": "폐휴대폰, 배터리 등 전자폐기물 수거",
+      "coordinates": [36.642502, 127.487587],
+      "operatingHours": "24시간",
+      "contact": "043-229-8000"
+    },
+    {
+      "id": 4,
+      "name": "서원구청 전자폐기물센터",
+      "type": "recycle",
+      "address": "충북 청주시 서원구 사직대로 227",
+      "description": "가전제품, 전자기기 수거 및 재활용",
+      "coordinates": [36.635621, 127.466531],
+      "operatingHours": "09:00-17:00",
+      "contact": "043-201-0000"
+    }
+  ]
+} 

@@ -35,53 +35,87 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* 상단 닫기 버튼 */}
-      <div className="flex justify-end p-4">
+    <div className="flex flex-col h-screen bg-toss-gray-50">
+      {/* 상단 헤더 - 토스 스타일 */}
+      <div className="bg-white px-5 py-4 flex items-center justify-between border-b border-toss-gray-200">
+        <div></div>
+        <h1 className="text-xl font-bold text-toss-gray-900">로그인</h1>
         <button
           onClick={() => router.push("/")}
-          className="p-2"
+          className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center hover:bg-toss-gray-200 transition-colors"
         >
-          <FaTimes className="text-gray-800 text-xl" />
+          <FaTimes className="text-toss-gray-600 text-lg" />
         </button>
       </div>
 
-      {/* 로고 및 로그인 폼 */}
-      <div className="flex-1 flex flex-col px-6 pb-8">
+      {/* 로그인 폼 */}
+      <div className="flex-1 flex flex-col px-5 pt-8">
         {/* 로고 */}
-        <div className="flex flex-col items-center mb-10 mt-4">
-          <h1 className="text-4xl font-bold text-gray-900 mb-1">C-NERGY</h1>
-          <p className="text-xs text-gray-600 tracking-wider">CARBON NEUTRAL ENERGY REVOLUTION GUIDE YOU</p>
+        <div className="flex flex-col items-center mb-12">
+          {/* 간단한 캐릭터 애니메이션 */}
+          <div className="w-16 h-16 bg-toss-green/10 rounded-full flex items-center justify-center mb-4 relative">
+            <span
+              className="text-2xl"
+              style={{
+                animation: 'gentleBounce 2s ease-in-out infinite'
+              }}
+            >
+              🌱
+            </span>
+            {/* 작은 반짝이 효과 */}
+            <div
+              className="absolute -top-1 -right-1 w-2 h-2 bg-toss-green/30 rounded-full"
+              style={{
+                animation: 'sparkle 3s ease-in-out infinite'
+              }}
+            ></div>
+          </div>
+
+          <h1 className="text-3xl font-bold text-toss-gray-700 mb-2">C-NERGY</h1>
+          <p className="text-sm text-toss-gray-500 text-center">탄소중립 에너지 혁신을 이끄는 플랫폼</p>
         </div>
 
-        {/* 로그인 폼 */}
-        <div className="space-y-4">
+        {/* 애니메이션 스타일 */}
+        <style jsx>{`
+          @keyframes gentleBounce {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-3px) scale(1.05); }
+          }
+
+          @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+          }
+        `}</style>
+
+        {/* 로그인 폼 - 토스 스타일 */}
+        <div className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">이메일 주소</label>
+            <label htmlFor="email" className="block text-sm font-medium text-toss-gray-600 mb-2">이메일 주소</label>
             <input
               id="email"
               type="email"
               placeholder="예) cnergy@cnergy.co.kr"
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full p-4 border border-toss-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-toss-green/20 focus:border-toss-green transition-colors"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+            <label htmlFor="password" className="block text-sm font-medium text-toss-gray-600 mb-2">비밀번호</label>
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="비밀번호"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary pr-10"
+                className="w-full p-4 pr-12 border border-toss-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-toss-green/20 focus:border-toss-green transition-colors"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-toss-gray-400 p-2 hover:text-toss-gray-600 transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -89,28 +123,29 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button
-            className="w-full py-3 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 transition-colors"
-            onClick={handleLogin}
-          >
-            로그인
-          </button>
-
-          {/* 통합학사 로그인 */}
-          <div className="mt-4">
+          <div className="pt-4">
             <button
-              className="w-full py-3 bg-green-500 text-white rounded-md font-medium flex items-center justify-center space-x-2 hover:bg-green-600 transition-colors"
+              className="w-full bg-toss-green/90 text-white py-4 rounded-xl font-medium hover:bg-toss-green transition-colors"
               onClick={handleIntegratedLogin}
             >
-              <span>통합학사로 로그인</span>
+              통합학사로 로그인
             </button>
           </div>
 
+          <button
+            className="w-full bg-toss-gray-100 text-toss-gray-700 py-4 rounded-xl font-medium hover:bg-toss-gray-200 transition-colors"
+            onClick={handleLogin}
+          >
+            일반 로그인
+          </button>
+
           {/* 아이디/비밀번호 찾기 및 회원가입 */}
-          <div className="flex items-center justify-between text-sm text-gray-600 mt-4">
-            <Link href="/auth/find-email" className="hover:underline">아이디 찾기</Link>
-            <Link href="/auth/find-password" className="hover:underline">비밀번호 찾기</Link>
-            <Link href="/auth/signup" className="hover:underline">회원가입</Link>
+          <div className="flex items-center justify-center space-x-6 text-sm text-toss-gray-500 pt-8">
+            <Link href="/auth/find-email" className="hover:text-toss-green transition-colors">아이디 찾기</Link>
+            <div className="w-px h-4 bg-toss-gray-300"></div>
+            <Link href="/auth/find-password" className="hover:text-toss-green transition-colors">비밀번호 찾기</Link>
+            <div className="w-px h-4 bg-toss-gray-300"></div>
+            <Link href="/auth/signup" className="hover:text-toss-green transition-colors">회원가입</Link>
           </div>
         </div>
       </div>
