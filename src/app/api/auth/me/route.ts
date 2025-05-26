@@ -19,17 +19,41 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "인증 실패" }, { status: 401 });
     }
 
-    console.log("사용자 데이터:", data.user); // ✅ 디버깅 로그 추가
+    // profiles 테이블에서 사용자 정보 가져오기
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
 
-    // ✅ 사용자 정보 반환 (닉네임, 학교, trees, level 포함)
-    return NextResponse.json({
-      id: data.user.id,
-      email: data.user.email,
-      nickname: data.user.user_metadata?.nickname || "닉네임 없음",
-      school: data.user.user_metadata?.school || "학교 없음",
-      trees: data.user.user_metadata?.trees ?? 0, // 기본값 0
-      level: data.user.user_metadata?.level ?? 1, // 기본값 1
-    });
+    if (profileError || !profile) {
+      // 프로필이 없으면 기본 프로필 생성 (Google OAuth 사용자의 경우)
+      const userMetadata = data.user.user_metadata;
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          nickname: userMetadata.full_name || userMetadata.name || '사용자',
+          school: '한밭대학교',
+          trees: 0,
+          level: 1,
+          points: 0,
+          avatar_url: userMetadata.avatar_url || userMetadata.picture,
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("프로필 생성 오류:", createError);
+        return NextResponse.json({ error: "프로필 생성 실패" }, { status: 500 });
+      }
+
+      return NextResponse.json(newProfile, { status: 200 });
+    }
+
+    // ✅ 프로필 정보 반환
+    return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "서버 오류 발생" }, { status: 500 });
   }

@@ -17,6 +17,7 @@ type AuthContextType = {
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: (credential: string) => Promise<boolean>;
   logout: () => Promise<void>;
 };
 
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   isLoading: true,
   login: async () => false,
+  loginWithGoogle: async () => false,
   logout: async () => {},
 });
 
@@ -97,6 +99,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 구글 로그인 함수
+  const loginWithGoogle = async (credential: string) => {
+    try {
+      setIsLoading(true);
+      console.log("구글 로그인 시도"); // 디버깅용
+
+      const response = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await response.json();
+      console.log("구글 로그인 응답:", data); // 디버깅용
+
+      if (!response.ok) {
+        console.error("구글 로그인 실패 응답:", data.error);
+        return false;
+      }
+
+      if (data.success) {
+        console.log("구글 로그인 성공, 사용자 정보 가져오기");
+        await fetchUser();
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("구글 로그인 실패 (예외):", error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 로그아웃 함수
   const logout = async () => {
     try {
@@ -122,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, isLoading, login, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
