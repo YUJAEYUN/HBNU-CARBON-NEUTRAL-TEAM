@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 
+// 동적 렌더링 강제 설정
+export const dynamic = 'force-dynamic';
+
 // 1365 자원봉사포털에서 봉사활동 정보를 크롤링하는 API
 export async function GET(request: Request) {
   try {
     // 실제 구현에서는 puppeteer를 사용하여 1365 사이트에서 데이터를 크롤링
     // 현재는 목업 데이터 반환
-    
+
     // URL 파라미터 파싱
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category") || "전체";
     const keyword = searchParams.get("keyword") || "";
-    
+
     // 목업 데이터
     const mockActivities = [
       {
@@ -93,16 +96,16 @@ export async function GET(request: Request) {
 
     // 필터링
     let filteredActivities = mockActivities;
-    
+
     if (category !== "전체") {
-      filteredActivities = filteredActivities.filter(activity => 
+      filteredActivities = filteredActivities.filter(activity =>
         activity.category === category
       );
     }
-    
+
     if (keyword) {
-      filteredActivities = filteredActivities.filter(activity => 
-        activity.title.toLowerCase().includes(keyword.toLowerCase()) || 
+      filteredActivities = filteredActivities.filter(activity =>
+        activity.title.toLowerCase().includes(keyword.toLowerCase()) ||
         activity.description.toLowerCase().includes(keyword.toLowerCase())
       );
     }
@@ -111,7 +114,7 @@ export async function GET(request: Request) {
     filteredActivities = filteredActivities.map(activity => {
       // 봉사활동 유형에 따른 탄소 절감량 계산
       let baseReduction = 0;
-      
+
       if (activity.category === "환경보호") {
         baseReduction = 5.0;
       } else if (activity.category === "탄소중립") {
@@ -121,23 +124,23 @@ export async function GET(request: Request) {
       } else {
         baseReduction = 2.0;
       }
-      
+
       // 활동 기간에 따른 조정
       const startDate = new Date(activity.startDate);
       const endDate = new Date(activity.endDate);
       const durationDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      
+
       // 최종 탄소 절감량 계산 (기본값 + 기간 조정)
       const carbonReduction = baseReduction + (durationDays > 1 ? durationDays * 0.5 : 0);
-      
+
       return {
         ...activity,
         carbonReduction: parseFloat(carbonReduction.toFixed(1))
       };
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       data: filteredActivities,
       meta: {
         total: filteredActivities.length,
@@ -147,9 +150,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("봉사활동 정보를 가져오는 중 오류 발생:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: "봉사활동 정보를 가져오는 중 오류가 발생했습니다." 
+    return NextResponse.json({
+      success: false,
+      error: "봉사활동 정보를 가져오는 중 오류가 발생했습니다."
     }, { status: 500 });
   }
 }

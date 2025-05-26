@@ -250,6 +250,103 @@ function determineCertificationType(labels: any[]): { type: string; carbonReduct
 }
 
 /**
+ * 사용자 이미지 목록 조회 함수
+ * @param userId 사용자 ID
+ * @param limit 조회할 이미지 개수 (기본값: 10)
+ * @returns 사용자 이미지 목록
+ */
+export async function getUserImages(userId: string, limit: number = 10) {
+  try {
+    const response = await fetch(`${PYTHON_API_URL}/images/user/${userId}?limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('사용자 이미지 목록 조회 오류:', error);
+    throw error;
+  }
+}
+
+/**
+ * 이미지 상세 정보 조회 함수
+ * @param imageId 이미지 ID
+ * @returns 이미지 상세 정보
+ */
+export async function getImageInfo(imageId: string) {
+  try {
+    const response = await fetch(`${PYTHON_API_URL}/images/${imageId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('이미지 상세 정보 조회 오류:', error);
+    throw error;
+  }
+}
+
+/**
+ * 이미지 URL 생성 함수
+ * @param imageId 이미지 ID
+ * @returns 이미지 URL
+ */
+export function getImageUrl(imageId: string): string {
+  return `${PYTHON_API_URL}/images/${imageId}/data`;
+}
+
+/**
+ * 이미지 분석 및 저장 함수
+ * @param imageFile 이미지 파일
+ * @param userId 사용자 ID (선택 사항)
+ * @param category 카테고리 (기본값: 'recycling')
+ * @returns 분석 및 저장 결과
+ */
+export async function analyzeAndSaveImage(imageFile: File, userId?: string, category: string = 'recycling') {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    if (userId) {
+      formData.append('user_id', userId);
+    }
+    formData.append('category', category);
+
+    const response = await fetch(`${PYTHON_API_URL}/analyze-and-save/`, {
+      method: 'POST',
+      body: formData,
+      mode: 'cors',
+    });
+
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('이미지 분석 및 저장 오류:', error);
+    throw error;
+  }
+}
+
+/**
  * 인증 추가 함수
  *
  * @param certificationData 인증 데이터

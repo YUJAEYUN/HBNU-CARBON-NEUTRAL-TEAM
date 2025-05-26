@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { FaBolt, FaLeaf, FaArrowUp } from "react-icons/fa";
+import { FaBolt, FaArrowUp } from "react-icons/fa";
 
 import { useAuth } from "@/context/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -14,7 +14,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination } from 'swiper/modules';
 import { Certification } from '@/types/certification';
-import { NewsItem, NewsMetadata } from '@/types/news';
+import { NewsItem } from '@/types/news';
 
 export default function HomePage() {
   const router = useRouter();

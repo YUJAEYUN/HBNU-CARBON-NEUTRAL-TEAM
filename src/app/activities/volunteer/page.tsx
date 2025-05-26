@@ -143,75 +143,81 @@ export default function VolunteerActivitiesPage() {
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">
-      {/* 상단 헤더 - iOS 스타일 */}
-      <div className="ios-header sticky top-0 z-10">
-        <div className="flex items-center">
+      {/* 상단 헤더 - 개선된 레이아웃 */}
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+        {/* 네비게이션 바 */}
+        <div className="flex items-center justify-between px-4 py-3">
           <button
-            className="text-gray-500 mr-2"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             onClick={() => router.push("/")}
           >
-            <FaArrowLeft />
+            <FaArrowLeft className="text-gray-600" />
           </button>
-          <h1 className="text-xl font-semibold text-gray-800">탄소중립 봉사활동</h1>
+          <h1 className="text-lg font-bold text-gray-900">탄소중립 봉사활동</h1>
+          <div className="flex items-center space-x-1">
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => setShowFilter(!showFilter)}
+            >
+              <FaFilter className="text-gray-600" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            className="text-gray-500"
-            onClick={() => setShowFilter(!showFilter)}
-          >
-            <FaFilter />
-          </button>
+
+        {/* 1365 바로가기 링크 */}
+        <div className="px-4 pb-3">
           <a
             href="https://www.1365.go.kr"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-ios-blue font-medium flex items-center"
+            className="inline-flex items-center bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-100 hover:from-green-100 hover:to-emerald-100 transition-all"
           >
-            1365 바로가기 <FaExternalLinkAlt className="ml-1 text-xs" />
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+              <span className="text-green-600 text-sm">🤝</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-700">1365 자원봉사포털에서 더 많은 활동 찾기</p>
+              <p className="text-xs text-green-600">환경보호, 탄소중립 봉사활동 정보</p>
+            </div>
+            <FaExternalLinkAlt className="text-green-600 text-sm ml-2" />
           </a>
         </div>
       </div>
 
-      {/* 검색 바 */}
-      <div className="p-4 bg-white">
+      {/* 검색 바 - 개선된 디자인 */}
+      <div className="px-4 py-3 bg-gray-50">
         <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <FaSearch className="text-gray-400 text-sm" />
+          </div>
           <input
             type="text"
             placeholder="봉사활동 검색"
-            className="ios-input pr-10"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
       </div>
 
-      {/* 필터 영역 */}
-      {showFilter && (
-        <motion.div
-          className="px-4 py-2 bg-gray-50"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <p className="text-sm font-medium text-gray-700 mb-2">카테고리</p>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className={`py-1.5 px-3 rounded-full text-xs font-medium transition-colors ${
-                  selectedCategory === category
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
+      {/* 필터 영역 - 개선된 디자인 */}
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <div className="flex overflow-x-auto space-x-2 hide-scrollbar">
+          {categories.map((category) => (
+            <button
+              key={category}
+              className={`flex-shrink-0 py-2 px-4 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategory === category
+                  ? "bg-primary text-white shadow-md transform scale-105"
+                  : "bg-white text-gray-600 border border-gray-200 hover:border-primary hover:text-primary"
+              }`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* 봉사활동 목록 */}
       <div className="flex-1 p-4 overflow-y-auto">

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import { supabase } from "@/lib/supabase";
 
+// 동적 렌더링 강제 설정
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     // URL에서 요일 파라미터 확인

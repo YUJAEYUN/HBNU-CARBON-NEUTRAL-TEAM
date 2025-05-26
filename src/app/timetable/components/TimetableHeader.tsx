@@ -27,31 +27,29 @@ const TimetableHeader = ({
   setError
 }: TimetableHeaderProps) => {
   return (
-    <div className="bg-white p-4 shadow-sm">
-      <div className="flex justify-between items-center">
+    <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+      {/* 네비게이션 바 */}
+      <div className="flex items-center justify-between px-4 py-3">
         <button
-          className="text-gray-500 p-2 rounded-full"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
           onClick={() => window.history.back()}
         >
-          <FaArrowLeft />
+          <FaArrowLeft className="text-gray-600" />
         </button>
-
-        <div className="flex items-center space-x-2">
-          {/* 과목 검색 버튼 */}
-          <button
-            className="text-gray-500 p-2 rounded-full"
-            onClick={() => {
-              if (!activeTimetable) {
-                setError("시간표를 먼저 추가해주세요.");
-                return;
-              }
-              setShowCourseSearchModal(true);
-            }}
-            title="과목 검색"
-          >
-            <FaSearch />
-          </button>
-        </div>
+        <h1 className="text-lg font-bold text-gray-900">시간표</h1>
+        <button
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+          onClick={() => {
+            if (!activeTimetable) {
+              setError("시간표를 먼저 추가해주세요.");
+              return;
+            }
+            setShowCourseSearchModal(true);
+          }}
+          title="과목 검색"
+        >
+          <FaSearch className="text-gray-600" />
+        </button>
       </div>
 
       {/* 학기 및 시간표 이름 */}

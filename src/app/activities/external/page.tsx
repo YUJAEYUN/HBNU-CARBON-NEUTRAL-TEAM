@@ -117,12 +117,12 @@ export default function ExternalActivitiesPage() {
   // 분야 필터링
   const filteredActivities = activities.filter(activity => {
     // 검색어 필터링
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          activity.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // 분야 필터링
     const matchesField = selectedField === "전체" || activity.field === selectedField;
-    
+
     return matchesSearch && matchesField;
   });
 
@@ -137,75 +137,81 @@ export default function ExternalActivitiesPage() {
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">
-      {/* 상단 헤더 - iOS 스타일 */}
-      <div className="ios-header sticky top-0 z-10">
-        <div className="flex items-center">
+      {/* 상단 헤더 - 개선된 레이아웃 */}
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+        {/* 네비게이션 바 */}
+        <div className="flex items-center justify-between px-4 py-3">
           <button
-            className="text-gray-500 mr-2"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             onClick={() => router.push("/")}
           >
-            <FaArrowLeft />
+            <FaArrowLeft className="text-gray-600" />
           </button>
-          <h1 className="text-xl font-semibold text-gray-800">탄소중립 대외활동</h1>
+          <h1 className="text-lg font-bold text-gray-900">탄소중립 대외활동</h1>
+          <div className="flex items-center space-x-1">
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => setShowFilter(!showFilter)}
+            >
+              <FaFilter className="text-gray-600" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button 
-            className="text-gray-500"
-            onClick={() => setShowFilter(!showFilter)}
-          >
-            <FaFilter />
-          </button>
-          <a 
-            href="https://www.wevity.com" 
-            target="_blank" 
+
+        {/* 위비티 바로가기 링크 */}
+        <div className="px-4 pb-3">
+          <a
+            href="https://www.wevity.com"
+            target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-ios-blue font-medium flex items-center"
+            className="inline-flex items-center bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-3 border border-purple-100 hover:from-purple-100 hover:to-blue-100 transition-all"
           >
-            위비티 바로가기 <FaExternalLinkAlt className="ml-1 text-xs" />
+            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+              <FaTrophy className="text-purple-600 text-sm" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-purple-700">위비티에서 더 많은 대외활동 찾기</p>
+              <p className="text-xs text-purple-600">공모전, 인턴십, 대외활동 정보</p>
+            </div>
+            <FaExternalLinkAlt className="text-purple-600 text-sm ml-2" />
           </a>
         </div>
       </div>
 
-      {/* 검색 바 */}
-      <div className="p-4 bg-white">
+      {/* 검색 바 - 개선된 디자인 */}
+      <div className="px-4 py-3 bg-gray-50">
         <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <FaSearch className="text-gray-400 text-sm" />
+          </div>
           <input
             type="text"
             placeholder="대외활동 검색"
-            className="ios-input pr-10"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
       </div>
 
-      {/* 필터 영역 */}
-      {showFilter && (
-        <motion.div 
-          className="px-4 py-2 bg-gray-50"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <p className="text-sm font-medium text-gray-700 mb-2">분야</p>
-          <div className="flex flex-wrap gap-2">
-            {fields.map((field) => (
-              <button
-                key={field}
-                className={`py-1.5 px-3 rounded-full text-xs font-medium transition-colors ${
-                  selectedField === field
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-                onClick={() => setSelectedField(field)}
-              >
-                {field}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
+      {/* 필터 영역 - 개선된 디자인 */}
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <div className="flex overflow-x-auto space-x-2 hide-scrollbar">
+          {fields.map((field) => (
+            <button
+              key={field}
+              className={`flex-shrink-0 py-2 px-4 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedField === field
+                  ? "bg-primary text-white shadow-md transform scale-105"
+                  : "bg-white text-gray-600 border border-gray-200 hover:border-primary hover:text-primary"
+              }`}
+              onClick={() => setSelectedField(field)}
+            >
+              {field}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* 대외활동 목록 */}
       <div className="flex-1 p-4 overflow-y-auto">
@@ -235,7 +241,7 @@ export default function ExternalActivitiesPage() {
                   </div>
                   <p className="text-sm text-gray-500 mt-1">{activity.organization}</p>
                   <p className="text-sm text-gray-500 mt-1">대상: {activity.target}</p>
-                  
+
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>활동기간: {activity.period}</span>
@@ -244,7 +250,7 @@ export default function ExternalActivitiesPage() {
                       <span>접수기간: {activity.applicationPeriod}</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 flex flex-wrap gap-1">
                     {activity.benefits.map((benefit, index) => (
                       <span key={index} className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full flex items-center">
@@ -252,9 +258,9 @@ export default function ExternalActivitiesPage() {
                       </span>
                     ))}
                   </div>
-                  
+
                   <p className="mt-3 text-sm text-gray-600 line-clamp-2">{activity.description}</p>
-                  
+
                   <div className="mt-3 flex justify-end">
                     <button className="text-xs bg-primary text-white font-medium px-3 py-1 rounded-full shadow-sm flex items-center">
                       신청하기 <span className="ml-1">›</span>

@@ -35,17 +35,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-toss-gray-50">
-      {/* 상단 헤더 - 토스 스타일 */}
-      <div className="bg-white px-5 py-4 flex items-center justify-between border-b border-toss-gray-200">
-        <div></div>
-        <h1 className="text-xl font-bold text-toss-gray-900">로그인</h1>
-        <button
-          onClick={() => router.push("/")}
-          className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center hover:bg-toss-gray-200 transition-colors"
-        >
-          <FaTimes className="text-toss-gray-600 text-lg" />
-        </button>
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* 상단 헤더 - 개선된 스타일 */}
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="w-10 h-10"></div> {/* 균형을 위한 빈 공간 */}
+          <h1 className="text-lg font-bold text-gray-900">로그인</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <FaTimes className="text-gray-600 text-lg" />
+          </button>
+        </div>
       </div>
 
       {/* 로그인 폼 */}

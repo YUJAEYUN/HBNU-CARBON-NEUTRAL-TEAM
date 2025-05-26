@@ -108,23 +108,23 @@ export default function MarketplacePage() {
 
     // 데이터 로드 후 상태 업데이트
     setProducts(mockProducts);
-    
+
     // 총 탄소 절감량 계산
     const total = mockProducts.reduce((sum, product) => sum + product.carbonSaved, 0);
     setTotalCarbonSaved(total);
-    
+
     setLoading(false);
   }, []);
 
   // 카테고리 필터링
   const filteredProducts = products.filter(product => {
     // 검색어 필터링
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // 카테고리 필터링
     const matchesCategory = selectedCategory === "전체" || product.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -139,49 +139,67 @@ export default function MarketplacePage() {
 
   return (
     <div className="flex-1 flex flex-col h-full pb-[76px]">
-      {/* 상단 헤더 - iOS 스타일 */}
-      <div className="ios-header sticky top-0 z-10">
-        <div className="flex items-center">
+      {/* 상단 헤더 - 개선된 레이아웃 */}
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+        {/* 네비게이션 바 */}
+        <div className="flex items-center justify-between px-4 py-3">
           <button
-            className="text-gray-500 mr-2"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             onClick={() => router.push("/")}
           >
-            <FaArrowLeft />
+            <FaArrowLeft className="text-gray-600" />
           </button>
-          <h1 className="text-xl font-semibold text-gray-800">중고장터</h1>
+          <h1 className="text-lg font-bold text-gray-900">중고장터</h1>
+          <div className="w-10 h-10"></div> {/* 균형을 위한 빈 공간 */}
         </div>
-        <div className="flex items-center">
-          <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-            <FaLeaf className="text-green-500 mr-1" />
-            <span className="text-sm text-gray-700 font-medium">{totalCarbonSaved.toFixed(1)}kg 절감</span>
+
+        {/* 탄소 절감량 표시 - 더 눈에 띄게 */}
+        <div className="px-4 pb-3">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-100">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <FaLeaf className="text-green-600 text-sm" />
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-green-600 font-medium">총 탄소 절감량</p>
+                  <p className="text-lg font-bold text-green-700">{totalCarbonSaved.toFixed(1)}kg</p>
+                </div>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-xs">🌱</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 검색 바 */}
-      <div className="p-4 bg-white">
+      {/* 검색 바 - 개선된 디자인 */}
+      <div className="px-4 py-3 bg-gray-50">
         <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <FaSearch className="text-gray-400 text-sm" />
+          </div>
           <input
             type="text"
             placeholder="상품명, 설명으로 검색"
-            className="ios-input pr-10"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
       </div>
 
-      {/* 카테고리 필터 */}
-      <div className="px-4 py-2 overflow-x-auto whitespace-nowrap hide-scrollbar">
-        <div className="flex space-x-2">
+      {/* 카테고리 필터 - 개선된 디자인 */}
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <div className="flex overflow-x-auto space-x-2 hide-scrollbar">
           {categories.map((category) => (
             <button
               key={category}
-              className={`py-1.5 px-4 rounded-full text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 py-2 px-4 rounded-full text-sm font-medium transition-all duration-200 ${
                 selectedCategory === category
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-600"
+                  ? "bg-primary text-white shadow-md transform scale-105"
+                  : "bg-white text-gray-600 border border-gray-200 hover:border-primary hover:text-primary"
               }`}
               onClick={() => setSelectedCategory(category)}
             >

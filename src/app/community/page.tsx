@@ -60,6 +60,30 @@ const CommunityPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // 페이지 로드 시 이벤트 배너 상태 초기화
+  useEffect(() => {
+    // 페이지가 로드될 때마다 배너를 다시 표시
+    setIsEventBannerCollapsed(false);
+  }, []);
+
+  // 배너 닫기 후 일정 시간 후 다시 표시하는 기능
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (isEventBannerCollapsed) {
+      // 배너를 닫은 후 30초 후에 다시 표시
+      timer = setTimeout(() => {
+        setIsEventBannerCollapsed(false);
+      }, 30000); // 30초
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [isEventBannerCollapsed]);
+
   // 검색어 상태 추가
   const [searchTerm, setSearchTerm] = useState("");
 
