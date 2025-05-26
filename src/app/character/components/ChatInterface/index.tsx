@@ -1,9 +1,9 @@
 "use client";
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChatMessage, TextMessage, ImageMessage } from "@/types/chat";
+import { ChatMessage } from "@/types/chat";
 import { useVoiceStore } from "@/store/voiceStore";
-import { FaVolumeUp, FaVolumeMute, FaMicrophone, FaMicrophoneAlt } from "react-icons/fa";
+import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import ImageUpload from "./ImageUpload";
@@ -19,7 +19,7 @@ interface ChatInterfaceProps {
   handleVoiceToggle: () => Promise<string> | string;
   handleStopSpeaking: () => void;
   speakMessage: (content: string) => void;
-  handleSendMessage: (messageText: string) => void;
+  handleSendMessage: (messageText: string, imageUrl?: string) => void;
   onClose: () => void;
 }
 
@@ -51,8 +51,8 @@ export default function ChatInterface({
     // 이미지 업로드 UI 닫기
     setShowImageUpload(false);
 
-    // 상위 컴포넌트의 이미지 전송 함수 호출
-    handleSendMessage(`[이미지: ${caption || '이미지'}]`);
+    // 상위 컴포넌트의 이미지 전송 함수 호출 (이미지 URL과 캡션을 함께 전달)
+    handleSendMessage(`[이미지: ${caption || '이미지'}]`, imageUrl);
   }, [handleSendMessage]);
 
   return (

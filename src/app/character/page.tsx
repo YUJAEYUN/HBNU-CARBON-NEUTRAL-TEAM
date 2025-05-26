@@ -5,7 +5,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import axiosInstance from "@/lib/axios";
 import { useVoiceStore } from "@/store/voiceStore";
 import { CHARACTER_STAGES, ActivityTabType } from "./constants";
-import { ChatMessage, TextMessage } from "@/types/chat";
+import { ChatMessage, TextMessage, ImageMessage } from "@/types/chat";
 import { Certification } from "@/types/certification";
 import { SAMPLE_CERTIFICATIONS } from "./data/certifications";
 
@@ -72,33 +72,74 @@ export default function CharacterPage() {
   }, [chatMessages, voiceMode, speakMessage]);
 
   // 챗봇 메시지 전송 처리
-  const handleSendMessage = useCallback(async (messageText: string) => {
+  const handleSendMessage = useCallback(async (messageText: string, imageUrl?: string) => {
     if (!messageText?.trim()) return;
 
     try {
-      // 사용자 메시지 추가
-      const userMessage: TextMessage = {
-        role: "user",
-        type: "text",
-        content: messageText
-      };
-      const updatedMessages = [...chatMessages, userMessage];
-      setChatMessages(updatedMessages);
       setChatLoading(true);
 
-      // axiosInstance를 사용한 API 호출
-      const response = await axiosInstance.post("/api/chat", {
-        messages: updatedMessages
-      });
+      // 이미지가 있는 경우 이미지 채팅 처리
+      if (imageUrl) {
+        // 동적 임포트로 chatWithImage 함수 가져오기
+        const { chatWithImage } = await import('@/lib/openai');
 
-      // 응답 메시지 추가
-      if (response.data.message) {
-        // API 응답에 type 필드가 없을 경우 추가
-        const assistantMessage = response.data.message.type
-          ? response.data.message
-          : { ...response.data.message, type: "text" };
+        // 기존 채팅 메시지를 OpenAI 형식으로 변환
+        const openaiMessages = chatMessages
+          .filter(msg => msg.type === 'text') // 텍스트 메시지만 필터링
+          .map(msg => ({
+            role: msg.role,
+            content: (msg as TextMessage).content
+          }));
 
-        setChatMessages([...updatedMessages, assistantMessage]);
+        // 이미지와 함께 채팅
+        const response = await chatWithImage(openaiMessages, imageUrl, messageText);
+
+        // 사용자 이미지 메시지 추가
+        const userImageMessage: ImageMessage = {
+          role: "user",
+          type: "image",
+          imageUrl: imageUrl,
+          caption: messageText.replace('[이미지: ', '').replace(']', '')
+        };
+
+        const updatedMessages = [...chatMessages, userImageMessage];
+        setChatMessages(updatedMessages);
+
+        // 응답 메시지 추가
+        if (response.message) {
+          const assistantMessage: TextMessage = {
+            role: "assistant",
+            type: "text",
+            content: typeof response.message.content === 'string'
+              ? response.message.content
+              : '이미지를 분석했습니다.'
+          };
+          setChatMessages([...updatedMessages, assistantMessage]);
+        }
+      } else {
+        // 일반 텍스트 메시지 처리
+        const userMessage: TextMessage = {
+          role: "user",
+          type: "text",
+          content: messageText
+        };
+        const updatedMessages = [...chatMessages, userMessage];
+        setChatMessages(updatedMessages);
+
+        // axiosInstance를 사용한 API 호출
+        const response = await axiosInstance.post("/api/chat", {
+          messages: updatedMessages
+        });
+
+        // 응답 메시지 추가
+        if (response.data.message) {
+          // API 응답에 type 필드가 없을 경우 추가
+          const assistantMessage = response.data.message.type
+            ? response.data.message
+            : { ...response.data.message, type: "text" };
+
+          setChatMessages([...updatedMessages, assistantMessage]);
+        }
       }
     } catch (error) {
       console.error("채팅 오류:", error);
