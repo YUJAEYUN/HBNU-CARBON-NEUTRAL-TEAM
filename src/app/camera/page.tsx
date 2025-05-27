@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaCamera, FaMapMarkerAlt } from 'react-icons/fa';
 import { CertificationType, CERTIFICATION_TYPE_INFO } from '@/types/certification';
 
 export default function CameraPage() {
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
 
@@ -29,7 +28,7 @@ export default function CameraPage() {
   return (
     <div className="flex flex-col h-screen bg-toss-gray-50">
       {/* 상단 헤더 - 토스 스타일 */}
-      <div className="bg-white px-5 py-4 flex items-center justify-between border-b border-toss-gray-200 sticky top-0 z-20">
+      <div className="bg-white px-5 py-4 flex items-center justify-between border-b border-toss-gray-200 sticky top-0 z-20 flex-shrink-0">
         <button
           className="w-10 h-10 bg-toss-gray-100 rounded-full flex items-center justify-center hover:bg-toss-gray-200 transition-colors"
           onClick={() => router.back()}
@@ -99,27 +98,8 @@ export default function CameraPage() {
         </div>
       </div>
 
-      {/* 카메라 뷰 */}
-      <div className="flex-1 relative bg-toss-gray-900 rounded-t-2xl mx-5 overflow-hidden">
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          autoPlay
-          playsInline
-        />
-        {/* 카메라 플레이스홀더 */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-20 h-20 bg-toss-gray-700 rounded-full flex items-center justify-center mb-4 mx-auto">
-              <FaCamera className="text-toss-gray-400 text-2xl" />
-            </div>
-            <p className="text-toss-gray-400 text-sm">카메라를 활성화하세요</p>
-          </div>
-        </div>
-      </div>
-
       {/* 인증 카테고리 버튼 그리드 - 토스 스타일 */}
-      <div className="px-5 py-6">
+      <div className="flex-1 px-5 py-6">
         <div className="bg-white rounded-2xl shadow-toss-2 border border-toss-gray-200 p-6">
           <h3 className="text-lg font-bold mb-4 text-toss-gray-900">인증 카테고리</h3>
           <div className="grid grid-cols-2 gap-4">
