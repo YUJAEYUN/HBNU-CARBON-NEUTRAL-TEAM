@@ -43,10 +43,16 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       const { supabase } = await import("@/lib/supabase");
+
+      // 프로덕션 환경에서는 Vercel URL 사용, 개발 환경에서는 localhost 사용
+      const baseUrl = process.env.NODE_ENV === 'production'
+        ? process.env.NEXT_PUBLIC_VERCEL_URL
+        : window.location.origin;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${baseUrl}/auth/callback`
         }
       });
 

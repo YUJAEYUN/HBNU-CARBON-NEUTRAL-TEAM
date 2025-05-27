@@ -37,8 +37,12 @@ export default function AuthCallback() {
 
           if (loginResponse.ok) {
             console.log('테스트 계정으로 로그인 성공');
+            // 프로덕션 환경에서는 Vercel URL 사용, 개발 환경에서는 localhost 사용
+            const baseUrl = process.env.NODE_ENV === 'production'
+              ? process.env.NEXT_PUBLIC_VERCEL_URL
+              : window.location.origin;
             // 페이지 새로고침으로 AuthContext 업데이트
-            window.location.href = '/';
+            window.location.href = `${baseUrl}/`;
           } else {
             console.error('테스트 계정 로그인 실패');
             router.push('/auth/login?error=test_login_failed');
